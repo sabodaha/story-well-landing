@@ -1,0 +1,8 @@
+name = "story-well-landing"
+compatibility_date = "2024-11-24"
+pages_build_output_dir = "out"
+
+# Cloudflare Pages configuration for Next.js static export
+[build]
+command = "npm run build"
+
