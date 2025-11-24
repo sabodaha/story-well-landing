@@ -23,12 +23,16 @@ export function CookieBanner() {
     localStorage.setItem("cookie-consent", "all");
     setShowBanner(false);
     setShowPreferences(false);
+    // Trigger event for GA to reload
+    window.dispatchEvent(new Event("cookieConsentChanged"));
   };
 
   const handleRejectNonEssential = () => {
     localStorage.setItem("cookie-consent", "essential");
     setShowBanner(false);
     setShowPreferences(false);
+    // Trigger event for GA to reload
+    window.dispatchEvent(new Event("cookieConsentChanged"));
   };
 
   const handleSavePreferences = (analytics: boolean, marketing: boolean) => {
@@ -40,6 +44,8 @@ export function CookieBanner() {
     localStorage.setItem("cookie-consent", JSON.stringify(preferences));
     setShowBanner(false);
     setShowPreferences(false);
+    // Trigger event for GA to reload
+    window.dispatchEvent(new Event("cookieConsentChanged"));
   };
 
   const handleClose = () => {
