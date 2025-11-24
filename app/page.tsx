@@ -507,7 +507,7 @@ export default function Home() {
                   </a>
                 </li>
                 <li><Link href="/privacy" className="hover:text-purple-400 transition">Privacy Policy</Link></li>
-                <li><Link href="#" className="hover:text-purple-400 transition">Terms of Service</Link></li>
+                <li><Link href="/terms" className="hover:text-purple-400 transition">Terms of Service</Link></li>
               </ul>
             </div>
           </div>

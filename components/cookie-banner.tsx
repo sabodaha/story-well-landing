@@ -91,7 +91,11 @@ export function CookieBanner() {
                     <Link href="/privacy" className="text-purple-600 hover:text-purple-700 underline font-semibold">
                       Privacy Policy
                     </Link>{" "}
-                    to learn more about how we protect your data.
+                    and{" "}
+                    <Link href="/terms" className="text-purple-600 hover:text-purple-700 underline font-semibold">
+                      Terms of Service
+                    </Link>{" "}
+                    to learn more.
                   </p>
                 </div>
 
