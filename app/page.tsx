@@ -506,7 +506,7 @@ export default function Home() {
                     admin@dartim-media.com
                   </a>
                 </li>
-                <li><Link href="#" className="hover:text-purple-400 transition">Privacy Policy</Link></li>
+                <li><Link href="/privacy" className="hover:text-purple-400 transition">Privacy Policy</Link></li>
                 <li><Link href="#" className="hover:text-purple-400 transition">Terms of Service</Link></li>
               </ul>
             </div>
