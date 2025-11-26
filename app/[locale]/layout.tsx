@@ -22,9 +22,10 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const locale = params.locale || defaultLocale;
+  const { locale: localeParam } = await params;
+  const locale = (locales.includes(localeParam as Locale) ? localeParam : defaultLocale) as Locale;
   
   const titles: Record<Locale, string> = {
     en: "Story Well - Multilingual Children's Story App",
@@ -61,14 +62,15 @@ export async function generateMetadata({
   };
 }
 
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: Locale };
+  params: Promise<{ locale: string }>;
 }>) {
-  const locale = params.locale || defaultLocale;
+  const { locale: localeParam } = await params;
+  const locale = (locales.includes(localeParam as Locale) ? localeParam : defaultLocale) as Locale;
   
   return (
     <html lang={locale}>

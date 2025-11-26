@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { defaultLocale } from '@/lib/i18n/config';
 
 export default function RootLayout({
@@ -6,6 +5,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // This layout is only used for the root path, which should redirect to the locale
-  redirect(`/${defaultLocale}`);
+  // For static export, we'll handle redirect in the page component
+  return children;
 }
