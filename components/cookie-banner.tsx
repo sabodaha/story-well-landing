@@ -5,8 +5,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Cookie, X } from "lucide-react";
+import { useTranslations } from "@/lib/i18n/use-translations";
+import { useParams } from "next/navigation";
 
 export function CookieBanner() {
+  const t = useTranslations();
+  const params = useParams();
+  const locale = params?.locale as string || 'en';
   const [showBanner, setShowBanner] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
 
@@ -85,23 +90,21 @@ export function CookieBanner() {
                 {/* Content */}
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    🍪 We Value Your Privacy
+                    {t.cookieTitle}
                   </h3>
                   <p className="text-gray-600 leading-relaxed mb-4">
-                    We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. 
-                    By clicking "Accept All", you consent to our use of cookies. You can manage your preferences or 
-                    choose to accept only essential cookies.
+                    {t.cookieDescription}
                   </p>
                   <p className="text-sm text-gray-500">
-                    Read our{" "}
-                    <Link href="/privacy" className="text-purple-600 hover:text-purple-700 underline font-semibold">
-                      Privacy Policy
+                    {t.cookieReadMore}{" "}
+                    <Link href={`/${locale}/privacy`} className="text-purple-600 hover:text-purple-700 underline font-semibold">
+                      {t.cookiePrivacyPolicy}
                     </Link>{" "}
                     and{" "}
-                    <Link href="/terms" className="text-purple-600 hover:text-purple-700 underline font-semibold">
-                      Terms of Service
+                    <Link href={`/${locale}/terms`} className="text-purple-600 hover:text-purple-700 underline font-semibold">
+                      {t.cookieTerms}
                     </Link>{" "}
-                    to learn more.
+                    {t.cookieLearnMore}
                   </p>
                 </div>
 
@@ -111,21 +114,21 @@ export function CookieBanner() {
                     onClick={handleAcceptAll}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 w-full"
                   >
-                    Accept All
+                    {t.cookieAcceptAll}
                   </Button>
                   <Button
                     onClick={handleRejectNonEssential}
                     variant="outline"
                     className="border-2 border-purple-600 text-purple-600 hover:bg-purple-50 w-full"
                   >
-                    Only Essential
+                    {t.cookieOnlyEssential}
                   </Button>
                   <Button
                     onClick={() => setShowPreferences(true)}
                     variant="ghost"
                     className="text-gray-600 hover:text-purple-600 w-full"
                   >
-                    Preferences
+                    {t.cookiePreferences}
                   </Button>
                 </div>
               </div>
@@ -150,15 +153,15 @@ function PreferencesPanel({
   onSave: (analytics: boolean, marketing: boolean) => void;
   onBack: () => void;
 }) {
+  const t = useTranslations();
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
 
   return (
     <div className="p-6 md:p-8">
-      <h3 className="text-xl font-bold text-gray-900 mb-4">Cookie Preferences</h3>
+      <h3 className="text-xl font-bold text-gray-900 mb-4">{t.cookiePreferencesTitle}</h3>
       <p className="text-gray-600 mb-6">
-        Manage your cookie preferences below. Essential cookies are always enabled as they are necessary for 
-        the website to function properly.
+        {t.cookiePreferencesDesc}
       </p>
 
       <div className="space-y-6 mb-6">
@@ -166,12 +169,11 @@ function PreferencesPanel({
         <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h4 className="font-semibold text-gray-900">Essential Cookies</h4>
-              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Required</span>
+              <h4 className="font-semibold text-gray-900">{t.cookieEssentialTitle}</h4>
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">{t.cookieEssentialRequired}</span>
             </div>
             <p className="text-sm text-gray-600">
-              These cookies are necessary for the website to function and cannot be disabled. They enable basic 
-              features like page navigation and access to secure areas.
+              {t.cookieEssentialDesc}
             </p>
           </div>
           <div className="ml-4">
@@ -187,10 +189,9 @@ function PreferencesPanel({
         {/* Analytics Cookies */}
         <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex-1">
-            <h4 className="font-semibold text-gray-900 mb-2">Analytics Cookies</h4>
+            <h4 className="font-semibold text-gray-900 mb-2">{t.cookieAnalyticsTitle}</h4>
             <p className="text-sm text-gray-600">
-              These cookies help us understand how visitors interact with our website by collecting and reporting 
-              information anonymously. This helps us improve our service.
+              {t.cookieAnalyticsDesc}
             </p>
           </div>
           <div className="ml-4">
@@ -206,10 +207,9 @@ function PreferencesPanel({
         {/* Marketing Cookies */}
         <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex-1">
-            <h4 className="font-semibold text-gray-900 mb-2">Marketing Cookies</h4>
+            <h4 className="font-semibold text-gray-900 mb-2">{t.cookieMarketingTitle}</h4>
             <p className="text-sm text-gray-600">
-              These cookies are used to track visitors across websites to display relevant and engaging advertisements. 
-              We currently do not use marketing cookies.
+              {t.cookieMarketingDesc}
             </p>
           </div>
           <div className="ml-4">
@@ -229,10 +229,10 @@ function PreferencesPanel({
           onClick={() => onSave(analytics, marketing)}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex-1"
         >
-          Save Preferences
+          {t.cookieSavePreferences}
         </Button>
         <Button onClick={onBack} variant="outline" className="border-2 border-gray-300 flex-1">
-          Back
+          {t.cookieBack}
         </Button>
       </div>
     </div>
