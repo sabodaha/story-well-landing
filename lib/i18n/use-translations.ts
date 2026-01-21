@@ -8,6 +8,47 @@ export function useTranslations() {
   const params = useParams();
   const locale = (params?.locale as Locale) || 'en';
   
-  return translations[locale] || translations.en;
+  const safeLocale = (locale in translations ? locale : 'en') as keyof typeof translations;
+
+  return translations[safeLocale];
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
