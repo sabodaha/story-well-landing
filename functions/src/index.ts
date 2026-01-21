@@ -1,5 +1,4 @@
 import { onRequest } from "firebase-functions/v2/https";
-import { config as functionsConfig } from "firebase-functions";
 import * as logger from "firebase-functions/logger";
 import cors from "cors";
 import express, { Request, Response } from "express";
@@ -14,12 +13,11 @@ initializeApp();
 const db = getFirestore();
 const auth = getAuth();
 const appCheck = getAppCheck();
-const opinionConfig = functionsConfig()?.opinion || {};
 
 const app = express();
 const corsMiddleware = cors({
   origin: (origin, callback) => {
-    const allowedOrigins = (process.env.ALLOWED_ORIGINS || opinionConfig.allowed_origins || "*")
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS || "*")
       .split(",")
       .map((value: string) => value.trim())
       .filter(Boolean);
@@ -40,14 +38,13 @@ app.use(corsMiddleware);
 app.use(express.json({ limit: "200kb" }));
 
 const ADMIN_EMAILS = new Set(
-  (process.env.ADMIN_EMAILS || opinionConfig.admin_emails || "")
+  (process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((value: string) => value.trim().toLowerCase())
     .filter(Boolean)
 );
 
-const REQUIRE_APP_CHECK =
-  (process.env.REQUIRE_APP_CHECK || opinionConfig.require_app_check || "true") !== "false";
+const REQUIRE_APP_CHECK = (process.env.REQUIRE_APP_CHECK || "true") !== "false";
 
 const collection = () => db.collection("opinions");
 
