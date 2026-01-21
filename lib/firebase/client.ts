@@ -2,7 +2,7 @@
 
 import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getAppCheck, getToken, initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { AppCheck, getToken, initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,6 +15,7 @@ const firebaseConfig = {
 };
 
 let appCheckInitialized = false;
+let appCheckInstance: AppCheck | null = null;
 
 export const getFirebaseApp = (): FirebaseApp => {
   if (!getApps().length) {
@@ -27,26 +28,31 @@ export const getFirebaseAuth = () => getAuth(getFirebaseApp());
 
 export const getGoogleProvider = () => new GoogleAuthProvider();
 
-export const initAppCheck = () => {
-  if (appCheckInitialized || typeof window === "undefined") return;
+const ensureAppCheck = () => {
+  if (appCheckInstance || typeof window === "undefined") return appCheckInstance;
   const siteKey = process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY;
-  if (!siteKey) return;
+  if (!siteKey) return null;
 
-  initializeAppCheck(getFirebaseApp(), {
+  appCheckInstance = initializeAppCheck(getFirebaseApp(), {
     provider: new ReCaptchaV3Provider(siteKey),
     isTokenAutoRefreshEnabled: true,
   });
-
   appCheckInitialized = true;
+
+  return appCheckInstance;
+};
+
+export const initAppCheck = () => {
+  if (appCheckInitialized) return;
+  ensureAppCheck();
 };
 
 export const getAppCheckToken = async () => {
   if (typeof window === "undefined") return null;
 
-  initAppCheck();
-
   try {
-    const appCheck = getAppCheck(getFirebaseApp());
+    const appCheck = ensureAppCheck();
+    if (!appCheck) return null;
     const { token } = await getToken(appCheck, false);
     return token;
   } catch {
