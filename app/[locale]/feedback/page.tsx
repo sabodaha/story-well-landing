@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTranslations } from "@/lib/i18n/use-translations";
+import { getAppCheckToken, initAppCheck } from "@/lib/firebase/client";
 import { cn } from "@/lib/utils";
 
 type Opinion = {
@@ -68,8 +69,15 @@ export default function FeedbackPage() {
   const t = useTranslations();
   const params = useParams();
   const locale = (params?.locale as string) || "en";
-  const feedbackListUrl = process.env.NEXT_PUBLIC_FEEDBACK_LIST_URL || "";
-  const feedbackSubmitUrl = process.env.NEXT_PUBLIC_FEEDBACK_SUBMIT_URL || "";
+  const feedbackApiBaseUrl = process.env.NEXT_PUBLIC_FEEDBACK_API_BASE_URL || "";
+  const feedbackListUrl =
+    (feedbackApiBaseUrl ? `${feedbackApiBaseUrl}/opinions` : "") ||
+    process.env.NEXT_PUBLIC_FEEDBACK_LIST_URL ||
+    "";
+  const feedbackSubmitUrl =
+    (feedbackApiBaseUrl ? `${feedbackApiBaseUrl}/opinions` : "") ||
+    process.env.NEXT_PUBLIC_FEEDBACK_SUBMIT_URL ||
+    "";
 
   const [opinions, setOpinions] = useState<Opinion[]>([]);
   const [isLoadingList, setIsLoadingList] = useState(false);
@@ -115,9 +123,11 @@ export default function FeedbackPage() {
 
     try {
       const url = buildUrlWithLocale(feedbackListUrl, locale);
+      const appCheckToken = await getAppCheckToken();
       const response = await fetch(url, {
         headers: {
           Accept: "application/json",
+          ...(appCheckToken ? { "X-Firebase-AppCheck": appCheckToken } : {}),
         },
       });
       if (!response.ok) {
@@ -137,6 +147,7 @@ export default function FeedbackPage() {
   }, [feedbackListUrl, locale]);
 
   useEffect(() => {
+    initAppCheck();
     loadOpinions();
   }, [loadOpinions]);
 
@@ -167,11 +178,13 @@ export default function FeedbackPage() {
     setIsSubmitting(true);
 
     try {
+      const appCheckToken = await getAppCheckToken();
       const response = await fetch(feedbackSubmitUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          ...(appCheckToken ? { "X-Firebase-AppCheck": appCheckToken } : {}),
         },
         body: JSON.stringify({
           name: name.trim() || undefined,

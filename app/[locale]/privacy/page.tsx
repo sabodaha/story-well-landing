@@ -61,6 +61,12 @@ export default function PrivacyPolicy() {
             <p className="text-gray-700 leading-relaxed mb-6">
               {t.privacySection1_1Note}
             </p>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              {t.privacyFeedbackNote}
+            </p>
+            <p className="text-gray-700 leading-relaxed mb-6">
+              {t.privacyFirebaseNote}
+            </p>
 
             <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{t.privacySection1_2Title}</h3>
             <p className="text-gray-700 leading-relaxed mb-4">
