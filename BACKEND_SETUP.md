@@ -47,6 +47,9 @@ Set these in **Cloudflare Pages → Settings → Environment Variables**:
 - `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY`
 - `NEXT_PUBLIC_FEEDBACK_API_BASE_URL` (e.g. `https://us-central1-your-project.cloudfunctions.net/opinionBoard`)
 
+If Cloudflare build logs still show no env vars, the public web config is also mirrored in
+`next.config.ts` under `env` so builds remain deterministic.
+
 ## 4) Admin Moderation Page
 Open: `/{locale}/admin/opinions`
 
