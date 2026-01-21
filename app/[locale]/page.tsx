@@ -69,6 +69,9 @@ export default function Home() {
               <Link href={`/${locale}/reviews`} className="text-gray-700 hover:text-purple-600 transition">
                 {t.navReviews}
               </Link>
+              <Link href={`/${locale}/feedback`} className="text-gray-700 hover:text-purple-600 transition">
+                {t.navFeedback}
+              </Link>
               <LanguageSwitcher />
               <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
                 {t.navDownload}
@@ -504,6 +507,7 @@ export default function Home() {
                 <li><Link href="#languages" className="hover:text-purple-400 transition">{t.navLanguages}</Link></li>
                 <li><Link href="#faq" className="hover:text-purple-400 transition">{t.navFAQ}</Link></li>
                 <li><Link href={`/${locale}/reviews`} className="hover:text-purple-400 transition">{t.navReviews}</Link></li>
+                <li><Link href={`/${locale}/feedback`} className="hover:text-purple-400 transition">{t.navFeedback}</Link></li>
                 <li><Link href="#" className="hover:text-purple-400 transition">{t.footerDownload}</Link></li>
               </ul>
             </div>
