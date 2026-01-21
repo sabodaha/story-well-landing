@@ -23,15 +23,12 @@ npm install
 npm run build
 ```
 
-Set function configuration (replace with your values):
-```bash
-firebase functions:config:set opinion.admin_emails="admin1@example.com,admin2@example.com"
-firebase functions:config:set opinion.allowed_origins="https://dartim-media.com"
-firebase functions:config:set opinion.require_app_check="true"
-```
+Set **environment variables** in Firebase Console → Functions → Settings → Environment variables:
+- `ADMIN_EMAILS=admin1@example.com,admin2@example.com`
+- `ALLOWED_ORIGINS=https://dartim-media.com`
+- `REQUIRE_APP_CHECK=true`
 
-These values are read in `functions/src/index.ts`. If you prefer, you can also set environment variables
-(`ADMIN_EMAILS`, `ALLOWED_ORIGINS`, `REQUIRE_APP_CHECK`) in your function runtime instead of using `functions:config`.
+These values are read in `functions/src/index.ts`. (Legacy `functions.config()` is deprecated by Firebase.)
 
 Deploy:
 ```bash
