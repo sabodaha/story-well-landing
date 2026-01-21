@@ -41,7 +41,7 @@ export default function AdminOpinionsPage() {
   const t = useTranslations();
   const params = useParams();
   const locale = (params?.locale as string) || "en";
-  const auth = getFirebaseAuth();
+  const [auth, setAuth] = useState<ReturnType<typeof getFirebaseAuth> | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [opinions, setOpinions] = useState<AdminOpinion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -95,12 +95,15 @@ export default function AdminOpinionsPage() {
   }, [pendingUrl, t.adminError, t.adminMissingConfig, t.adminNotAuthorized, user]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     initAppCheck();
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+    const firebaseAuth = getFirebaseAuth();
+    setAuth(firebaseAuth);
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (nextUser) => {
       setUser(nextUser);
     });
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -109,6 +112,7 @@ export default function AdminOpinionsPage() {
   }, [loadOpinions, user]);
 
   const handleSignIn = async () => {
+    if (!auth) return;
     setError(null);
     try {
       await signInWithPopup(auth, getGoogleProvider());
@@ -118,12 +122,17 @@ export default function AdminOpinionsPage() {
   };
 
   const handleSignOut = async () => {
+    if (!auth) return;
     await signOut(auth);
     setOpinions([]);
   };
 
   const handleUpdate = async (id: string, status: "approved" | "rejected") => {
     if (!user) return;
+    if (!auth) {
+      setError(t.adminMissingConfig);
+      return;
+    }
     if (!updateBaseUrl) {
       setError(t.adminMissingConfig);
       return;
