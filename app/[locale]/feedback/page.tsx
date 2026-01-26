@@ -197,7 +197,40 @@ export default function FeedbackPage() {
       });
 
       if (!response.ok) {
-        throw new Error("submit-failed");
+        const errorText = await response.text().catch(() => "");
+        let errorMessage = t.feedbackFormError;
+        
+        // Provide more specific error messages
+        if (response.status === 401) {
+          errorMessage = "Authentication required. Please refresh the page and try again.";
+        } else if (response.status === 403) {
+          errorMessage = "Access denied. Please check your permissions.";
+        } else if (response.status === 429) {
+          errorMessage = "Too many requests. Please wait a moment and try again.";
+        } else if (response.status === 400) {
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.error === "message-required") {
+              errorMessage = "Please enter a message.";
+            } else if (errorData.error === "rating-invalid") {
+              errorMessage = "Please select a valid rating.";
+            } else {
+              errorMessage = "Invalid input. Please check your submission.";
+            }
+          } catch {
+            errorMessage = "Invalid input. Please check your submission.";
+          }
+        } else if (response.status >= 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+        
+        console.error("Opinion submission failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+        });
+        
+        throw new Error(errorMessage);
       }
 
       setSubmitSuccess(true);
@@ -206,7 +239,9 @@ export default function FeedbackPage() {
       setMessage("");
       setRating(5);
     } catch (error) {
-      setSubmitError(t.feedbackFormError);
+      const errorMessage = error instanceof Error ? error.message : t.feedbackFormError;
+      setSubmitError(errorMessage);
+      console.error("Opinion submission error:", error);
     } finally {
       setIsSubmitting(false);
     }

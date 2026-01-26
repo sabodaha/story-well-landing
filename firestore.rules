@@ -2,10 +2,47 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // All access is performed through Cloud Functions (Admin SDK).
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Stories collection: Allow admin users to read and write
+    // This is needed for the admin-panel to manage stories
+    match /stories/{storyId} {
+      allow read, write: if isAdmin();
+      
+      // Allow read access to published stories for app users (if needed)
+      // Uncomment if the mobile app needs direct Firestore access
+      // allow read: if resource.data.isPublished == true;
+      
+      // Pages subcollection
+      match /pages/{pageId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // Config collection: Allow admin users to read and write
+    match /config/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Opinions collection: Restricted - only accessible via Cloud Functions (Admin SDK)
+    // No direct client access allowed
+    match /opinions/{opinionId} {
+      allow read, write: if false;
+    }
+
+    // User preferences: Users can only access their own data
+    match /user_prefs/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default: Deny all other access
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
+
 

@@ -15,14 +15,32 @@ const auth = getAuth();
 const appCheck = getAppCheck();
 
 const app = express();
+const DEFAULT_ALLOWED_ORIGINS = [
+  "https://dartim-media.com",
+  "https://www.dartim-media.com",
+  "https://kidsstoriesapp.web.app",
+  "https://kidsstoriesapp.firebaseapp.com",
+];
+
+const parseAllowedOrigins = () => {
+  const envOrigins = (process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((value: string) => value.trim())
+    .filter(Boolean);
+  const merged = envOrigins.length ? [...DEFAULT_ALLOWED_ORIGINS, ...envOrigins] : DEFAULT_ALLOWED_ORIGINS;
+  const allowedOrigins = Array.from(new Set(merged));
+
+  return {
+    allowAny: allowedOrigins.includes("*"),
+    allowedOrigins,
+  };
+};
+
+const { allowAny: allowAnyOrigin, allowedOrigins } = parseAllowedOrigins();
+
 const corsMiddleware = cors({
   origin: (origin, callback) => {
-    const allowedOrigins = (process.env.ALLOWED_ORIGINS || "*")
-      .split(",")
-      .map((value: string) => value.trim())
-      .filter(Boolean);
-
-    if (allowedOrigins.includes("*")) {
+    if (allowAnyOrigin) {
       return callback(null, true);
     }
 
@@ -45,12 +63,23 @@ const ADMIN_EMAILS = new Set(
 );
 
 const REQUIRE_APP_CHECK = (process.env.REQUIRE_APP_CHECK || "true") !== "false";
+const shouldSkipAppCheck = (req: Request) => req.header("X-Admin-Panel") === "true";
+const allowedContentLocales = new Set(["en", "de", "es", "fr", "it", "ru", "tr", "uk"]);
 
 const collection = () => db.collection("opinions");
+const contentCollection = () => db.collection("site_content");
 
 const getLocaleParam = (req: Request) => {
   const locale = String(req.query.locale || "").trim().toLowerCase();
   return locale || null;
+};
+
+const getContentLocale = (req: Request) => {
+  const locale = getLocaleParam(req) || "en";
+  if (!allowedContentLocales.has(locale)) {
+    throw new Error("invalid-locale");
+  }
+  return locale;
 };
 
 const parseLimit = (req: Request, defaultLimit = 20) => {
@@ -90,6 +119,11 @@ const verifyAdmin = async (req: Request) => {
 
   const decoded = await auth.verifyIdToken(token);
   const email = decoded.email?.toLowerCase() || "";
+  const hasAdminClaim = decoded.admin === true || decoded.admin === "true";
+
+  if (hasAdminClaim) {
+    return { email, uid: decoded.uid };
+  }
 
   if (!ADMIN_EMAILS.has(email)) {
     throw new Error("not-admin");
@@ -190,8 +224,10 @@ app.post("/opinions", async (req: Request, res: Response) => {
 
 app.get("/opinions/pending", async (req: Request, res: Response) => {
   try {
-    await verifyAppCheck(req);
     await verifyAdmin(req);
+    if (!shouldSkipAppCheck(req)) {
+      await verifyAppCheck(req);
+    }
 
     const limit = parseLimit(req, 50);
     const snapshot = await collection()
@@ -217,8 +253,10 @@ app.get("/opinions/pending", async (req: Request, res: Response) => {
 
 app.patch("/opinions/:id", async (req: Request, res: Response) => {
   try {
-    await verifyAppCheck(req);
     const admin = await verifyAdmin(req);
+    if (!shouldSkipAppCheck(req)) {
+      await verifyAppCheck(req);
+    }
 
     const status = String(req.body?.status || "").toLowerCase();
     if (!["approved", "rejected"].includes(status)) {
@@ -246,6 +284,172 @@ app.patch("/opinions/:id", async (req: Request, res: Response) => {
     }
     logger.error("opinions:patch:error", error);
     res.status(500).json({ error: "failed-to-update" });
+  }
+});
+
+app.get("/opinions/approved", async (req: Request, res: Response) => {
+  try {
+    await verifyAdmin(req);
+    if (!shouldSkipAppCheck(req)) {
+      await verifyAppCheck(req);
+    }
+
+    const limit = parseLimit(req, 50);
+    const snapshot = await collection()
+      .where("status", "==", "approved")
+      .orderBy("createdAt", "desc")
+      .limit(limit)
+      .get();
+
+    const opinions = snapshot.docs.map((doc) => sanitizeOpinion(doc.id, doc.data()));
+    res.json(opinions);
+  } catch (error) {
+    const message = (error as Error).message;
+    if (message === "missing-auth" || message === "not-admin") {
+      return res.status(403).json({ error: "forbidden" });
+    }
+    if (message === "missing-app-check") {
+      return res.status(401).json({ error: "missing-app-check" });
+    }
+    logger.error("opinions:approved:error", error);
+    res.status(500).json({ error: "failed-to-load" });
+  }
+});
+
+app.patch("/opinions/:id/edit", async (req: Request, res: Response) => {
+  try {
+    const admin = await verifyAdmin(req);
+    if (!shouldSkipAppCheck(req)) {
+      await verifyAppCheck(req);
+    }
+
+    const { name, storyTitle, rating, message, locale } = req.body || {};
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ error: "message-required" });
+    }
+
+    const parsedRating = Number(rating);
+    if (!Number.isFinite(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+      return res.status(400).json({ error: "rating-invalid" });
+    }
+
+    const now = FieldValue.serverTimestamp();
+    const update: Record<string, unknown> = {
+      name: typeof name === "string" ? name.trim().slice(0, 120) : null,
+      storyTitle: typeof storyTitle === "string" ? storyTitle.trim().slice(0, 160) : null,
+      rating: parsedRating,
+      message: message.trim().slice(0, 2000),
+      locale: typeof locale === "string" ? locale.trim().toLowerCase() : null,
+      updatedAt: now,
+      moderatedBy: admin.email,
+    };
+
+    await collection().doc(req.params.id).update(update);
+    res.json({ status: "approved" });
+  } catch (error) {
+    const message = (error as Error).message;
+    if (message === "missing-auth" || message === "not-admin") {
+      return res.status(403).json({ error: "forbidden" });
+    }
+    if (message === "missing-app-check") {
+      return res.status(401).json({ error: "missing-app-check" });
+    }
+    logger.error("opinions:edit:error", error);
+    res.status(500).json({ error: "failed-to-update" });
+  }
+});
+
+app.delete("/opinions/:id", async (req: Request, res: Response) => {
+  try {
+    await verifyAdmin(req);
+    if (!shouldSkipAppCheck(req)) {
+      await verifyAppCheck(req);
+    }
+
+    await collection().doc(req.params.id).delete();
+    res.json({ status: "deleted" });
+  } catch (error) {
+    const message = (error as Error).message;
+    if (message === "missing-auth" || message === "not-admin") {
+      return res.status(403).json({ error: "forbidden" });
+    }
+    if (message === "missing-app-check") {
+      return res.status(401).json({ error: "missing-app-check" });
+    }
+    logger.error("opinions:delete:error", error);
+    res.status(500).json({ error: "failed-to-delete" });
+  }
+});
+
+app.get("/content", async (req: Request, res: Response) => {
+  try {
+    await verifyAdmin(req);
+    if (!shouldSkipAppCheck(req)) {
+      await verifyAppCheck(req);
+    }
+
+    const locale = getContentLocale(req);
+    const doc = await contentCollection().doc(locale).get();
+    if (!doc.exists) {
+      return res.json({ locale, empty: true });
+    }
+    return res.json({ locale, ...doc.data() });
+  } catch (error) {
+    const message = (error as Error).message;
+    if (message === "invalid-locale") {
+      return res.status(400).json({ error: "invalid-locale" });
+    }
+    if (message === "missing-auth" || message === "not-admin") {
+      return res.status(403).json({ error: "forbidden" });
+    }
+    if (message === "missing-app-check") {
+      return res.status(401).json({ error: "missing-app-check" });
+    }
+    logger.error("content:get:error", error);
+    res.status(500).json({ error: "failed-to-load" });
+  }
+});
+
+app.put("/content", async (req: Request, res: Response) => {
+  try {
+    const admin = await verifyAdmin(req);
+    if (!shouldSkipAppCheck(req)) {
+      await verifyAppCheck(req);
+    }
+
+    const locale = getContentLocale(req);
+    const payload = req.body || {};
+    if (typeof payload !== "object" || payload === null) {
+      return res.status(400).json({ error: "invalid-payload" });
+    }
+
+    const now = FieldValue.serverTimestamp();
+    await contentCollection()
+      .doc(locale)
+      .set(
+        {
+          ...payload,
+          locale,
+          updatedAt: now,
+          updatedBy: admin.email,
+        },
+        { merge: true }
+      );
+
+    res.json({ status: "saved", locale });
+  } catch (error) {
+    const message = (error as Error).message;
+    if (message === "invalid-locale") {
+      return res.status(400).json({ error: "invalid-locale" });
+    }
+    if (message === "missing-auth" || message === "not-admin") {
+      return res.status(403).json({ error: "forbidden" });
+    }
+    if (message === "missing-app-check") {
+      return res.status(401).json({ error: "missing-app-check" });
+    }
+    logger.error("content:put:error", error);
+    res.status(500).json({ error: "failed-to-save" });
   }
 });
 

@@ -6,7 +6,9 @@ This guide explains how to set up the Opinion Board backend using Firebase (Fire
 - Create a project at https://console.firebase.google.com/
 - Enable **Firestore** (Production mode is fine; rules are provided in `firestore.rules`).
 - Enable **Authentication** → **Google** provider.
+- Add `dartim-media.com` (and any preview domains you use) under **Authentication** → **Settings** → **Authorized domains**.
 - Enable **App Check** → **reCAPTCHA v3** (create a site key).
+- Verify the **App Check** web app entry matches the reCAPTCHA v3 site key used in `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY`.
 
 ## 2) Configure Cloud Functions
 Install Firebase CLI:
@@ -25,12 +27,12 @@ npm run build
 
 Set **environment variables** in Firebase Console → Functions → Settings → Environment variables:
 - `ADMIN_EMAILS=admin1@example.com,admin2@example.com`
-- `ALLOWED_ORIGINS=https://dartim-media.com`
-- `REQUIRE_APP_CHECK=true`
+- `ALLOWED_ORIGINS=https://dartim-media.com,https://www.dartim-media.com` (add preview domains as needed)
+- `REQUIRE_APP_CHECK=true` (set to `false` only if App Check is not configured)
 
 These values are read in `functions/src/index.ts`. (Legacy `functions.config()` is deprecated by Firebase.)
 
-Deploy:
+Deploy (re-run after env var updates so CORS changes apply):
 ```bash
 firebase deploy --only functions,firestore
 ```
