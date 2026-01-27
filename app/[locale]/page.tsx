@@ -1,16 +1,9 @@
-'use client';
-
-import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { FAQSection } from "@/components/faq-section";
 import { 
   BookOpen, 
   Globe, 
@@ -25,11 +18,10 @@ import {
   Zap,
   Users
 } from "lucide-react";
-import { useTranslations } from "@/lib/i18n/use-translations";
+import { getTranslations } from "@/lib/i18n/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { localeNames } from "@/lib/i18n/config";
-import { useParams } from "next/navigation";
-import { getSiteContent } from "@/lib/content/client";
+import { localeNames, type Locale } from "@/lib/i18n/config";
+import { getSiteContent } from "@/lib/content/server";
 
 const iconMap = {
   BookOpen,
@@ -77,7 +69,7 @@ const resolveIcon = (name?: string) => {
   return iconMap[name as keyof typeof iconMap] || BookOpen;
 };
 
-type LinkButtonProps = ComponentProps<typeof Button> & {
+type LinkButtonProps = React.ComponentProps<typeof Button> & {
   href?: string;
 };
 
@@ -95,7 +87,7 @@ const LinkButton = ({ href, children, ...props }: LinkButtonProps) => {
   );
 };
 
-const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
+const buildDefaultContent = (t: ReturnType<typeof getTranslations>) => ({
   nav: {
     features: t.navFeatures,
     languages: t.navLanguages,
@@ -193,12 +185,19 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
   },
 });
 
-export default function Home() {
-  const t = useTranslations();
-  const params = useParams();
-  const locale = params?.locale as string || 'en';
-  const defaultContent = useMemo(() => buildDefaultContent(t), [t]);
-  const [content, setContent] = useState(defaultContent);
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale: localeParam } = await params;
+  const locale = (localeParam || 'en') as Locale;
+  const t = getTranslations(locale);
+  const defaultContent = buildDefaultContent(t);
+  
+  // Fetch content server-side
+  const content = await getSiteContent(locale, defaultContent);
+  
   const languages = [
     { code: 'en', flag: "🇬🇧", native: localeNames.en.native, english: localeNames.en.english },
     { code: 'de', flag: "🇩🇪", native: localeNames.de.native, english: localeNames.de.english },
@@ -209,6 +208,7 @@ export default function Home() {
     { code: 'tr', flag: "🇹🇷", native: localeNames.tr.native, english: localeNames.tr.english },
     { code: 'es', flag: "🇪🇸", native: localeNames.es.native, english: localeNames.es.english },
   ];
+  
   const navDownloadUrl = resolveLink(content.nav.downloadUrl, content.nav.download) || DEFAULT_DOWNLOAD_URL;
   const heroDownloadUrl = resolveLink(content.hero.downloadUrl, content.hero.downloadCta) || DEFAULT_DOWNLOAD_URL;
   const heroWatchDemoUrl = resolveLink(content.hero.watchDemoUrl, content.hero.watchDemo);
@@ -217,17 +217,6 @@ export default function Home() {
   const ctaIosUrl = resolveLink(content.cta.downloadIosUrl, content.cta.downloadIos);
   const footerDownloadUrl =
     resolveLink(content.footer.downloadUrl, content.footer.downloadLabel) || DEFAULT_DOWNLOAD_URL;
-
-  useEffect(() => {
-    let active = true;
-    setContent(defaultContent);
-    getSiteContent(locale, defaultContent).then((data) => {
-      if (active) setContent(data);
-    });
-    return () => {
-      active = false;
-    };
-  }, [locale, defaultContent]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-blue-50">
@@ -270,6 +259,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
+      <main id="main-content">
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -321,12 +311,15 @@ export default function Home() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-3xl blur-3xl opacity-20 animate-pulse"></div>
               <div className="relative bg-white rounded-3xl shadow-2xl p-8 border-4 border-purple-200">
-                <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 rounded-2xl flex items-center justify-center overflow-hidden">
+                <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 rounded-2xl flex items-center justify-center overflow-hidden relative">
                   {content.hero.imageUrl ? (
-                    <img
+                    <Image
                       src={content.hero.imageUrl}
                       alt="Story Well preview"
-                      className="h-full w-full object-cover"
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
                     />
                   ) : (
                     <BookOpen className="h-32 w-32 text-purple-400" />
@@ -499,18 +492,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <Accordion type="single" collapsible className="space-y-4">
-            {content.faq.items.map((item, index) => (
-              <AccordionItem key={`${item.title}-${index}`} value={`item-${index}`} className="bg-white rounded-lg px-6 border-2">
-                <AccordionTrigger className="text-left font-semibold hover:text-purple-600">
-                  {item.title}
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-600">
-                  {item.description}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <FAQSection items={content.faq.items} />
         </div>
       </section>
 
@@ -599,6 +581,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      </main>
     </div>
   );
 }

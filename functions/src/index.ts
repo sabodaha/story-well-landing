@@ -381,12 +381,21 @@ app.delete("/opinions/:id", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/health", async (_req: Request, res: Response) => {
+  try {
+    // Simple health check - verify database connection
+    await db.collection("_health").limit(1).get();
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error("health:check:error", error);
+    res.status(503).json({ status: "error", timestamp: new Date().toISOString() });
+  }
+});
+
 app.get("/content", async (req: Request, res: Response) => {
   try {
-    await verifyAdmin(req);
-    if (!shouldSkipAppCheck(req)) {
-      await verifyAppCheck(req);
-    }
+    // GET /content is public (read-only) - no auth required
+    // PUT /content remains admin-only for security
 
     const locale = getContentLocale(req);
     const doc = await contentCollection().doc(locale).get();
@@ -398,12 +407,6 @@ app.get("/content", async (req: Request, res: Response) => {
     const message = (error as Error).message;
     if (message === "invalid-locale") {
       return res.status(400).json({ error: "invalid-locale" });
-    }
-    if (message === "missing-auth" || message === "not-admin") {
-      return res.status(403).json({ error: "forbidden" });
-    }
-    if (message === "missing-app-check") {
-      return res.status(401).json({ error: "missing-app-check" });
     }
     logger.error("content:get:error", error);
     res.status(500).json({ error: "failed-to-load" });

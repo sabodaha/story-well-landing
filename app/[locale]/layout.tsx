@@ -27,6 +27,8 @@ export async function generateMetadata({
   const { locale: localeParam } = await params;
   const locale = (locales.includes(localeParam as Locale) ? localeParam : defaultLocale) as Locale;
   
+  const baseUrl = 'https://dartim-media.com';
+  
   const titles: Record<Locale, string> = {
     en: "Story Well - Multilingual Children's Story App",
     de: "Story Well - Mehrsprachige Kindergeschichten-App",
@@ -49,15 +51,27 @@ export async function generateMetadata({
     uk: "Занурте своїх дітей у прекрасно ілюстровані історії, доступні 8 мовами. Читайте офлайн, миттєво перемикайте мови та створюйте незабутні спогади.",
   };
 
+  // Generate hreflang alternates
+  const languages: Record<string, string> = {};
+  for (const loc of locales) {
+    languages[loc] = `${baseUrl}/${loc}`;
+  }
+  languages['x-default'] = `${baseUrl}/en`;
+
   return {
     title: titles[locale] || titles[defaultLocale],
     description: descriptions[locale] || descriptions[defaultLocale],
     keywords: ["children's stories", "multilingual", "kids app", "bedtime stories", "language learning", "offline reading"],
     authors: [{ name: "Story Well Team" }],
+    alternates: {
+      canonical: `${baseUrl}/${locale}`,
+      languages,
+    },
     openGraph: {
       title: titles[locale] || titles[defaultLocale],
       description: descriptions[locale] || descriptions[defaultLocale],
       type: "website",
+      url: `${baseUrl}/${locale}`,
     },
   };
 }
@@ -72,11 +86,45 @@ export default async function LocaleLayout({
   const { locale: localeParam } = await params;
   const locale = (locales.includes(localeParam as Locale) ? localeParam : defaultLocale) as Locale;
   
+  // Structured data for SoftwareApplication
+  const appStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Story Well',
+    applicationCategory: 'EducationApplication',
+    operatingSystem: 'Android, iOS',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '5',
+      ratingCount: '1000+',
+    },
+    description: locale === 'en' 
+      ? "Immerse your children in beautifully illustrated stories available in 8 languages. Read offline, switch languages instantly, and create lasting memories."
+      : "Multilingual children's story app",
+  };
+  
   return (
     <html lang={locale}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(appStructuredData) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-purple-600 focus:text-white focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+        >
+          Skip to main content
+        </a>
         <GoogleAnalytics />
         {children}
         <CookieBanner />

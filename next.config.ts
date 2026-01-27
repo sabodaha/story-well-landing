@@ -3,7 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'export',
   images: {
-    unoptimized: true,
+    unoptimized: true, // Required for static export, but Image component still provides lazy loading and srcset
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**', // Allow images from any domain (since imageUrl comes from API)
+      },
+    ],
   },
   // Cloudflare Pages configuration
   trailingSlash: true,

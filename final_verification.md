@@ -73,3 +73,4 @@ curl https://opinionboard-lb23erpsaq-uc.a.run.app/opinions?limit=1
 3. Test opinion submission - should work after IAM fix
 4. Monitor Firebase Console logs for any issues
 
+
