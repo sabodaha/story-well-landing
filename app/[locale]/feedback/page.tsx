@@ -198,7 +198,7 @@ export default function FeedbackPage() {
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "");
-        let errorMessage = t.feedbackFormError;
+        let errorMessage: string = t.feedbackFormError;
         
         // Provide more specific error messages
         if (response.status === 401) {
