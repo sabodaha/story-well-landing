@@ -1,3 +1,6 @@
+\"use client\";
+
+import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -18,10 +21,11 @@ import {
   Zap,
   Users
 } from "lucide-react";
-import { getTranslations } from "@/lib/i18n/server";
+import { useTranslations } from "@/lib/i18n/use-translations";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { localeNames, type Locale } from "@/lib/i18n/config";
-import { getSiteContent } from "@/lib/content/server";
+import { useParams } from "next/navigation";
+import { getSiteContent } from "@/lib/content/client";
 
 const iconMap = {
   BookOpen,
@@ -69,7 +73,7 @@ const resolveIcon = (name?: string) => {
   return iconMap[name as keyof typeof iconMap] || BookOpen;
 };
 
-type LinkButtonProps = React.ComponentProps<typeof Button> & {
+type LinkButtonProps = ComponentProps<typeof Button> & {
   href?: string;
 };
 
@@ -87,7 +91,7 @@ const LinkButton = ({ href, children, ...props }: LinkButtonProps) => {
   );
 };
 
-const buildDefaultContent = (t: ReturnType<typeof getTranslations>) => ({
+const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
   nav: {
     features: t.navFeatures,
     languages: t.navLanguages,
@@ -185,18 +189,23 @@ const buildDefaultContent = (t: ReturnType<typeof getTranslations>) => ({
   },
 });
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale: localeParam } = await params;
-  const locale = (localeParam || 'en') as Locale;
-  const t = getTranslations(locale);
-  const defaultContent = buildDefaultContent(t);
-  
-  // Fetch content server-side
-  const content = await getSiteContent(locale, defaultContent);
+export default function Home() {
+  const params = useParams();
+  const locale = (params?.locale as Locale) || "en";
+  const t = useTranslations();
+  const defaultContent = useMemo(() => buildDefaultContent(t), [t]);
+  const [content, setContent] = useState(defaultContent);
+
+  useEffect(() => {
+    let active = true;
+    setContent(defaultContent);
+    getSiteContent(locale, defaultContent).then((data) => {
+      if (active) setContent(data);
+    });
+    return () => {
+      active = false;
+    };
+  }, [locale, defaultContent]);
   
   const languages = [
     { code: 'en', flag: "🇬🇧", native: localeNames.en.native, english: localeNames.en.english },
