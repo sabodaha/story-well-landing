@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,9 +58,41 @@ const featureToneClasses = [
   { borderHover: "hover:border-violet-300", bg: "bg-violet-100", text: "text-violet-600" },
 ];
 
+const DEFAULT_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.dartim_media.storywell";
+
+const normalizeLink = (value?: string) => (typeof value === "string" ? value.trim() : "");
+const isExternalLink = (href: string) => /^https?:\/\//i.test(href);
+const resolveLink = (explicitUrl?: string, fallbackLabel?: string) => {
+  const explicit = normalizeLink(explicitUrl);
+  if (explicit) return explicit;
+  const fallback = normalizeLink(fallbackLabel);
+  if (/^https?:\/\//i.test(fallback)) return fallback;
+  return "";
+};
+const linkProps = (href: string) =>
+  isExternalLink(href) ? { target: "_blank", rel: "noopener noreferrer" } : {};
+
 const resolveIcon = (name?: string) => {
   if (!name) return BookOpen;
   return iconMap[name as keyof typeof iconMap] || BookOpen;
+};
+
+type LinkButtonProps = ComponentProps<typeof Button> & {
+  href?: string;
+};
+
+const LinkButton = ({ href, children, ...props }: LinkButtonProps) => {
+  if (!href) {
+    return <Button {...props}>{children}</Button>;
+  }
+
+  return (
+    <Button asChild {...props}>
+      <a href={href} {...linkProps(href)}>
+        {children}
+      </a>
+    </Button>
+  );
 };
 
 const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
@@ -71,6 +103,7 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     reviews: t.navReviews,
     feedback: t.navFeedback,
     download: t.navDownload,
+    downloadUrl: "",
   },
   hero: {
     badge: t.heroBadge,
@@ -80,6 +113,8 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     description: t.heroDescription,
     downloadCta: t.heroDownload,
     watchDemo: t.heroWatchDemo,
+    downloadUrl: "",
+    watchDemoUrl: "",
     lovedBy: t.heroLovedBy,
     worldwide: t.heroWorldwide,
     imageUrl: "",
@@ -145,6 +180,8 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     subtitle: t.ctaSubtitle,
     downloadAndroid: t.ctaDownloadAndroid,
     downloadIos: t.ctaDownloadiOS,
+    downloadAndroidUrl: "",
+    downloadIosUrl: "",
   },
   footer: {
     description: t.footerDescription,
@@ -152,6 +189,7 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     productLabel: t.footerProduct,
     contactLabel: t.footerContact,
     downloadLabel: t.footerDownload,
+    downloadUrl: "",
   },
 });
 
@@ -171,6 +209,14 @@ export default function Home() {
     { code: 'tr', flag: "🇹🇷", native: localeNames.tr.native, english: localeNames.tr.english },
     { code: 'es', flag: "🇪🇸", native: localeNames.es.native, english: localeNames.es.english },
   ];
+  const navDownloadUrl = resolveLink(content.nav.downloadUrl, content.nav.download) || DEFAULT_DOWNLOAD_URL;
+  const heroDownloadUrl = resolveLink(content.hero.downloadUrl, content.hero.downloadCta) || DEFAULT_DOWNLOAD_URL;
+  const heroWatchDemoUrl = resolveLink(content.hero.watchDemoUrl, content.hero.watchDemo);
+  const ctaAndroidUrl =
+    resolveLink(content.cta.downloadAndroidUrl, content.cta.downloadAndroid) || DEFAULT_DOWNLOAD_URL;
+  const ctaIosUrl = resolveLink(content.cta.downloadIosUrl, content.cta.downloadIos);
+  const footerDownloadUrl =
+    resolveLink(content.footer.downloadUrl, content.footer.downloadLabel) || DEFAULT_DOWNLOAD_URL;
 
   useEffect(() => {
     let active = true;
@@ -212,9 +258,12 @@ export default function Home() {
                 {content.nav.feedback}
               </Link>
               <LanguageSwitcher />
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+              <LinkButton
+                href={navDownloadUrl}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              >
                 {content.nav.download}
-              </Button>
+              </LinkButton>
             </div>
           </div>
         </div>
@@ -239,13 +288,22 @@ export default function Home() {
                 {content.hero.description}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-lg h-14 px-8">
+                <LinkButton
+                  href={heroDownloadUrl}
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-lg h-14 px-8"
+                >
                   <Download className="mr-2 h-5 w-5" />
                   {content.hero.downloadCta}
-                </Button>
-                <Button size="lg" variant="outline" className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+                </LinkButton>
+                <LinkButton
+                  href={heroWatchDemoUrl}
+                  size="lg"
+                  variant="outline"
+                  className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
+                >
                   {content.hero.watchDemo}
-                </Button>
+                </LinkButton>
               </div>
               <div className="flex items-center gap-6 pt-4">
                 <div className="flex items-center gap-1">
@@ -466,14 +524,23 @@ export default function Home() {
             {content.cta.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100 text-lg h-14 px-8">
+            <LinkButton
+              href={ctaAndroidUrl}
+              size="lg"
+              className="bg-white text-purple-600 hover:bg-gray-100 text-lg h-14 px-8"
+            >
               <Download className="mr-2 h-5 w-5" />
               {content.cta.downloadAndroid}
-            </Button>
-            <Button size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg h-14 px-8">
+            </LinkButton>
+            <LinkButton
+              href={ctaIosUrl}
+              size="lg"
+              variant="outline"
+              className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg h-14 px-8"
+            >
               <Download className="mr-2 h-5 w-5" />
               {content.cta.downloadIos}
-            </Button>
+            </LinkButton>
           </div>
         </div>
       </section>
@@ -502,7 +569,19 @@ export default function Home() {
                 <li><Link href="#faq" className="hover:text-purple-400 transition">{content.nav.faq}</Link></li>
                 <li><Link href={`/${locale}/reviews`} className="hover:text-purple-400 transition">{content.nav.reviews}</Link></li>
                 <li><Link href={`/${locale}/feedback`} className="hover:text-purple-400 transition">{content.nav.feedback}</Link></li>
-                <li><Link href="#" className="hover:text-purple-400 transition">{content.footer.downloadLabel}</Link></li>
+                <li>
+                  {footerDownloadUrl ? (
+                    <a
+                      href={footerDownloadUrl}
+                      className="hover:text-purple-400 transition"
+                      {...linkProps(footerDownloadUrl)}
+                    >
+                      {content.footer.downloadLabel}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">{content.footer.downloadLabel}</span>
+                  )}
+                </li>
               </ul>
             </div>
             <div>
