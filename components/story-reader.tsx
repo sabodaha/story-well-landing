@@ -3,15 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { fetchPagesForStory } from "@/lib/firebase/stories";
+import { initAppCheck } from "@/lib/firebase/client";
+import { resolveAllAudioUrls } from "@/lib/firebase/storage";
 import type { StoryPage } from "@/lib/types/story";
 import { locales, localeNames, type Locale } from "@/lib/i18n/config";
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const STORAGE_BUCKET =
-  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "kidsstoriesapp.firebasestorage.app";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -23,34 +18,6 @@ const resolveLocalizedText = (
 ) => {
   if (!value) return "";
   return value[locale] || value.en || Object.values(value)[0] || "";
-};
-
-/**
- * Resolve a playable audio URL for a story page.
- *
- * Strategy:
- * 1. If the page's `audioUrls` map contains a value for the locale that is
- *    already an HTTP(S) URL → use it directly.
- * 2. Otherwise build the URL from the well-known Firebase Storage path
- *    pattern used by the admin tool / TTS pipeline:
- *    `https://storage.googleapis.com/{bucket}/stories/{storyId}/audio/{locale}/page_{index}.mp3`
- */
-const resolveAudioUrl = (
-  page: StoryPage | undefined,
-  locale: string,
-  storyId: string
-): string => {
-  if (!page) return "";
-
-  const stored = page.audioUrls?.[locale] || "";
-
-  // Already a full HTTP URL
-  if (stored.startsWith("http://") || stored.startsWith("https://")) {
-    return stored;
-  }
-
-  // Construct from the known storage path pattern
-  return `https://storage.googleapis.com/${STORAGE_BUCKET}/stories/${storyId}/audio/${locale}/page_${page.index}.mp3`;
 };
 
 // ---------------------------------------------------------------------------
@@ -89,10 +56,18 @@ export const StoryReader = ({
   onExit,
   labels,
 }: StoryReaderProps) => {
+  // ---- Initialise App Check on mount (reCAPTCHA v3 – blocks simple bots) --
+  useEffect(() => {
+    initAppCheck();
+  }, []);
+
   // ---- Data ---------------------------------------------------------------
   const [pages, setPages] = useState<StoryPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ---- Resolved audio URLs (Firebase Storage SDK download URLs) -----------
+  const [audioUrlMap, setAudioUrlMap] = useState<Map<number, string>>(new Map());
 
   // ---- Navigation ---------------------------------------------------------
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -122,11 +97,8 @@ export const StoryReader = ({
     [currentPage, readerLocale]
   );
 
-  // Resolve audio URL – handles Firestore values AND fallback construction
-  const audioUrl = useMemo(
-    () => resolveAudioUrl(currentPage, readerLocale, storyId),
-    [currentPage, readerLocale, storyId]
-  );
+  // Current page audio URL from resolved map
+  const audioUrl = audioUrlMap.get(currentPage?.index ?? -1) || "";
 
   // =========================================================================
   // Data fetching
@@ -155,6 +127,32 @@ export const StoryReader = ({
       active = false;
     };
   }, [storyId, labels.error]);
+
+  // =========================================================================
+  // Resolve audio URLs via Firebase Storage SDK (not public GCS URLs)
+  // Re-resolve when pages load or reader locale changes
+  // =========================================================================
+
+  useEffect(() => {
+    if (pages.length === 0) return;
+    let active = true;
+
+    console.log(`[StoryReader] Resolving audio URLs for locale="${readerLocale}", ${pages.length} pages…`);
+
+    resolveAllAudioUrls(pages, readerLocale, storyId)
+      .then((map) => {
+        if (!active) return;
+        console.log("[StoryReader] Audio URL map resolved:", Object.fromEntries(map));
+        setAudioUrlMap(map);
+      })
+      .catch((err) => {
+        console.error("[StoryReader] Failed to resolve audio URLs:", err);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [pages, readerLocale, storyId]);
 
   // =========================================================================
   // Navigation helpers (no URL mutation – keeps fullscreen alive)
@@ -249,12 +247,12 @@ export const StoryReader = ({
   useEffect(() => {
     const nextPage = pages[currentIndex + 1];
     if (!nextPage) return;
-    const nextUrl = resolveAudioUrl(nextPage, readerLocale, storyId);
+    const nextUrl = audioUrlMap.get(nextPage.index) || "";
     if (!nextUrl) return;
     const preloader = new Audio(nextUrl);
     preloader.preload = "auto";
     preloader.load();
-  }, [pages, currentIndex, readerLocale, storyId]);
+  }, [pages, currentIndex, audioUrlMap]);
 
   // =========================================================================
   // Audio event handlers (stable callbacks)
@@ -277,7 +275,7 @@ export const StoryReader = ({
       return;
     }
     if (!audioUrl) {
-      console.warn("[StoryReader] Play ignored – audioUrl is empty.");
+      console.warn("[StoryReader] Play ignored – audioUrl is empty for page", currentIndex);
       return;
     }
 
@@ -304,7 +302,7 @@ export const StoryReader = ({
           setIsPlaying(false);
         });
     }
-  }, [audioUrl, isPlaying]);
+  }, [audioUrl, isPlaying, currentIndex]);
 
   // =========================================================================
   // Keyboard
@@ -552,7 +550,7 @@ export const StoryReader = ({
         </p>
       </div>
 
-      {/* ---- Hidden audio element (NO crossOrigin – avoids CORS issues with Firebase Storage) ---- */}
+      {/* ---- Hidden audio element ---- */}
       <audio
         ref={audioRef}
         preload="auto"

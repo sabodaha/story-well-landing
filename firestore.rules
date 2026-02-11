@@ -2,6 +2,22 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // -----------------------------------------------------------------------
+    // SECURITY ARCHITECTURE
+    // -----------------------------------------------------------------------
+    // - Android app: Uses Firebase SDK with user auth. App Check currently
+    //   DISABLED in the Flutter app (main.dart). Must be enabled there BEFORE
+    //   enforcing App Check globally.
+    // - Web app (landing-page): Uses Firebase SDK with App Check (reCAPTCHA v3).
+    //   App Check is initialized in lib/firebase/client.ts.
+    // - Admin panel: Uses Firebase SDK with admin auth token.
+    //
+    // IMPORTANT: Do NOT enforce App Check at the Firebase project level until
+    //   the Android app has App Check activated with PlayIntegrity provider.
+    //   Use scripts/setup-appcheck-enforcement.js when ready.
+    // -----------------------------------------------------------------------
+
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null && request.auth.token.admin == true;
@@ -11,10 +27,10 @@ service cloud.firestore {
     // This is needed for the admin-panel to manage stories
     match /stories/{storyId} {
       allow read, write: if isAdmin();
-      
+
       // Allow public read for published stories (web + mobile clients)
       allow read: if resource.data.isPublished == true;
-      
+
       // Pages subcollection
       match /pages/{pageId} {
         allow read, write: if isAdmin();
@@ -47,5 +63,3 @@ service cloud.firestore {
     }
   }
 }
-
-
