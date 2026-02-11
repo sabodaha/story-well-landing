@@ -7,6 +7,13 @@ import type { StoryPage } from "@/lib/types/story";
 import { locales, localeNames, type Locale } from "@/lib/i18n/config";
 
 // ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const STORAGE_BUCKET =
+  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "kidsstoriesapp.firebasestorage.app";
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -16,6 +23,34 @@ const resolveLocalizedText = (
 ) => {
   if (!value) return "";
   return value[locale] || value.en || Object.values(value)[0] || "";
+};
+
+/**
+ * Resolve a playable audio URL for a story page.
+ *
+ * Strategy:
+ * 1. If the page's `audioUrls` map contains a value for the locale that is
+ *    already an HTTP(S) URL → use it directly.
+ * 2. Otherwise build the URL from the well-known Firebase Storage path
+ *    pattern used by the admin tool / TTS pipeline:
+ *    `https://storage.googleapis.com/{bucket}/stories/{storyId}/audio/{locale}/page_{index}.mp3`
+ */
+const resolveAudioUrl = (
+  page: StoryPage | undefined,
+  locale: string,
+  storyId: string
+): string => {
+  if (!page) return "";
+
+  const stored = page.audioUrls?.[locale] || "";
+
+  // Already a full HTTP URL
+  if (stored.startsWith("http://") || stored.startsWith("https://")) {
+    return stored;
+  }
+
+  // Construct from the known storage path pattern
+  return `https://storage.googleapis.com/${STORAGE_BUCKET}/stories/${storyId}/audio/${locale}/page_${page.index}.mp3`;
 };
 
 // ---------------------------------------------------------------------------
@@ -87,12 +122,11 @@ export const StoryReader = ({
     [currentPage, readerLocale]
   );
 
-  const rawAudioUrl = currentPage?.audioUrls?.[readerLocale] || "";
-  // Only use HTTP(S) URLs – PAD paths like "media/..." are not playable in browser
-  const audioUrl =
-    rawAudioUrl.startsWith("http://") || rawAudioUrl.startsWith("https://")
-      ? rawAudioUrl
-      : "";
+  // Resolve audio URL – handles Firestore values AND fallback construction
+  const audioUrl = useMemo(
+    () => resolveAudioUrl(currentPage, readerLocale, storyId),
+    [currentPage, readerLocale, storyId]
+  );
 
   // =========================================================================
   // Data fetching
@@ -106,6 +140,7 @@ export const StoryReader = ({
     fetchPagesForStory(storyId)
       .then((data) => {
         if (!active) return;
+        console.log("[StoryReader] Loaded", data.length, "pages. First page audioUrls:", data[0]?.audioUrls);
         setPages(data);
         setLoading(false);
         setCurrentIndex(0);
@@ -167,12 +202,12 @@ export const StoryReader = ({
   // Audio: single combined effect – avoids race conditions
   // =========================================================================
 
-  // When page or locale changes, load the new audio and auto-play if needed
+  // When page or audioUrl changes, load the new audio and auto-play if needed
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    console.log("[StoryReader] Audio effect – page:", currentIndex, "rawUrl:", rawAudioUrl, "httpUrl:", audioUrl, "autoPlay:", shouldAutoPlayRef.current);
+    console.log("[StoryReader] Audio effect – page:", currentIndex, "url:", audioUrl, "autoPlay:", shouldAutoPlayRef.current);
 
     // Always stop whatever was playing
     audio.pause();
@@ -181,15 +216,9 @@ export const StoryReader = ({
     if (!audioUrl) {
       audio.removeAttribute("src");
       setIsPlaying(false);
-      if (rawAudioUrl) {
-        console.warn("[StoryReader] Audio URL is not HTTP – cannot play in browser:", rawAudioUrl);
-      }
-      // If auto-play was on but this page has no audio, advance again after a
-      // short pause so the user can see the image.
+      // If auto-play was on but this page has no audio, advance after a pause
       if (shouldAutoPlayRef.current && currentIndex < totalPages - 1) {
-        const t = setTimeout(() => {
-          goToPage(currentIndex + 1);
-        }, 2000);
+        const t = setTimeout(() => goToPage(currentIndex + 1), 2000);
         return () => clearTimeout(t);
       }
       return;
@@ -199,7 +228,6 @@ export const StoryReader = ({
     audio.load();
 
     if (shouldAutoPlayRef.current) {
-      // Small delay before playing the next page (mirrors Flutter's 1 s delay)
       const t = setTimeout(() => {
         audio
           .play()
@@ -217,52 +245,16 @@ export const StoryReader = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, audioUrl]);
 
-  // Re-load audio when only the locale changes (same page, different language)
-  // We need a separate ref to track the previous locale so we only act on
-  // locale changes, not page changes (which are handled above).
-  const prevLocaleRef = useRef(readerLocale);
-  useEffect(() => {
-    if (prevLocaleRef.current === readerLocale) return;
-    prevLocaleRef.current = readerLocale;
-
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const wasPlaying = isPlaying;
-    audio.pause();
-    audio.currentTime = 0;
-
-    const newUrl = currentPage?.audioUrls?.[readerLocale] || "";
-    if (!newUrl) {
-      audio.removeAttribute("src");
-      setIsPlaying(false);
-      return;
-    }
-
-    audio.src = newUrl;
-    audio.load();
-
-    if (wasPlaying || shouldAutoPlayRef.current) {
-      const t = setTimeout(() => {
-        audio
-          .play()
-          .then(() => setIsPlaying(true))
-          .catch(() => setIsPlaying(false));
-      }, 300);
-      return () => clearTimeout(t);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [readerLocale]);
-
   // Preload next page audio
   useEffect(() => {
     const nextPage = pages[currentIndex + 1];
-    const nextUrl = nextPage?.audioUrls?.[readerLocale];
+    if (!nextPage) return;
+    const nextUrl = resolveAudioUrl(nextPage, readerLocale, storyId);
     if (!nextUrl) return;
     const preloader = new Audio(nextUrl);
     preloader.preload = "auto";
     preloader.load();
-  }, [pages, currentIndex, readerLocale]);
+  }, [pages, currentIndex, readerLocale, storyId]);
 
   // =========================================================================
   // Audio event handlers (stable callbacks)
@@ -272,18 +264,20 @@ export const StoryReader = ({
     setIsPlaying(false);
     shouldAutoPlayRef.current = true;
     if (currentIndex < totalPages - 1) {
-      // Advance to next page; the combined effect will auto-play
       goToPage(currentIndex + 1);
     } else {
-      // Last page – stop auto-play
       shouldAutoPlayRef.current = false;
     }
   }, [currentIndex, totalPages, goToPage]);
 
   const handlePlayPause = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !audioUrl) {
-      console.warn("[StoryReader] Play ignored – no audio element or audioUrl is empty.", { audioUrl, rawAudioUrl });
+    if (!audio) {
+      console.warn("[StoryReader] Play ignored – no audio element.");
+      return;
+    }
+    if (!audioUrl) {
+      console.warn("[StoryReader] Play ignored – audioUrl is empty.");
       return;
     }
 
@@ -292,8 +286,9 @@ export const StoryReader = ({
       setIsPlaying(false);
       shouldAutoPlayRef.current = false;
     } else {
-      // Ensure src is set (guard against stale element)
-      if (audio.src !== audioUrl && !audio.src.endsWith(new URL(audioUrl).pathname)) {
+      // Ensure src is set before playing
+      if (!audio.src || !audio.src.startsWith("http")) {
+        console.log("[StoryReader] Setting audio src before play:", audioUrl);
         audio.src = audioUrl;
         audio.load();
       }
@@ -301,15 +296,15 @@ export const StoryReader = ({
       audio
         .play()
         .then(() => {
-          console.log("[StoryReader] Audio playing:", audioUrl);
+          console.log("[StoryReader] Playing:", audioUrl);
           setIsPlaying(true);
         })
         .catch((err) => {
-          console.error("[StoryReader] audio.play() failed:", err, { src: audio.src, audioUrl });
+          console.error("[StoryReader] play() failed:", err, "src:", audio.src);
           setIsPlaying(false);
         });
     }
-  }, [audioUrl, rawAudioUrl, isPlaying]);
+  }, [audioUrl, isPlaying]);
 
   // =========================================================================
   // Keyboard
@@ -478,7 +473,7 @@ export const StoryReader = ({
             <span className="hidden sm:inline">{isPlaying ? labels.pause : labels.play}</span>
           </button>
 
-          {/* Language selector (inline <select>, NO portal) */}
+          {/* Language selector (inline, NO portal) */}
           <div className="relative">
             <button
               onClick={() => setLangMenuOpen((v) => !v)}
@@ -557,18 +552,17 @@ export const StoryReader = ({
         </p>
       </div>
 
-      {/* ---- Hidden audio element ---- */}
+      {/* ---- Hidden audio element (NO crossOrigin – avoids CORS issues with Firebase Storage) ---- */}
       <audio
         ref={audioRef}
         preload="auto"
         className="hidden"
-        crossOrigin="anonymous"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={onAudioEnded}
         onError={(e) => {
-          const audio = e.currentTarget;
-          console.error("[StoryReader] Audio element error:", audio.error?.message, "src:", audio.src);
+          const el = e.currentTarget;
+          console.error("[StoryReader] Audio error:", el.error?.code, el.error?.message, "src:", el.src);
           setIsPlaying(false);
         }}
       />
