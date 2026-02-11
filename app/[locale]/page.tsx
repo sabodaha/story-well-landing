@@ -114,6 +114,7 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     lovedBy: t.heroLovedBy,
     worldwide: t.heroWorldwide,
     imageUrl: "",
+    imageCaption: "",
   },
   features: {
     badge: t.featuresBadge,
@@ -320,7 +321,7 @@ export default function Home() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-3xl blur-3xl opacity-20 animate-pulse"></div>
               <div className="relative bg-white rounded-3xl shadow-2xl p-8 border-4 border-purple-200">
-                <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 rounded-2xl flex items-center justify-center overflow-hidden relative">
+                <div className="min-h-[300px] bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 rounded-2xl flex items-center justify-center overflow-hidden relative">
                   {content.hero.imageUrl ? (
                     <Image
                       src={content.hero.imageUrl}
@@ -328,17 +329,17 @@ export default function Home() {
                       fill
                       priority
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover"
+                      className="object-contain"
                     />
                   ) : (
                     <BookOpen className="h-32 w-32 text-purple-400" />
                   )}
                 </div>
-                <div className="mt-6 space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                </div>
+                {content.hero.imageCaption && (
+                  <p className="mt-6 text-sm text-gray-600 text-center leading-relaxed">
+                    {content.hero.imageCaption}
+                  </p>
+                )}
               </div>
             </div>
           </div>
