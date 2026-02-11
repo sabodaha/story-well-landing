@@ -26,7 +26,6 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { localeNames, type Locale } from "@/lib/i18n/config";
 import { useParams } from "next/navigation";
 import { getSiteContent } from "@/lib/content/client";
-import { fetchPublishedStories, fetchPagesForStory } from "@/lib/firebase/stories";
 
 const HERO_STORY_ID = "theMoonbellQuest";
 
@@ -205,7 +204,6 @@ export default function Home() {
   const t = useTranslations();
   const defaultContent = useMemo(() => buildDefaultContent(t), [t]);
   const [content, setContent] = useState(defaultContent);
-  const [heroStoryId, setHeroStoryId] = useState(HERO_STORY_ID);
 
   useEffect(() => {
     let active = true;
@@ -217,49 +215,6 @@ export default function Home() {
       active = false;
     };
   }, [locale, defaultContent]);
-
-  useEffect(() => {
-    let active = true;
-
-    const pickHeroStory = async () => {
-      const hasPages = async (storyId: string) => {
-        try {
-          const pages = await fetchPagesForStory(storyId);
-          return pages.length > 0;
-        } catch {
-          return false;
-        }
-      };
-
-      // Prefer explicit default story when it is still readable.
-      if (await hasPages(HERO_STORY_ID)) {
-        if (active) setHeroStoryId(HERO_STORY_ID);
-        return;
-      }
-
-      try {
-        const stories = await fetchPublishedStories();
-        for (const story of stories) {
-          if (story.isPremium) continue;
-          if (await hasPages(story.id)) {
-            if (active) setHeroStoryId(story.id);
-            return;
-          }
-        }
-      } catch (error) {
-        console.warn("[Home] Failed to resolve fallback hero story:", error);
-      }
-
-      // Keep default ID as a last resort to avoid rendering nothing.
-      if (active) setHeroStoryId(HERO_STORY_ID);
-    };
-
-    pickHeroStory();
-
-    return () => {
-      active = false;
-    };
-  }, []);
   
   const languages = [
     { code: 'en', flag: "🇬🇧", native: localeNames.en.native, english: localeNames.en.english },
@@ -393,7 +348,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-3xl blur-3xl opacity-20 animate-pulse"></div>
               <div className="relative rounded-3xl shadow-2xl overflow-hidden border-4 border-purple-200">
                 <StoryReader
-                  storyId={heroStoryId}
+                  storyId={HERO_STORY_ID}
                   locale={locale}
                   onExit={() => {}}
                   labels={{

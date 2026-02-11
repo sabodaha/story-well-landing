@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { fetchPagesForStory } from "@/lib/firebase/stories";
-import { initAppCheck } from "@/lib/firebase/client";
-import { resolveAudioDownloadUrl } from "@/lib/firebase/storage";
 import type { StoryPage } from "@/lib/types/story";
 import { locales, localeNames, type Locale } from "@/lib/i18n/config";
 
@@ -12,12 +10,48 @@ import { locales, localeNames, type Locale } from "@/lib/i18n/config";
 // Helpers
 // ---------------------------------------------------------------------------
 
+const BUCKET = "kidsstoriesapp.firebasestorage.app";
+
 const resolveLocalizedText = (
   value: Record<string, string> | undefined,
   locale: Locale
 ) => {
   if (!value) return "";
   return value[locale] || value.en || Object.values(value)[0] || "";
+};
+
+/**
+ * Synchronously derive the audio URL for a story page.
+ *
+ * Priority:
+ * 1. `audioUrls[locale]` from Firestore (direct GCS or Firebase download URL).
+ * 2. `audioUrls["en"]` fallback.
+ * 3. First non-empty value in `audioUrls`.
+ * 4. Construct the well-known GCS URL:
+ *    `https://storage.googleapis.com/{BUCKET}/stories/{storyId}/audio/{locale}/page_{index+1}.mp3`
+ *    (Storage files are 1-indexed: page_1.mp3, page_2.mp3, etc.)
+ *
+ * Zero network calls — works instantly.
+ */
+const getPageAudioUrl = (
+  audioUrls: Record<string, string> | undefined,
+  locale: string,
+  storyId: string,
+  pageIndex: number
+): string => {
+  const localeUrl = audioUrls?.[locale]?.trim();
+  if (localeUrl) return localeUrl;
+
+  const enUrl = audioUrls?.en?.trim();
+  if (enUrl) return enUrl;
+
+  const anyUrl = Object.values(audioUrls || {}).find(
+    (v) => typeof v === "string" && v.trim().length > 0
+  );
+  if (anyUrl) return anyUrl.trim();
+
+  // Construct well-known path (files in Storage are 1-indexed)
+  return `https://storage.googleapis.com/${BUCKET}/stories/${storyId}/audio/${locale}/page_${pageIndex + 1}.mp3`;
 };
 
 // ---------------------------------------------------------------------------
@@ -56,19 +90,10 @@ export const StoryReader = ({
   onExit,
   labels,
 }: StoryReaderProps) => {
-  // ---- Initialise App Check on mount (reCAPTCHA v3 – blocks simple bots) --
-  useEffect(() => {
-    initAppCheck();
-  }, []);
-
   // ---- Data ---------------------------------------------------------------
   const [pages, setPages] = useState<StoryPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [noPagesFound, setNoPagesFound] = useState(false);
-
-  // ---- Resolved audio URLs (Firebase Storage SDK download URLs) -----------
-  const [audioUrlMap, setAudioUrlMap] = useState<Map<number, string>>(new Map());
 
   // ---- Navigation ---------------------------------------------------------
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -84,10 +109,8 @@ export const StoryReader = ({
 
   // ---- Audio --------------------------------------------------------------
   const [isPlaying, setIsPlaying] = useState(false);
-  const [resolvingAudio, setResolvingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const shouldAutoPlayRef = useRef(false);
-  const emptyRetryRef = useRef(false);
 
   // ---- Controls visibility (tap to toggle, like Flutter) ------------------
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -100,122 +123,47 @@ export const StoryReader = ({
     [currentPage, readerLocale]
   );
 
-  // Current page audio URL from resolved map
-  const audioUrl = audioUrlMap.get(currentPage?.index ?? -1) || "";
-
-  useEffect(() => {
-    // Prevent stale page-index keys from previous story/locale from being reused.
-    setAudioUrlMap(new Map());
-  }, [storyId, readerLocale]);
+  // Derive audio URL synchronously – zero async, zero network calls.
+  const audioUrl = useMemo(
+    () =>
+      currentPage
+        ? getPageAudioUrl(currentPage.audioUrls, readerLocale, storyId, currentPage.index)
+        : "",
+    [currentPage, readerLocale, storyId]
+  );
 
   // =========================================================================
-  // Data fetching
+  // Data fetching – single call, simple error/retry
   // =========================================================================
 
   useEffect(() => {
     let active = true;
-    let retryTimer: ReturnType<typeof setTimeout> | null = null;
     setLoading(true);
     setError(null);
-    setNoPagesFound(false);
-    emptyRetryRef.current = false;
 
-    const loadPages = (allowRetryOnError: boolean) => {
-      fetchPagesForStory(storyId)
-        .then((data) => {
-          if (!active) return;
-          console.log("[StoryReader] Loaded", data.length, "pages. First page audioUrls:", data[0]?.audioUrls);
-          if (data.length === 0) {
-            if (!emptyRetryRef.current) {
-              // Transient empty snapshots happen occasionally in production; confirm once before showing empty state.
-              emptyRetryRef.current = true;
-              retryTimer = setTimeout(() => {
-                if (!active) return;
-                loadPages(false);
-              }, 600);
-              return;
-            }
-            setNoPagesFound(true);
-            setPages([]);
-            setLoading(false);
-            setCurrentIndex(0);
-            return;
-          }
-          setPages(data);
-          setLoading(false);
-          setCurrentIndex(0);
-        })
-        .catch((err) => {
-          if (!active) return;
-          const message = err instanceof Error ? err.message : String(err);
-          console.error(`[StoryReader] Failed loading pages for storyId="${storyId}"`, err);
-          if (allowRetryOnError && message.toLowerCase().includes("timed out")) {
-            retryTimer = setTimeout(() => {
-              if (!active) return;
-              loadPages(false);
-            }, 700);
-            return;
-          }
-          setError(err instanceof Error ? err.message : labels.error);
-          setLoading(false);
-        });
-    };
-
-    loadPages(true);
-
-    return () => {
-      active = false;
-      if (retryTimer) clearTimeout(retryTimer);
-    };
-  }, [storyId, labels.error]);
-
-  // =========================================================================
-  // Resolve current page audio first; preload next page audio in background.
-  // =========================================================================
-
-  useEffect(() => {
-    if (!currentPage) return;
-    let active = true;
-
-    const ensureAudioUrl = async (page: StoryPage) => {
-      try {
-        const existing = audioUrlMap.get(page.index);
-        if (existing) return existing;
-        const url = await resolveAudioDownloadUrl(page.audioUrls, readerLocale, storyId, page.index);
-        if (!active || !url) return "";
-        setAudioUrlMap((prev) => {
-          const next = new Map(prev);
-          next.set(page.index, url);
-          return next;
-        });
-        return url;
-      } catch (err) {
-        console.error("[StoryReader] Failed to resolve audio URL for page", page.index, err);
-        return "";
-      }
-    };
-
-    // 1) Make current page playable ASAP
-    void ensureAudioUrl(currentPage);
-
-    // 2) Preload next page in background
-    const nextPage = pages[currentIndex + 1];
-    if (nextPage) {
-      void ensureAudioUrl(nextPage).then((url) => {
-        if (!active || !url) return;
-        const preloader = new Audio(url);
-        preloader.preload = "auto";
-        preloader.load();
+    fetchPagesForStory(storyId)
+      .then((data) => {
+        if (!active) return;
+        console.log(
+          "[StoryReader] Loaded", data.length,
+          "pages. audioUrl[0]:", data[0] ? getPageAudioUrl(data[0].audioUrls, locale, storyId, data[0].index) : "(none)"
+        );
+        setPages(data);
+        setCurrentIndex(0);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!active) return;
+        console.error(`[StoryReader] Failed loading pages for storyId="${storyId}"`, err);
+        setError(err instanceof Error ? err.message : labels.error);
+        setLoading(false);
       });
-    }
 
-    return () => {
-      active = false;
-    };
-  }, [currentPage, pages, currentIndex, readerLocale, storyId, audioUrlMap]);
+    return () => { active = false; };
+  }, [storyId, locale, labels.error]);
 
   // =========================================================================
-  // Navigation helpers (no URL mutation – keeps fullscreen alive)
+  // Navigation helpers
   // =========================================================================
 
   const goToPage = useCallback(
@@ -226,15 +174,11 @@ export const StoryReader = ({
   );
 
   const handleNext = useCallback(() => {
-    if (currentIndex < totalPages - 1) {
-      goToPage(currentIndex + 1);
-    }
+    if (currentIndex < totalPages - 1) goToPage(currentIndex + 1);
   }, [currentIndex, totalPages, goToPage]);
 
   const handlePrev = useCallback(() => {
-    if (currentIndex > 0) {
-      goToPage(currentIndex - 1);
-    }
+    if (currentIndex > 0) goToPage(currentIndex - 1);
   }, [currentIndex, goToPage]);
 
   // =========================================================================
@@ -257,24 +201,21 @@ export const StoryReader = ({
   }, []);
 
   // =========================================================================
-  // Audio: single combined effect – avoids race conditions
+  // Audio: load src when page or locale changes
   // =========================================================================
 
-  // When page or audioUrl changes, load the new audio and auto-play if needed
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    console.log("[StoryReader] Audio effect – page:", currentIndex, "url:", audioUrl, "autoPlay:", shouldAutoPlayRef.current);
-
-    // Always stop whatever was playing
+    // Stop whatever was playing
     audio.pause();
     audio.currentTime = 0;
 
     if (!audioUrl) {
       audio.removeAttribute("src");
       setIsPlaying(false);
-      // If auto-play was on but this page has no audio, advance after a pause
+      // If auto-play chain was active, advance after brief pause
       if (shouldAutoPlayRef.current && currentIndex < totalPages - 1) {
         const t = setTimeout(() => goToPage(currentIndex + 1), 2000);
         return () => clearTimeout(t);
@@ -289,22 +230,30 @@ export const StoryReader = ({
       const t = setTimeout(() => {
         audio
           .play()
-          .then(() => {
-            console.log("[StoryReader] Auto-play started:", audioUrl);
-            setIsPlaying(true);
-          })
+          .then(() => setIsPlaying(true))
           .catch((err) => {
-            console.error("[StoryReader] Auto-play failed:", err);
+            console.warn("[StoryReader] Auto-play blocked:", err.message);
             setIsPlaying(false);
           });
-      }, 400);
+      }, 300);
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, audioUrl]);
 
+  // Preload next page audio so transitions are seamless
+  useEffect(() => {
+    const nextPage = pages[currentIndex + 1];
+    if (!nextPage) return;
+    const nextUrl = getPageAudioUrl(nextPage.audioUrls, readerLocale, storyId, nextPage.index);
+    if (!nextUrl) return;
+    const preloader = new Audio(nextUrl);
+    preloader.preload = "auto";
+    preloader.load();
+  }, [pages, currentIndex, readerLocale, storyId]);
+
   // =========================================================================
-  // Audio event handlers (stable callbacks)
+  // Audio event handlers
   // =========================================================================
 
   const onAudioEnded = useCallback(() => {
@@ -317,71 +266,38 @@ export const StoryReader = ({
     }
   }, [currentIndex, totalPages, goToPage]);
 
+  /** Synchronous play/pause — keeps user-gesture context intact for mobile. */
   const handlePlayPause = useCallback(() => {
-    const playOrPause = async () => {
-      const audio = audioRef.current;
-      if (!audio) {
-        console.warn("[StoryReader] Play ignored – no audio element.");
-        return;
-      }
+    const audio = audioRef.current;
+    if (!audio) return;
 
-      if (isPlaying) {
-        audio.pause();
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+      shouldAutoPlayRef.current = false;
+      return;
+    }
+
+    if (!audioUrl) {
+      console.warn("[StoryReader] No audio URL for page", currentIndex);
+      return;
+    }
+
+    // Ensure src is set (should already be via effect, but guard against edge cases)
+    if (!audio.src || audio.src !== audioUrl) {
+      audio.src = audioUrl;
+      audio.load();
+    }
+
+    shouldAutoPlayRef.current = true;
+    audio
+      .play()
+      .then(() => setIsPlaying(true))
+      .catch((err) => {
+        console.error("[StoryReader] play() failed:", err.message, "src:", audio.src);
         setIsPlaying(false);
-        shouldAutoPlayRef.current = false;
-        return;
-      }
-
-      let resolvedUrl = audioUrl;
-      if (!resolvedUrl && currentPage) {
-        try {
-          setResolvingAudio(true);
-          resolvedUrl = await resolveAudioDownloadUrl(
-            currentPage.audioUrls,
-            readerLocale,
-            storyId,
-            currentPage.index
-          );
-          if (resolvedUrl) {
-            setAudioUrlMap((prev) => {
-              const next = new Map(prev);
-              next.set(currentPage.index, resolvedUrl);
-              return next;
-            });
-          }
-        } catch (err) {
-          console.error("[StoryReader] On-demand audio resolve failed:", err);
-        } finally {
-          setResolvingAudio(false);
-        }
-      }
-
-      if (!resolvedUrl) {
-        console.warn("[StoryReader] Play ignored – audio URL still empty for page", currentIndex);
-        return;
-      }
-
-      if (!audio.src || !audio.src.startsWith("http") || audio.src !== resolvedUrl) {
-        console.log("[StoryReader] Setting audio src before play:", resolvedUrl);
-        audio.src = resolvedUrl;
-        audio.load();
-      }
-
-      shouldAutoPlayRef.current = true;
-      audio
-        .play()
-        .then(() => {
-          console.log("[StoryReader] Playing:", resolvedUrl);
-          setIsPlaying(true);
-        })
-        .catch((err) => {
-          console.error("[StoryReader] play() failed:", err, "src:", audio.src);
-          setIsPlaying(false);
-        });
-    };
-
-    void playOrPause();
-  }, [audioUrl, isPlaying, currentIndex, currentPage, readerLocale, storyId]);
+      });
+  }, [audioUrl, isPlaying, currentIndex]);
 
   // =========================================================================
   // Keyboard
@@ -426,20 +342,11 @@ export const StoryReader = ({
   const retryLoad = () => {
     setLoading(true);
     setError(null);
-    setNoPagesFound(false);
     fetchPagesForStory(storyId)
       .then((data) => {
-        if (data.length === 0) {
-          console.warn(`[StoryReader] Retry found no pages for storyId="${storyId}"`);
-          setNoPagesFound(true);
-          setPages([]);
-          setLoading(false);
-          setCurrentIndex(0);
-          return;
-        }
         setPages(data);
-        setLoading(false);
         setCurrentIndex(0);
+        setLoading(false);
       })
       .catch((err) => {
         console.error(`[StoryReader] Retry failed for storyId="${storyId}"`, err);
@@ -474,7 +381,7 @@ export const StoryReader = ({
     );
   }
 
-  if (noPagesFound) {
+  if (pages.length === 0) {
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-amber-300 bg-black/80 text-white">
         <span className="text-amber-300">No pages found for this story yet.</span>
@@ -562,8 +469,7 @@ export const StoryReader = ({
           {/* Play / Pause */}
           <button
             onClick={handlePlayPause}
-            disabled={resolvingAudio}
-            className="flex h-9 items-center gap-1.5 rounded-full bg-black/50 px-3 text-sm text-white backdrop-blur-sm disabled:opacity-40"
+            className="flex h-9 items-center gap-1.5 rounded-full bg-black/50 px-3 text-sm text-white backdrop-blur-sm"
             aria-label={isPlaying ? labels.pause : labels.play}
           >
             {isPlaying ? (

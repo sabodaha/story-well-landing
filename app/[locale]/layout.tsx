@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { CookieBanner } from "@/components/cookie-banner";
+import { FirebaseBootstrap } from "@/components/firebase-bootstrap";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { locales, defaultLocale, type Locale } from "@/lib/i18n/config";
 
@@ -125,6 +126,7 @@ export default async function LocaleLayout({
         >
           Skip to main content
         </a>
+        <FirebaseBootstrap />
         <GoogleAnalytics />
         {children}
         <CookieBanner />
