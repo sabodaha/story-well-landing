@@ -98,7 +98,11 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     faq: t.navFAQ,
     reviews: t.navReviews,
     feedback: t.navFeedback,
+    stories: t.navStories,
+    sleep: t.navSleep,
     download: t.navDownload,
+    storiesUrl: "",
+    sleepUrl: "",
     downloadUrl: "",
   },
   hero: {
@@ -108,8 +112,10 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     titleEnd: t.heroTitleEnd,
     description: t.heroDescription,
     downloadCta: t.heroDownload,
+    readOnline: t.heroReadOnline,
     watchDemo: t.heroWatchDemo,
     downloadUrl: "",
+    readOnlineUrl: "",
     watchDemoUrl: "",
     lovedBy: t.heroLovedBy,
     worldwide: t.heroWorldwide,
@@ -220,7 +226,11 @@ export default function Home() {
   ];
   
   const navDownloadUrl = resolveLink(content.nav.downloadUrl, content.nav.download) || DEFAULT_DOWNLOAD_URL;
+  const navStoriesUrl = resolveLink(content.nav.storiesUrl, content.nav.stories) || `/${locale}/stories/`;
+  const navSleepUrl = resolveLink(content.nav.sleepUrl, content.nav.sleep) || `/${locale}/sleep/`;
   const heroDownloadUrl = resolveLink(content.hero.downloadUrl, content.hero.downloadCta) || DEFAULT_DOWNLOAD_URL;
+  const heroReadOnlineUrl =
+    resolveLink(content.hero.readOnlineUrl, content.hero.readOnline) || `/${locale}/stories/`;
   const heroWatchDemoUrl = resolveLink(content.hero.watchDemoUrl, content.hero.watchDemo);
   const ctaAndroidUrl =
     resolveLink(content.cta.downloadAndroidUrl, content.cta.downloadAndroid) || DEFAULT_DOWNLOAD_URL;
@@ -249,6 +259,12 @@ export default function Home() {
               </Link>
               <Link href="#faq" className="text-gray-700 hover:text-purple-600 transition">
                 {content.nav.faq}
+              </Link>
+              <Link href={navStoriesUrl} className="text-gray-700 hover:text-purple-600 transition">
+                {content.nav.stories}
+              </Link>
+              <Link href={navSleepUrl} className="text-gray-700 hover:text-purple-600 transition">
+                {content.nav.sleep}
               </Link>
               <Link href={`/${locale}/reviews`} className="text-gray-700 hover:text-purple-600 transition">
                 {content.nav.reviews}
@@ -295,6 +311,14 @@ export default function Home() {
                 >
                   <Download className="mr-2 h-5 w-5" />
                   {content.hero.downloadCta}
+                </LinkButton>
+                <LinkButton
+                  href={heroReadOnlineUrl}
+                  size="lg"
+                  variant="outline"
+                  className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
+                >
+                  {content.hero.readOnline}
                 </LinkButton>
                 <LinkButton
                   href={heroWatchDemoUrl}

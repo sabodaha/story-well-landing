@@ -118,3 +118,6 @@ fs.writeFileSync(outputPath, JSON.stringify(contentStructure, null, 2), 'utf-8')
 console.log(`✅ Exported translations to: ${outputPath}`);
 console.log(`   Locales: ${Object.keys(contentStructure).join(', ')}`);
 
+
+
+

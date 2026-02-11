@@ -74,3 +74,6 @@ curl https://opinionboard-lb23erpsaq-uc.a.run.app/opinions?limit=1
 4. Monitor Firebase Console logs for any issues
 
 
+
+
+

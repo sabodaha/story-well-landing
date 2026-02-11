@@ -12,19 +12,22 @@ service cloud.firestore {
     match /stories/{storyId} {
       allow read, write: if isAdmin();
       
-      // Allow read access to published stories for app users (if needed)
-      // Uncomment if the mobile app needs direct Firestore access
-      // allow read: if resource.data.isPublished == true;
+      // Allow public read for published stories (web + mobile clients)
+      allow read: if resource.data.isPublished == true;
       
       // Pages subcollection
       match /pages/{pageId} {
         allow read, write: if isAdmin();
+        // Allow public read for pages of published stories
+        allow read: if get(/databases/$(database)/documents/stories/$(storyId)).data.isPublished == true;
       }
     }
 
     // Config collection: Allow admin users to read and write
     match /config/{document=**} {
       allow read, write: if isAdmin();
+      // Allow public read for global config (used by clients)
+      allow read: if true;
     }
 
     // Opinions collection: Restricted - only accessible via Cloud Functions (Admin SDK)

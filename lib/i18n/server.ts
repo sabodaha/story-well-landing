@@ -14,3 +14,6 @@ export function getTranslations(locale: Locale = 'en') {
   return translations[safeLocale];
 }
 
+
+
+
