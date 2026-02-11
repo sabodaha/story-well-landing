@@ -9,10 +9,38 @@ const storage = getStorage(getFirebaseApp());
 const urlCache = new Map<string, string>();
 const failedPaths = new Set<string>();
 
+// Bucket name used by the project (for parsing GCS URLs)
+const BUCKET = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "kidsstoriesapp.firebasestorage.app";
+
+/**
+ * Extract the Firebase Storage path from a `storage.googleapis.com` URL.
+ *
+ * Example:
+ *   Input:  https://storage.googleapis.com/kidsstoriesapp.firebasestorage.app/stories/X/audio/en/page_1.mp3
+ *   Output: stories/X/audio/en/page_1.mp3
+ *
+ * Returns null if the URL isn't a GCS URL for our bucket.
+ */
+function extractPathFromGcsUrl(url: string): string | null {
+  const prefix = `https://storage.googleapis.com/${BUCKET}/`;
+  if (url.startsWith(prefix)) {
+    return url.slice(prefix.length);
+  }
+  return null;
+}
+
+/**
+ * Check if a URL is already a Firebase download URL (firebasestorage.googleapis.com)
+ * with a token – these work as-is.
+ */
+function isFirebaseDownloadUrl(url: string): boolean {
+  return url.includes("firebasestorage.googleapis.com") && url.includes("alt=media");
+}
+
 /**
  * Get a Firebase Storage download URL for a given storage path.
- * Returns a token-bearing URL (firebasestorage.googleapis.com) that is
- * authenticated via Firebase Storage rules instead of public GCS access.
+ * Returns a token-bearing URL (firebasestorage.googleapis.com) that works
+ * regardless of public GCS access settings.
  *
  * Results are cached in memory for the session.
  */
@@ -46,12 +74,13 @@ export async function getStorageDownloadUrl(storagePath: string): Promise<string
  * Resolve an audio URL for a story page.
  *
  * Priority:
- * 1. If `audioUrls[locale]` is already an HTTPS URL → use directly.
- * 2. Otherwise try Firebase Storage SDK `getDownloadURL` with the well-known
- *    path pattern: `stories/{storyId}/audio/{locale}/page_{index}.mp3`
- *
- * This avoids constructing raw `storage.googleapis.com` URLs, which are only
- * accessible when the GCS bucket has `allUsers` read access.
+ * 1. If `audioUrls[locale]` is a Firebase download URL (with token) → use directly.
+ * 2. If it's a `storage.googleapis.com` URL → extract the path and call
+ *    `getDownloadURL()` to get a token-bearing URL that actually works.
+ * 3. If it's some other HTTP URL → use directly (external host).
+ * 4. If no URL in Firestore → try the well-known Storage path:
+ *    `stories/{storyId}/audio/{locale}/page_{index+1}.mp3`
+ *    (Pages in Storage are 1-indexed: page_1.mp3, page_2.mp3, etc.)
  */
 export async function resolveAudioDownloadUrl(
   audioUrls: Record<string, string> | undefined,
@@ -61,14 +90,31 @@ export async function resolveAudioDownloadUrl(
 ): Promise<string> {
   const stored = audioUrls?.[locale] || "";
 
-  // Already a full HTTP URL – use as-is
-  if (stored.startsWith("http://") || stored.startsWith("https://")) {
+  // --- Case 1: Already a Firebase download URL (has token) ---
+  if (stored && isFirebaseDownloadUrl(stored)) {
     return stored;
   }
 
-  // Try the well-known storage path via Firebase SDK
-  const storagePath = `stories/${storyId}/audio/${locale}/page_${pageIndex}.mp3`;
-  const downloadUrl = await getStorageDownloadUrl(storagePath);
+  // --- Case 2: GCS public URL → convert to Firebase download URL ---
+  if (stored) {
+    const gcsPath = extractPathFromGcsUrl(stored);
+    if (gcsPath) {
+      const downloadUrl = await getStorageDownloadUrl(gcsPath);
+      if (downloadUrl) return downloadUrl;
+      // Fall through to other fallbacks if getDownloadURL failed
+    }
+  }
+
+  // --- Case 3: Other HTTP URL (e.g. external CDN) → use as-is ---
+  if (stored && (stored.startsWith("http://") || stored.startsWith("https://"))) {
+    return stored;
+  }
+
+  // --- Case 4: No URL or non-HTTP path → try the well-known storage path ---
+  // Files in storage are 1-indexed: page_1.mp3 corresponds to Firestore page index 0
+  const fileIndex = pageIndex + 1;
+  const fallbackPath = `stories/${storyId}/audio/${locale}/page_${fileIndex}.mp3`;
+  const downloadUrl = await getStorageDownloadUrl(fallbackPath);
   return downloadUrl || "";
 }
 
@@ -91,4 +137,3 @@ export async function resolveAllAudioUrls(
   await Promise.all(promises);
   return result;
 }
-
