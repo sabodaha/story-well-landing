@@ -65,6 +65,7 @@ export const StoryReader = ({
   const [pages, setPages] = useState<StoryPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [noPagesFound, setNoPagesFound] = useState(false);
 
   // ---- Resolved audio URLs (Firebase Storage SDK download URLs) -----------
   const [audioUrlMap, setAudioUrlMap] = useState<Map<number, string>>(new Map());
@@ -108,17 +109,27 @@ export const StoryReader = ({
     let active = true;
     setLoading(true);
     setError(null);
+    setNoPagesFound(false);
 
     fetchPagesForStory(storyId)
       .then((data) => {
         if (!active) return;
         console.log("[StoryReader] Loaded", data.length, "pages. First page audioUrls:", data[0]?.audioUrls);
+        if (data.length === 0) {
+          console.warn(`[StoryReader] No pages returned for storyId="${storyId}"`);
+          setNoPagesFound(true);
+          setPages([]);
+          setLoading(false);
+          setCurrentIndex(0);
+          return;
+        }
         setPages(data);
         setLoading(false);
         setCurrentIndex(0);
       })
       .catch((err) => {
         if (!active) return;
+        console.error(`[StoryReader] Failed loading pages for storyId="${storyId}"`, err);
         setError(err instanceof Error ? err.message : labels.error);
         setLoading(false);
       });
@@ -347,13 +358,23 @@ export const StoryReader = ({
   const retryLoad = () => {
     setLoading(true);
     setError(null);
+    setNoPagesFound(false);
     fetchPagesForStory(storyId)
       .then((data) => {
+        if (data.length === 0) {
+          console.warn(`[StoryReader] Retry found no pages for storyId="${storyId}"`);
+          setNoPagesFound(true);
+          setPages([]);
+          setLoading(false);
+          setCurrentIndex(0);
+          return;
+        }
         setPages(data);
         setLoading(false);
         setCurrentIndex(0);
       })
       .catch((err) => {
+        console.error(`[StoryReader] Retry failed for storyId="${storyId}"`, err);
         setError(err instanceof Error ? err.message : labels.error);
         setLoading(false);
       });
@@ -375,6 +396,20 @@ export const StoryReader = ({
     return (
       <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-red-300 bg-black/80 text-white">
         <span className="text-red-400">{error}</span>
+        <button
+          onClick={retryLoad}
+          className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10"
+        >
+          {labels.retry}
+        </button>
+      </div>
+    );
+  }
+
+  if (noPagesFound) {
+    return (
+      <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-amber-300 bg-black/80 text-white">
+        <span className="text-amber-300">No pages found for this story yet.</span>
         <button
           onClick={retryLoad}
           className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10"

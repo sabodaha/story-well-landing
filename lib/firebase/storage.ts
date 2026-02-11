@@ -22,10 +22,40 @@ const BUCKET = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "kidsstoriesap
  * Returns null if the URL isn't a GCS URL for our bucket.
  */
 function extractPathFromGcsUrl(url: string): string | null {
-  const prefix = `https://storage.googleapis.com/${BUCKET}/`;
-  if (url.startsWith(prefix)) {
-    return url.slice(prefix.length);
+  try {
+    if (url.startsWith("gs://")) {
+      const withoutScheme = url.slice("gs://".length);
+      if (!withoutScheme.startsWith(`${BUCKET}/`)) return null;
+      return withoutScheme.slice(BUCKET.length + 1);
+    }
+
+    const parsed = new URL(url);
+
+    // https://storage.googleapis.com/{bucket}/{path}
+    if (parsed.hostname === "storage.googleapis.com") {
+      const directPrefix = `/${BUCKET}/`;
+      if (parsed.pathname.startsWith(directPrefix)) {
+        return decodeURIComponent(parsed.pathname.slice(directPrefix.length));
+      }
+
+      // https://storage.googleapis.com/download/storage/v1/b/{bucket}/o/{path}?alt=media
+      const apiPrefix = `/download/storage/v1/b/${BUCKET}/o/`;
+      if (parsed.pathname.startsWith(apiPrefix)) {
+        return decodeURIComponent(parsed.pathname.slice(apiPrefix.length));
+      }
+    }
+
+    // https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path}?alt=media&token=...
+    if (parsed.hostname === "firebasestorage.googleapis.com") {
+      const firebasePrefix = `/v0/b/${BUCKET}/o/`;
+      if (parsed.pathname.startsWith(firebasePrefix)) {
+        return decodeURIComponent(parsed.pathname.slice(firebasePrefix.length));
+      }
+    }
+  } catch {
+    return null;
   }
+
   return null;
 }
 
@@ -88,34 +118,54 @@ export async function resolveAudioDownloadUrl(
   storyId: string,
   pageIndex: number
 ): Promise<string> {
-  const stored = audioUrls?.[locale] || "";
+  const firstConfiguredUrl = Object.values(audioUrls || {}).find((value) => typeof value === "string" && value.length > 0) || "";
+  const candidateUrls = Array.from(
+    new Set(
+      [audioUrls?.[locale] || "", audioUrls?.en || "", firstConfiguredUrl]
+        .map((value) => value.trim())
+        .filter(Boolean)
+    )
+  );
 
-  // --- Case 1: Already a Firebase download URL (has token) ---
-  if (stored && isFirebaseDownloadUrl(stored)) {
-    return stored;
-  }
+  for (const stored of candidateUrls) {
+    // --- Case 1: Already a Firebase download URL (has token) ---
+    if (isFirebaseDownloadUrl(stored)) {
+      return stored;
+    }
 
-  // --- Case 2: GCS public URL → convert to Firebase download URL ---
-  if (stored) {
+    // --- Case 2: GCS public URL → convert to Firebase download URL ---
     const gcsPath = extractPathFromGcsUrl(stored);
     if (gcsPath) {
       const downloadUrl = await getStorageDownloadUrl(gcsPath);
       if (downloadUrl) return downloadUrl;
       // Fall through to other fallbacks if getDownloadURL failed
     }
-  }
 
-  // --- Case 3: Other HTTP URL (e.g. external CDN) → use as-is ---
-  if (stored && (stored.startsWith("http://") || stored.startsWith("https://"))) {
-    return stored;
+    // --- Case 3: Other HTTP URL (e.g. external CDN) → use as-is ---
+    if (stored.startsWith("http://") || stored.startsWith("https://")) {
+      return stored;
+    }
+
+    // Sometimes Firestore stores plain object paths.
+    const asStoragePath = await getStorageDownloadUrl(stored);
+    if (asStoragePath) return asStoragePath;
   }
 
   // --- Case 4: No URL or non-HTTP path → try the well-known storage path ---
   // Files in storage are 1-indexed: page_1.mp3 corresponds to Firestore page index 0
   const fileIndex = pageIndex + 1;
   const fallbackPath = `stories/${storyId}/audio/${locale}/page_${fileIndex}.mp3`;
-  const downloadUrl = await getStorageDownloadUrl(fallbackPath);
-  return downloadUrl || "";
+  const localizedFallbackUrl = await getStorageDownloadUrl(fallbackPath);
+  if (localizedFallbackUrl) return localizedFallbackUrl;
+
+  // English fallback path helps when a localized narration is missing.
+  if (locale !== "en") {
+    const englishFallbackPath = `stories/${storyId}/audio/en/page_${fileIndex}.mp3`;
+    const englishFallbackUrl = await getStorageDownloadUrl(englishFallbackPath);
+    if (englishFallbackUrl) return englishFallbackUrl;
+  }
+
+  return "";
 }
 
 /**

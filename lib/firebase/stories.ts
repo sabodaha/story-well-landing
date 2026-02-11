@@ -71,28 +71,47 @@ const mapStoryPage = (data: Record<string, unknown>): StoryPage => ({
 });
 
 export const fetchPublishedStories = async (): Promise<Story[]> => {
-  const storiesQuery = query(
-    collection(db, "stories"),
-    where("isPublished", "==", true),
-    orderBy("createdAt", "desc")
-  );
-  const snapshot = await getDocs(storiesQuery);
-  return snapshot.docs.map((docSnap) => mapStory(docSnap.id, docSnap.data()));
+  try {
+    const storiesQuery = query(
+      collection(db, "stories"),
+      where("isPublished", "==", true),
+      orderBy("createdAt", "desc")
+    );
+    const snapshot = await getDocs(storiesQuery);
+    return snapshot.docs.map((docSnap) => mapStory(docSnap.id, docSnap.data()));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`[Firestore] Failed to fetch published stories: ${message}`);
+  }
 };
 
 export const fetchStoryById = async (storyId: string): Promise<Story | null> => {
-  const storyRef = doc(db, "stories", storyId);
-  const snapshot = await getDoc(storyRef);
-  if (!snapshot.exists()) return null;
-  return mapStory(snapshot.id, snapshot.data());
+  try {
+    const storyRef = doc(db, "stories", storyId);
+    const snapshot = await getDoc(storyRef);
+    if (!snapshot.exists()) return null;
+    return mapStory(snapshot.id, snapshot.data());
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`[Firestore] Failed to fetch story "${storyId}": ${message}`);
+  }
 };
 
 export const fetchPagesForStory = async (storyId: string): Promise<StoryPage[]> => {
-  const pagesQuery = query(
-    collection(db, "stories", storyId, "pages"),
-    orderBy("index", "asc")
-  );
-  const snapshot = await getDocs(pagesQuery);
-  return snapshot.docs.map((docSnap) => mapStoryPage(docSnap.data()));
+  try {
+    const pagesQuery = query(
+      collection(db, "stories", storyId, "pages"),
+      orderBy("index", "asc")
+    );
+    const snapshot = await getDocs(pagesQuery);
+    if (snapshot.empty) {
+      console.warn(`[Firestore] No pages found at stories/${storyId}/pages`);
+    }
+    return snapshot.docs.map((docSnap) => mapStoryPage(docSnap.data()));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`[Firestore] Failed to fetch pages at stories/${storyId}/pages: ${message}`);
+  }
 };
+
 
