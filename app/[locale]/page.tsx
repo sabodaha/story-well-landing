@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FAQSection } from "@/components/faq-section";
+import { StoryReader } from "@/components/story-reader";
 import { 
   BookOpen, 
   Globe, 
@@ -26,6 +26,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { localeNames, type Locale } from "@/lib/i18n/config";
 import { useParams } from "next/navigation";
 import { getSiteContent } from "@/lib/content/client";
+
+const HERO_STORY_ID = "theMoonbellQuest";
 
 const iconMap = {
   BookOpen,
@@ -344,26 +346,28 @@ export default function Home() {
             </div>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-3xl blur-3xl opacity-20 animate-pulse"></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl p-8 border-4 border-purple-200">
-                <div className="min-h-[300px] bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 rounded-2xl flex items-center justify-center overflow-hidden relative">
-                  {content.hero.imageUrl ? (
-                    <Image
-                      src={content.hero.imageUrl}
-                      alt="Story Well preview"
-                      fill
-                      priority
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-contain"
-                    />
-                  ) : (
-                    <BookOpen className="h-32 w-32 text-purple-400" />
-                  )}
-                </div>
-                {content.hero.imageCaption && (
-                  <p className="mt-6 text-sm text-gray-600 text-center leading-relaxed">
-                    {content.hero.imageCaption}
-                  </p>
-                )}
+              <div className="relative rounded-3xl shadow-2xl overflow-hidden border-4 border-purple-200">
+                <StoryReader
+                  storyId={HERO_STORY_ID}
+                  locale={locale}
+                  onExit={() => {}}
+                  labels={{
+                    loading: t.storyReaderLoading,
+                    error: t.storyReaderError,
+                    retry: t.storyReaderRetry,
+                    back: t.storyReaderBack,
+                    pageLabel: t.storyReaderPageLabel,
+                    audioLabel: t.storyReaderAudioLabel,
+                    noAudio: t.storyReaderNoAudio,
+                    play: t.storyReaderPlay,
+                    pause: t.storyReaderPause,
+                    next: t.storyReaderNext,
+                    prev: t.storyReaderPrev,
+                    fullscreenEnter: t.storyReaderFullscreenEnter,
+                    fullscreenExit: t.storyReaderFullscreenExit,
+                    languageLabel: t.storyReaderLanguageLabel,
+                  }}
+                />
               </div>
             </div>
           </div>
