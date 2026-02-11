@@ -84,6 +84,7 @@ export const StoryReader = ({
 
   // ---- Audio --------------------------------------------------------------
   const [isPlaying, setIsPlaying] = useState(false);
+  const [resolvingAudio, setResolvingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const shouldAutoPlayRef = useRef(false);
   const emptyRetryRef = useRef(false);
@@ -324,40 +325,70 @@ export const StoryReader = ({
   }, [currentIndex, totalPages, goToPage]);
 
   const handlePlayPause = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      console.warn("[StoryReader] Play ignored – no audio element.");
-      return;
-    }
-    if (!audioUrl) {
-      console.warn("[StoryReader] Play ignored – audioUrl is empty for page", currentIndex);
-      return;
-    }
+    const playOrPause = async () => {
+      const audio = audioRef.current;
+      if (!audio) {
+        console.warn("[StoryReader] Play ignored – no audio element.");
+        return;
+      }
 
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-      shouldAutoPlayRef.current = false;
-    } else {
-      // Ensure src is set before playing
-      if (!audio.src || !audio.src.startsWith("http")) {
-        console.log("[StoryReader] Setting audio src before play:", audioUrl);
-        audio.src = audioUrl;
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+        shouldAutoPlayRef.current = false;
+        return;
+      }
+
+      let resolvedUrl = audioUrl;
+      if (!resolvedUrl && currentPage) {
+        try {
+          setResolvingAudio(true);
+          resolvedUrl = await resolveAudioDownloadUrl(
+            currentPage.audioUrls,
+            readerLocale,
+            storyId,
+            currentPage.index
+          );
+          if (resolvedUrl) {
+            setAudioUrlMap((prev) => {
+              const next = new Map(prev);
+              next.set(currentPage.index, resolvedUrl);
+              return next;
+            });
+          }
+        } catch (err) {
+          console.error("[StoryReader] On-demand audio resolve failed:", err);
+        } finally {
+          setResolvingAudio(false);
+        }
+      }
+
+      if (!resolvedUrl) {
+        console.warn("[StoryReader] Play ignored – audio URL still empty for page", currentIndex);
+        return;
+      }
+
+      if (!audio.src || !audio.src.startsWith("http") || audio.src !== resolvedUrl) {
+        console.log("[StoryReader] Setting audio src before play:", resolvedUrl);
+        audio.src = resolvedUrl;
         audio.load();
       }
+
       shouldAutoPlayRef.current = true;
       audio
         .play()
         .then(() => {
-          console.log("[StoryReader] Playing:", audioUrl);
+          console.log("[StoryReader] Playing:", resolvedUrl);
           setIsPlaying(true);
         })
         .catch((err) => {
           console.error("[StoryReader] play() failed:", err, "src:", audio.src);
           setIsPlaying(false);
         });
-    }
-  }, [audioUrl, isPlaying, currentIndex]);
+    };
+
+    void playOrPause();
+  }, [audioUrl, isPlaying, currentIndex, currentPage, readerLocale, storyId]);
 
   // =========================================================================
   // Keyboard
@@ -538,7 +569,7 @@ export const StoryReader = ({
           {/* Play / Pause */}
           <button
             onClick={handlePlayPause}
-            disabled={!audioUrl}
+            disabled={resolvingAudio}
             className="flex h-9 items-center gap-1.5 rounded-full bg-black/50 px-3 text-sm text-white backdrop-blur-sm disabled:opacity-40"
             aria-label={isPlaying ? labels.pause : labels.play}
           >

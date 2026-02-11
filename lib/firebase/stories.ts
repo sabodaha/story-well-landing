@@ -13,7 +13,7 @@ import { getFirebaseApp } from "./client";
 import type { LocalizedText, Story, StoryPage } from "@/lib/types/story";
 
 const db = getFirestore(getFirebaseApp());
-const FETCH_TIMEOUT_MS = 12000;
+const FETCH_TIMEOUT_MS = 30000;
 
 const withTimeout = async <T>(promise: Promise<T>, ms: number, scope: string): Promise<T> => {
   let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
@@ -90,7 +90,8 @@ export const fetchPublishedStories = async (): Promise<Story[]> => {
       where("isPublished", "==", true),
       orderBy("createdAt", "desc")
     );
-    const snapshot = await withTimeout(getDocs(storiesQuery), FETCH_TIMEOUT_MS, "fetchPublishedStories");
+    // Keep story list fetch untimed so slow first loads do not fail on production users.
+    const snapshot = await getDocs(storiesQuery);
     return snapshot.docs.map((docSnap) => mapStory(docSnap.id, docSnap.data()));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
