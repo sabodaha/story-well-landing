@@ -87,7 +87,12 @@ export const StoryReader = ({
     [currentPage, readerLocale]
   );
 
-  const audioUrl = currentPage?.audioUrls?.[readerLocale] || "";
+  const rawAudioUrl = currentPage?.audioUrls?.[readerLocale] || "";
+  // Only use HTTP(S) URLs – PAD paths like "media/..." are not playable in browser
+  const audioUrl =
+    rawAudioUrl.startsWith("http://") || rawAudioUrl.startsWith("https://")
+      ? rawAudioUrl
+      : "";
 
   // =========================================================================
   // Data fetching
@@ -167,6 +172,8 @@ export const StoryReader = ({
     const audio = audioRef.current;
     if (!audio) return;
 
+    console.log("[StoryReader] Audio effect – page:", currentIndex, "rawUrl:", rawAudioUrl, "httpUrl:", audioUrl, "autoPlay:", shouldAutoPlayRef.current);
+
     // Always stop whatever was playing
     audio.pause();
     audio.currentTime = 0;
@@ -174,6 +181,9 @@ export const StoryReader = ({
     if (!audioUrl) {
       audio.removeAttribute("src");
       setIsPlaying(false);
+      if (rawAudioUrl) {
+        console.warn("[StoryReader] Audio URL is not HTTP – cannot play in browser:", rawAudioUrl);
+      }
       // If auto-play was on but this page has no audio, advance again after a
       // short pause so the user can see the image.
       if (shouldAutoPlayRef.current && currentIndex < totalPages - 1) {
@@ -193,8 +203,14 @@ export const StoryReader = ({
       const t = setTimeout(() => {
         audio
           .play()
-          .then(() => setIsPlaying(true))
-          .catch(() => setIsPlaying(false));
+          .then(() => {
+            console.log("[StoryReader] Auto-play started:", audioUrl);
+            setIsPlaying(true);
+          })
+          .catch((err) => {
+            console.error("[StoryReader] Auto-play failed:", err);
+            setIsPlaying(false);
+          });
       }, 400);
       return () => clearTimeout(t);
     }
@@ -266,20 +282,34 @@ export const StoryReader = ({
 
   const handlePlayPause = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !audioUrl) return;
+    if (!audio || !audioUrl) {
+      console.warn("[StoryReader] Play ignored – no audio element or audioUrl is empty.", { audioUrl, rawAudioUrl });
+      return;
+    }
 
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
       shouldAutoPlayRef.current = false;
     } else {
+      // Ensure src is set (guard against stale element)
+      if (audio.src !== audioUrl && !audio.src.endsWith(new URL(audioUrl).pathname)) {
+        audio.src = audioUrl;
+        audio.load();
+      }
       shouldAutoPlayRef.current = true;
       audio
         .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+        .then(() => {
+          console.log("[StoryReader] Audio playing:", audioUrl);
+          setIsPlaying(true);
+        })
+        .catch((err) => {
+          console.error("[StoryReader] audio.play() failed:", err, { src: audio.src, audioUrl });
+          setIsPlaying(false);
+        });
     }
-  }, [audioUrl, isPlaying]);
+  }, [audioUrl, rawAudioUrl, isPlaying]);
 
   // =========================================================================
   // Keyboard
@@ -532,9 +562,15 @@ export const StoryReader = ({
         ref={audioRef}
         preload="auto"
         className="hidden"
+        crossOrigin="anonymous"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={onAudioEnded}
+        onError={(e) => {
+          const audio = e.currentTarget;
+          console.error("[StoryReader] Audio element error:", audio.error?.message, "src:", audio.src);
+          setIsPlaying(false);
+        }}
       />
     </div>
   );
