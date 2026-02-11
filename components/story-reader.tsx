@@ -108,62 +108,58 @@ export const StoryReader = ({
 
   useEffect(() => {
     let active = true;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
     setLoading(true);
     setError(null);
     setNoPagesFound(false);
     emptyRetryRef.current = false;
 
-    fetchPagesForStory(storyId)
-      .then((data) => {
-        if (!active) return;
-        console.log("[StoryReader] Loaded", data.length, "pages. First page audioUrls:", data[0]?.audioUrls);
-        if (data.length === 0) {
-          if (!emptyRetryRef.current) {
-            // Transient empty snapshots happen occasionally in production; confirm once before showing empty state.
-            emptyRetryRef.current = true;
-            setTimeout(() => {
-              if (!active) return;
-              fetchPagesForStory(storyId)
-                .then((retryData) => {
-                  if (!active) return;
-                  if (retryData.length === 0) {
-                    console.warn(`[StoryReader] No pages returned for storyId="${storyId}" after retry`);
-                    setNoPagesFound(true);
-                    setPages([]);
-                  } else {
-                    setPages(retryData);
-                  }
-                  setLoading(false);
-                  setCurrentIndex(0);
-                })
-                .catch((retryErr) => {
-                  if (!active) return;
-                  console.error(`[StoryReader] Retry load failed for storyId="${storyId}"`, retryErr);
-                  setError(retryErr instanceof Error ? retryErr.message : labels.error);
-                  setLoading(false);
-                });
-            }, 600);
+    const loadPages = (allowRetryOnError: boolean) => {
+      fetchPagesForStory(storyId)
+        .then((data) => {
+          if (!active) return;
+          console.log("[StoryReader] Loaded", data.length, "pages. First page audioUrls:", data[0]?.audioUrls);
+          if (data.length === 0) {
+            if (!emptyRetryRef.current) {
+              // Transient empty snapshots happen occasionally in production; confirm once before showing empty state.
+              emptyRetryRef.current = true;
+              retryTimer = setTimeout(() => {
+                if (!active) return;
+                loadPages(false);
+              }, 600);
+              return;
+            }
+            setNoPagesFound(true);
+            setPages([]);
+            setLoading(false);
+            setCurrentIndex(0);
             return;
           }
-          setNoPagesFound(true);
-          setPages([]);
+          setPages(data);
           setLoading(false);
           setCurrentIndex(0);
-          return;
-        }
-        setPages(data);
-        setLoading(false);
-        setCurrentIndex(0);
-      })
-      .catch((err) => {
-        if (!active) return;
-        console.error(`[StoryReader] Failed loading pages for storyId="${storyId}"`, err);
-        setError(err instanceof Error ? err.message : labels.error);
-        setLoading(false);
-      });
+        })
+        .catch((err) => {
+          if (!active) return;
+          const message = err instanceof Error ? err.message : String(err);
+          console.error(`[StoryReader] Failed loading pages for storyId="${storyId}"`, err);
+          if (allowRetryOnError && message.toLowerCase().includes("timed out")) {
+            retryTimer = setTimeout(() => {
+              if (!active) return;
+              loadPages(false);
+            }, 700);
+            return;
+          }
+          setError(err instanceof Error ? err.message : labels.error);
+          setLoading(false);
+        });
+    };
+
+    loadPages(true);
 
     return () => {
       active = false;
+      if (retryTimer) clearTimeout(retryTimer);
     };
   }, [storyId, labels.error]);
 
@@ -636,8 +632,9 @@ export const StoryReader = ({
       {/* ---- Hidden audio element ---- */}
       <audio
         ref={audioRef}
+        playsInline
         preload="auto"
-        className="hidden"
+        className="pointer-events-none absolute h-0 w-0 opacity-0"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={onAudioEnded}

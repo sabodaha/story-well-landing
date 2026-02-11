@@ -13,6 +13,19 @@ import { getFirebaseApp } from "./client";
 import type { LocalizedText, Story, StoryPage } from "@/lib/types/story";
 
 const db = getFirestore(getFirebaseApp());
+const FETCH_TIMEOUT_MS = 12000;
+
+const withTimeout = async <T>(promise: Promise<T>, ms: number, scope: string): Promise<T> => {
+  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  try {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error(`[Firestore] ${scope} timed out after ${ms}ms`)), ms);
+    });
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+  }
+};
 
 const normalizeLocalizedText = (value: unknown): LocalizedText => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -77,7 +90,7 @@ export const fetchPublishedStories = async (): Promise<Story[]> => {
       where("isPublished", "==", true),
       orderBy("createdAt", "desc")
     );
-    const snapshot = await getDocs(storiesQuery);
+    const snapshot = await withTimeout(getDocs(storiesQuery), FETCH_TIMEOUT_MS, "fetchPublishedStories");
     return snapshot.docs.map((docSnap) => mapStory(docSnap.id, docSnap.data()));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -88,7 +101,7 @@ export const fetchPublishedStories = async (): Promise<Story[]> => {
 export const fetchStoryById = async (storyId: string): Promise<Story | null> => {
   try {
     const storyRef = doc(db, "stories", storyId);
-    const snapshot = await getDoc(storyRef);
+    const snapshot = await withTimeout(getDoc(storyRef), FETCH_TIMEOUT_MS, `fetchStoryById(${storyId})`);
     if (!snapshot.exists()) return null;
     return mapStory(snapshot.id, snapshot.data());
   } catch (error) {
@@ -103,7 +116,11 @@ export const fetchPagesForStory = async (storyId: string): Promise<StoryPage[]> 
       collection(db, "stories", storyId, "pages"),
       orderBy("index", "asc")
     );
-    const snapshot = await getDocs(pagesQuery);
+    const snapshot = await withTimeout(
+      getDocs(pagesQuery),
+      FETCH_TIMEOUT_MS,
+      `fetchPagesForStory(stories/${storyId}/pages)`
+    );
     if (snapshot.empty) {
       console.warn(`[Firestore] No pages found at stories/${storyId}/pages`);
     }
