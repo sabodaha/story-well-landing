@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { fetchPagesForStory } from "@/lib/firebase/stories";
 import { initAppCheck } from "@/lib/firebase/client";
-import { resolveAllAudioUrls, resolveAudioDownloadUrl } from "@/lib/firebase/storage";
+import { resolveAudioDownloadUrl } from "@/lib/firebase/storage";
 import type { StoryPage } from "@/lib/types/story";
 import { locales, localeNames, type Locale } from "@/lib/i18n/config";
 
@@ -103,6 +103,11 @@ export const StoryReader = ({
   // Current page audio URL from resolved map
   const audioUrl = audioUrlMap.get(currentPage?.index ?? -1) || "";
 
+  useEffect(() => {
+    // Prevent stale page-index keys from previous story/locale from being reused.
+    setAudioUrlMap(new Map());
+  }, [storyId, readerLocale]);
+
   // =========================================================================
   // Data fetching
   // =========================================================================
@@ -165,50 +170,49 @@ export const StoryReader = ({
   }, [storyId, labels.error]);
 
   // =========================================================================
-  // Resolve audio URLs via Firebase Storage SDK (not public GCS URLs)
-  // Re-resolve when pages load or reader locale changes
+  // Resolve current page audio first; preload next page audio in background.
   // =========================================================================
 
   useEffect(() => {
-    if (pages.length === 0) return;
+    if (!currentPage) return;
     let active = true;
 
-    console.log(`[StoryReader] Resolving audio URLs for locale="${readerLocale}", ${pages.length} pages…`);
-
-    const current = pages[currentIndex];
-    if (current) {
-      resolveAudioDownloadUrl(current.audioUrls, readerLocale, storyId, current.index)
-        .then((url) => {
-          if (!active || !url) return;
-          setAudioUrlMap((prev) => {
-            const next = new Map(prev);
-            next.set(current.index, url);
-            return next;
-          });
-        })
-        .catch((err) => {
-          console.error("[StoryReader] Failed to resolve current page audio URL:", err);
-        });
-    }
-
-    resolveAllAudioUrls(pages, readerLocale, storyId)
-      .then((map) => {
-        if (!active) return;
-        console.log("[StoryReader] Audio URL map resolved:", Object.fromEntries(map));
+    const ensureAudioUrl = async (page: StoryPage) => {
+      try {
+        const existing = audioUrlMap.get(page.index);
+        if (existing) return existing;
+        const url = await resolveAudioDownloadUrl(page.audioUrls, readerLocale, storyId, page.index);
+        if (!active || !url) return "";
         setAudioUrlMap((prev) => {
           const next = new Map(prev);
-          map.forEach((value, key) => next.set(key, value));
+          next.set(page.index, url);
           return next;
         });
-      })
-      .catch((err) => {
-        console.error("[StoryReader] Failed to resolve audio URLs:", err);
+        return url;
+      } catch (err) {
+        console.error("[StoryReader] Failed to resolve audio URL for page", page.index, err);
+        return "";
+      }
+    };
+
+    // 1) Make current page playable ASAP
+    void ensureAudioUrl(currentPage);
+
+    // 2) Preload next page in background
+    const nextPage = pages[currentIndex + 1];
+    if (nextPage) {
+      void ensureAudioUrl(nextPage).then((url) => {
+        if (!active || !url) return;
+        const preloader = new Audio(url);
+        preloader.preload = "auto";
+        preloader.load();
       });
+    }
 
     return () => {
       active = false;
     };
-  }, [pages, readerLocale, storyId, currentIndex]);
+  }, [currentPage, pages, currentIndex, readerLocale, storyId, audioUrlMap]);
 
   // =========================================================================
   // Navigation helpers (no URL mutation – keeps fullscreen alive)
@@ -298,17 +302,6 @@ export const StoryReader = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, audioUrl]);
-
-  // Preload next page audio
-  useEffect(() => {
-    const nextPage = pages[currentIndex + 1];
-    if (!nextPage) return;
-    const nextUrl = audioUrlMap.get(nextPage.index) || "";
-    if (!nextUrl) return;
-    const preloader = new Audio(nextUrl);
-    preloader.preload = "auto";
-    preloader.load();
-  }, [pages, currentIndex, audioUrlMap]);
 
   // =========================================================================
   // Audio event handlers (stable callbacks)
