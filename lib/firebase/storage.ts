@@ -12,6 +12,18 @@ const failedPaths = new Set<string>();
 // Bucket name used by the project (for parsing GCS URLs)
 const BUCKET = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "kidsstoriesapp.firebasestorage.app";
 
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  try {
+    const timeoutPromise = new Promise<null>((resolve) => {
+      timeoutHandle = setTimeout(() => resolve(null), ms);
+    });
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+  }
+}
+
 /**
  * Extract the Firebase Storage path from a `storage.googleapis.com` URL.
  *
@@ -136,9 +148,10 @@ export async function resolveAudioDownloadUrl(
     // --- Case 2: GCS public URL → convert to Firebase download URL ---
     const gcsPath = extractPathFromGcsUrl(stored);
     if (gcsPath) {
-      const downloadUrl = await getStorageDownloadUrl(gcsPath);
+      // Prefer tokenized URL when available, but do not block playback waiting on SDK calls.
+      const downloadUrl = await withTimeout(getStorageDownloadUrl(gcsPath), 1500);
       if (downloadUrl) return downloadUrl;
-      // Fall through to other fallbacks if getDownloadURL failed
+      return stored;
     }
 
     // --- Case 3: Other HTTP URL (e.g. external CDN) → use as-is ---

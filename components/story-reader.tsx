@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { fetchPagesForStory } from "@/lib/firebase/stories";
 import { initAppCheck } from "@/lib/firebase/client";
-import { resolveAllAudioUrls } from "@/lib/firebase/storage";
+import { resolveAllAudioUrls, resolveAudioDownloadUrl } from "@/lib/firebase/storage";
 import type { StoryPage } from "@/lib/types/story";
 import { locales, localeNames, type Locale } from "@/lib/i18n/config";
 
@@ -86,6 +86,7 @@ export const StoryReader = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const shouldAutoPlayRef = useRef(false);
+  const emptyRetryRef = useRef(false);
 
   // ---- Controls visibility (tap to toggle, like Flutter) ------------------
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -110,13 +111,40 @@ export const StoryReader = ({
     setLoading(true);
     setError(null);
     setNoPagesFound(false);
+    emptyRetryRef.current = false;
 
     fetchPagesForStory(storyId)
       .then((data) => {
         if (!active) return;
         console.log("[StoryReader] Loaded", data.length, "pages. First page audioUrls:", data[0]?.audioUrls);
         if (data.length === 0) {
-          console.warn(`[StoryReader] No pages returned for storyId="${storyId}"`);
+          if (!emptyRetryRef.current) {
+            // Transient empty snapshots happen occasionally in production; confirm once before showing empty state.
+            emptyRetryRef.current = true;
+            setTimeout(() => {
+              if (!active) return;
+              fetchPagesForStory(storyId)
+                .then((retryData) => {
+                  if (!active) return;
+                  if (retryData.length === 0) {
+                    console.warn(`[StoryReader] No pages returned for storyId="${storyId}" after retry`);
+                    setNoPagesFound(true);
+                    setPages([]);
+                  } else {
+                    setPages(retryData);
+                  }
+                  setLoading(false);
+                  setCurrentIndex(0);
+                })
+                .catch((retryErr) => {
+                  if (!active) return;
+                  console.error(`[StoryReader] Retry load failed for storyId="${storyId}"`, retryErr);
+                  setError(retryErr instanceof Error ? retryErr.message : labels.error);
+                  setLoading(false);
+                });
+            }, 600);
+            return;
+          }
           setNoPagesFound(true);
           setPages([]);
           setLoading(false);
@@ -150,11 +178,31 @@ export const StoryReader = ({
 
     console.log(`[StoryReader] Resolving audio URLs for locale="${readerLocale}", ${pages.length} pages…`);
 
+    const current = pages[currentIndex];
+    if (current) {
+      resolveAudioDownloadUrl(current.audioUrls, readerLocale, storyId, current.index)
+        .then((url) => {
+          if (!active || !url) return;
+          setAudioUrlMap((prev) => {
+            const next = new Map(prev);
+            next.set(current.index, url);
+            return next;
+          });
+        })
+        .catch((err) => {
+          console.error("[StoryReader] Failed to resolve current page audio URL:", err);
+        });
+    }
+
     resolveAllAudioUrls(pages, readerLocale, storyId)
       .then((map) => {
         if (!active) return;
         console.log("[StoryReader] Audio URL map resolved:", Object.fromEntries(map));
-        setAudioUrlMap(map);
+        setAudioUrlMap((prev) => {
+          const next = new Map(prev);
+          map.forEach((value, key) => next.set(key, value));
+          return next;
+        });
       })
       .catch((err) => {
         console.error("[StoryReader] Failed to resolve audio URLs:", err);
@@ -163,7 +211,7 @@ export const StoryReader = ({
     return () => {
       active = false;
     };
-  }, [pages, readerLocale, storyId]);
+  }, [pages, readerLocale, storyId, currentIndex]);
 
   // =========================================================================
   // Navigation helpers (no URL mutation – keeps fullscreen alive)
