@@ -8,6 +8,8 @@ const baseUrl = 'https://dartim-media.com';
 // Routes that exist for each locale
 const localeRoutes = [
   '',           // Home page
+  '/stories',   // Read online
+  '/sleep',     // Sleep music
   '/feedback',  // Feedback page
   '/reviews',   // Reviews page
   '/privacy',   // Privacy policy

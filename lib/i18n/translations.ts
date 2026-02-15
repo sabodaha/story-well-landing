@@ -437,6 +437,22 @@ export const translations = {
     sleepTimerOff: 'Timer off',
     sleepTimerSet: '{minutes} min',
     sleepTimerCancel: 'Cancel timer',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Ad-Free',
+    trustAdFreeDesc: 'No ads, no in-app purchases. Just beautiful stories for your family.',
+    trustSafeTitle: 'Safe for Kids',
+    trustSafeDesc: 'Curated content designed for children ages 3-10. No external links or distractions.',
+    trustMadeWithLoveTitle: 'Made with Love',
+    trustMadeWithLoveDesc: 'Crafted by parents who care about quality storytelling and language learning.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 New Stories Every Week',
+    exploreStoriesTitle: 'Explore Our',
+    exploreStoriesTitleHighlight: 'Story Library',
+    exploreStoriesSubtitle: 'Browse and read beautifully illustrated stories right in your browser — or relax with calming sleep music.',
+    exploreStoriesCta: 'Browse Stories',
+    exploreSleepCta: 'Sleep Music',
   },
   de: {
     navFeatures: 'Funktionen',
@@ -838,6 +854,22 @@ export const translations = {
     sleepTimerOff: 'Timer aus',
     sleepTimerSet: '{minutes} Min.',
     sleepTimerCancel: 'Timer abbrechen',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Werbefrei',
+    trustAdFreeDesc: 'Keine Werbung, keine In-App-Käufe. Nur wunderschöne Geschichten für Ihre Familie.',
+    trustSafeTitle: 'Sicher für Kinder',
+    trustSafeDesc: 'Kuratierte Inhalte für Kinder von 3 bis 10 Jahren. Keine externen Links oder Ablenkungen.',
+    trustMadeWithLoveTitle: 'Mit Liebe gemacht',
+    trustMadeWithLoveDesc: 'Erstellt von Eltern, denen qualitatives Erzählen und Sprachenlernen am Herzen liegt.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 Jede Woche neue Geschichten',
+    exploreStoriesTitle: 'Entdecken Sie unsere',
+    exploreStoriesTitleHighlight: 'Geschichtenbibliothek',
+    exploreStoriesSubtitle: 'Lesen Sie wunderschön illustrierte Geschichten direkt in Ihrem Browser — oder entspannen Sie sich mit beruhigender Schlafmusik.',
+    exploreStoriesCta: 'Geschichten entdecken',
+    exploreSleepCta: 'Schlafmusik',
   },
   es: {
     navFeatures: 'Características',
@@ -1239,6 +1271,22 @@ export const translations = {
     sleepTimerOff: 'Temporizador apagado',
     sleepTimerSet: '{minutes} min',
     sleepTimerCancel: 'Cancelar temporizador',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Sin Anuncios',
+    trustAdFreeDesc: 'Sin anuncios, sin compras en la aplicación. Solo historias hermosas para tu familia.',
+    trustSafeTitle: 'Seguro para Niños',
+    trustSafeDesc: 'Contenido curado diseñado para niños de 3 a 10 años. Sin enlaces externos ni distracciones.',
+    trustMadeWithLoveTitle: 'Hecho con Amor',
+    trustMadeWithLoveDesc: 'Creado por padres que se preocupan por la narración de calidad y el aprendizaje de idiomas.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 Nuevas Historias Cada Semana',
+    exploreStoriesTitle: 'Explora Nuestra',
+    exploreStoriesTitleHighlight: 'Biblioteca de Historias',
+    exploreStoriesSubtitle: 'Lee historias bellamente ilustradas directamente en tu navegador — o relájate con música relajante para dormir.',
+    exploreStoriesCta: 'Ver Historias',
+    exploreSleepCta: 'Música para Dormir',
   },
   fr: {
     navFeatures: 'Fonctionnalités',
@@ -1640,6 +1688,22 @@ export const translations = {
     sleepTimerOff: 'Minuteur désactivé',
     sleepTimerSet: '{minutes} min',
     sleepTimerCancel: 'Annuler le minuteur',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Sans Publicité',
+    trustAdFreeDesc: 'Aucune publicité, aucun achat intégré. Juste de belles histoires pour votre famille.',
+    trustSafeTitle: 'Sûr pour les Enfants',
+    trustSafeDesc: 'Contenu sélectionné pour les enfants de 3 à 10 ans. Pas de liens externes ni de distractions.',
+    trustMadeWithLoveTitle: 'Fait avec Amour',
+    trustMadeWithLoveDesc: 'Créé par des parents soucieux de la qualité des histoires et de l\'apprentissage des langues.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 Nouvelles Histoires Chaque Semaine',
+    exploreStoriesTitle: 'Explorez Notre',
+    exploreStoriesTitleHighlight: 'Bibliothèque d\'Histoires',
+    exploreStoriesSubtitle: 'Parcourez et lisez des histoires magnifiquement illustrées directement dans votre navigateur — ou détendez-vous avec de la musique apaisante.',
+    exploreStoriesCta: 'Parcourir les Histoires',
+    exploreSleepCta: 'Musique de Sommeil',
   },
   it: {
     navFeatures: 'Funzionalità',
@@ -2041,6 +2105,22 @@ export const translations = {
     sleepTimerOff: 'Timer disattivato',
     sleepTimerSet: '{minutes} min',
     sleepTimerCancel: 'Annulla timer',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Senza Pubblicità',
+    trustAdFreeDesc: 'Nessuna pubblicità, nessun acquisto in-app. Solo belle storie per la tua famiglia.',
+    trustSafeTitle: 'Sicuro per i Bambini',
+    trustSafeDesc: 'Contenuti curati per bambini dai 3 ai 10 anni. Nessun link esterno o distrazioni.',
+    trustMadeWithLoveTitle: 'Fatto con Amore',
+    trustMadeWithLoveDesc: 'Creato da genitori attenti alla qualità delle storie e all\'apprendimento delle lingue.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 Nuove Storie Ogni Settimana',
+    exploreStoriesTitle: 'Esplora la Nostra',
+    exploreStoriesTitleHighlight: 'Biblioteca di Storie',
+    exploreStoriesSubtitle: 'Sfoglia e leggi storie splendidamente illustrate direttamente nel tuo browser — oppure rilassati con musica rilassante per dormire.',
+    exploreStoriesCta: 'Sfoglia Storie',
+    exploreSleepCta: 'Musica per Dormire',
   },
   ru: {
     navFeatures: 'Функции',
@@ -2442,6 +2522,22 @@ export const translations = {
     sleepTimerOff: 'Таймер выключен',
     sleepTimerSet: '{minutes} мин',
     sleepTimerCancel: 'Отменить таймер',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Без Рекламы',
+    trustAdFreeDesc: 'Никакой рекламы, никаких встроенных покупок. Только красивые истории для вашей семьи.',
+    trustSafeTitle: 'Безопасно для Детей',
+    trustSafeDesc: 'Подобранный контент для детей от 3 до 10 лет. Без внешних ссылок и отвлечений.',
+    trustMadeWithLoveTitle: 'Сделано с Любовью',
+    trustMadeWithLoveDesc: 'Создано родителями, которым важны качественные истории и изучение языков.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 Новые Истории Каждую Неделю',
+    exploreStoriesTitle: 'Откройте Нашу',
+    exploreStoriesTitleHighlight: 'Библиотеку Историй',
+    exploreStoriesSubtitle: 'Читайте красиво иллюстрированные истории прямо в браузере — или расслабьтесь под спокойную музыку для сна.',
+    exploreStoriesCta: 'Смотреть Истории',
+    exploreSleepCta: 'Музыка для Сна',
   },
   tr: {
     navFeatures: 'Özellikler',
@@ -2843,6 +2939,22 @@ export const translations = {
     sleepTimerOff: 'Zamanlayıcı kapalı',
     sleepTimerSet: '{minutes} dk',
     sleepTimerCancel: 'Zamanlayıcıyı iptal et',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Reklamsız',
+    trustAdFreeDesc: 'Reklam yok, uygulama içi satın alma yok. Aileniz için sadece güzel hikayeler.',
+    trustSafeTitle: 'Çocuklar İçin Güvenli',
+    trustSafeDesc: '3-10 yaş çocuklar için özenle seçilmiş içerik. Harici bağlantı veya dikkat dağıtıcı yok.',
+    trustMadeWithLoveTitle: 'Sevgiyle Yapıldı',
+    trustMadeWithLoveDesc: 'Kaliteli hikaye anlatımı ve dil öğrenimini önemseyen ebeveynler tarafından oluşturuldu.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 Her Hafta Yeni Hikayeler',
+    exploreStoriesTitle: 'Keşfedin',
+    exploreStoriesTitleHighlight: 'Hikaye Kütüphanemizi',
+    exploreStoriesSubtitle: 'Tarayıcınızda güzelce resimlendirilmiş hikayeleri okuyun — veya sakinleştirici uyku müziğiyle rahatlayın.',
+    exploreStoriesCta: 'Hikayeleri Keşfet',
+    exploreSleepCta: 'Uyku Müziği',
   },
   uk: {
     navFeatures: 'Функції',
@@ -3244,6 +3356,22 @@ export const translations = {
     sleepTimerOff: 'Таймер вимкнено',
     sleepTimerSet: '{minutes} хв',
     sleepTimerCancel: 'Скасувати таймер',
+
+    // Trust Signals
+    trustAdFreeTitle: '100% Без Реклами',
+    trustAdFreeDesc: 'Жодної реклами, жодних покупок у додатку. Тільки чудові історії для вашої родини.',
+    trustSafeTitle: 'Безпечно для Дітей',
+    trustSafeDesc: 'Відібраний контент для дітей від 3 до 10 років. Без зовнішніх посилань та відволікань.',
+    trustMadeWithLoveTitle: 'Зроблено з Любов\'ю',
+    trustMadeWithLoveDesc: 'Створено батьками, які цінують якісні історії та вивчення мов.',
+
+    // Explore Stories Section
+    exploreStoriesBadge: '📖 Нові Історії Щотижня',
+    exploreStoriesTitle: 'Відкрийте Нашу',
+    exploreStoriesTitleHighlight: 'Бібліотеку Історій',
+    exploreStoriesSubtitle: 'Читайте прекрасно ілюстровані історії прямо у браузері — або розслабтеся під заспокійливу музику для сну.',
+    exploreStoriesCta: 'Переглянути Історії',
+    exploreSleepCta: 'Музика для Сну',
   },
 } as const;
 

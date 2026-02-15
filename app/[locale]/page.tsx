@@ -19,7 +19,12 @@ import {
   Languages,
   Shield,
   Zap,
-  Users
+  Users,
+  Menu,
+  X,
+  ShieldCheck,
+  Sparkles,
+  BookHeart,
 } from "lucide-react";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -204,6 +209,7 @@ export default function Home() {
   const t = useTranslations();
   const defaultContent = useMemo(() => buildDefaultContent(t), [t]);
   const [content, setContent] = useState(defaultContent);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -282,7 +288,52 @@ export default function Home() {
                 {content.nav.download}
               </LinkButton>
             </div>
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-purple-50 transition"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6 text-purple-600" /> : <Menu className="h-6 w-6 text-purple-600" />}
+            </button>
           </div>
+          {/* Mobile menu drawer */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-purple-100 bg-white/95 backdrop-blur-md pb-4 px-2 space-y-1">
+              <Link href="#features" className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
+                {content.nav.features}
+              </Link>
+              <Link href="#languages" className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
+                {content.nav.languages}
+              </Link>
+              <Link href="#faq" className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
+                {content.nav.faq}
+              </Link>
+              <Link href={navStoriesUrl} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
+                {content.nav.stories}
+              </Link>
+              <Link href={navSleepUrl} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
+                {content.nav.sleep}
+              </Link>
+              <Link href={`/${locale}/reviews`} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
+                {content.nav.reviews}
+              </Link>
+              <Link href={`/${locale}/feedback`} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
+                {content.nav.feedback}
+              </Link>
+              <div className="py-2 px-3">
+                <LanguageSwitcher />
+              </div>
+              <div className="py-2 px-3">
+                <LinkButton
+                  href={navDownloadUrl}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  {content.nav.download}
+                </LinkButton>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -531,6 +582,72 @@ export default function Home() {
           </div>
 
           <FAQSection items={content.faq.items} />
+        </div>
+      </section>
+
+      {/* Trust Signals */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="flex flex-col items-center gap-3 p-6">
+              <div className="h-14 w-14 bg-green-100 rounded-2xl flex items-center justify-center">
+                <ShieldCheck className="h-7 w-7 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900">{t.trustAdFreeTitle}</h3>
+              <p className="text-gray-600 text-sm">{t.trustAdFreeDesc}</p>
+            </div>
+            <div className="flex flex-col items-center gap-3 p-6">
+              <div className="h-14 w-14 bg-purple-100 rounded-2xl flex items-center justify-center">
+                <Heart className="h-7 w-7 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900">{t.trustSafeTitle}</h3>
+              <p className="text-gray-600 text-sm">{t.trustSafeDesc}</p>
+            </div>
+            <div className="flex flex-col items-center gap-3 p-6">
+              <div className="h-14 w-14 bg-blue-100 rounded-2xl flex items-center justify-center">
+                <Sparkles className="h-7 w-7 text-blue-600" />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900">{t.trustMadeWithLoveTitle}</h3>
+              <p className="text-gray-600 text-sm">{t.trustMadeWithLoveDesc}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Explore Stories Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <Badge className="mb-4 bg-orange-100 text-orange-700 hover:bg-orange-200">
+            {t.exploreStoriesBadge}
+          </Badge>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            {t.exploreStoriesTitle}{" "}
+            <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
+              {t.exploreStoriesTitleHighlight}
+            </span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            {t.exploreStoriesSubtitle}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <LinkButton
+              href={`/${locale}/stories/`}
+              size="lg"
+              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-lg h-14 px-8"
+            >
+              <BookHeart className="mr-2 h-5 w-5" />
+              {t.exploreStoriesCta}
+            </LinkButton>
+            <LinkButton
+              href={`/${locale}/sleep/`}
+              size="lg"
+              variant="outline"
+              className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
+            >
+              <Moon className="mr-2 h-5 w-5" />
+              {t.exploreSleepCta}
+            </LinkButton>
+          </div>
         </div>
       </section>
 
