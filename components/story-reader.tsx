@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { fetchPagesForStory } from "@/lib/firebase/stories";
+import { resolveAudioDownloadUrl } from "@/lib/firebase/storage";
 import type { StoryPage } from "@/lib/types/story";
 import { locales, localeNames, type Locale } from "@/lib/i18n/config";
 
@@ -10,48 +11,12 @@ import { locales, localeNames, type Locale } from "@/lib/i18n/config";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const BUCKET = "kidsstoriesapp.firebasestorage.app";
-
 const resolveLocalizedText = (
   value: Record<string, string> | undefined,
   locale: Locale
 ) => {
   if (!value) return "";
   return value[locale] || value.en || Object.values(value)[0] || "";
-};
-
-/**
- * Synchronously derive the audio URL for a story page.
- *
- * Priority:
- * 1. `audioUrls[locale]` from Firestore (direct GCS or Firebase download URL).
- * 2. `audioUrls["en"]` fallback.
- * 3. First non-empty value in `audioUrls`.
- * 4. Construct the well-known GCS URL:
- *    `https://storage.googleapis.com/{BUCKET}/stories/{storyId}/audio/{locale}/page_{index+1}.mp3`
- *    (Storage files are 1-indexed: page_1.mp3, page_2.mp3, etc.)
- *
- * Zero network calls — works instantly.
- */
-const getPageAudioUrl = (
-  audioUrls: Record<string, string> | undefined,
-  locale: string,
-  storyId: string,
-  pageIndex: number
-): string => {
-  const localeUrl = audioUrls?.[locale]?.trim();
-  if (localeUrl) return localeUrl;
-
-  const enUrl = audioUrls?.en?.trim();
-  if (enUrl) return enUrl;
-
-  const anyUrl = Object.values(audioUrls || {}).find(
-    (v) => typeof v === "string" && v.trim().length > 0
-  );
-  if (anyUrl) return anyUrl.trim();
-
-  // Construct well-known path (files in Storage are 1-indexed)
-  return `https://storage.googleapis.com/${BUCKET}/stories/${storyId}/audio/${locale}/page_${pageIndex + 1}.mp3`;
 };
 
 // ---------------------------------------------------------------------------
@@ -123,14 +88,29 @@ export const StoryReader = ({
     [currentPage, readerLocale]
   );
 
-  // Derive audio URL synchronously – zero async, zero network calls.
-  const audioUrl = useMemo(
-    () =>
-      currentPage
-        ? getPageAudioUrl(currentPage.audioUrls, readerLocale, storyId, currentPage.index)
-        : "",
-    [currentPage, readerLocale, storyId]
-  );
+  // Resolve audio URL asynchronously via Firebase Storage SDK (tokenized URLs).
+  const [audioUrl, setAudioUrl] = useState("");
+
+  useEffect(() => {
+    if (!currentPage) {
+      setAudioUrl("");
+      return;
+    }
+
+    let cancelled = false;
+
+    resolveAudioDownloadUrl(currentPage.audioUrls, readerLocale, storyId, currentPage.index)
+      .then((url) => {
+        if (cancelled) return;
+        setAudioUrl(url);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAudioUrl("");
+      });
+
+    return () => { cancelled = true; };
+  }, [currentPage, readerLocale, storyId]);
 
   // =========================================================================
   // Data fetching – single call, simple error/retry
@@ -146,7 +126,7 @@ export const StoryReader = ({
         if (!active) return;
         console.log(
           "[StoryReader] Loaded", data.length,
-          "pages. audioUrl[0]:", data[0] ? getPageAudioUrl(data[0].audioUrls, locale, storyId, data[0].index) : "(none)"
+          "pages. First page audioUrls:", data[0]?.audioUrls ?? "(none)"
         );
         setPages(data);
         setCurrentIndex(0);
@@ -245,11 +225,18 @@ export const StoryReader = ({
   useEffect(() => {
     const nextPage = pages[currentIndex + 1];
     if (!nextPage) return;
-    const nextUrl = getPageAudioUrl(nextPage.audioUrls, readerLocale, storyId, nextPage.index);
-    if (!nextUrl) return;
-    const preloader = new Audio(nextUrl);
-    preloader.preload = "auto";
-    preloader.load();
+    let cancelled = false;
+
+    resolveAudioDownloadUrl(nextPage.audioUrls, readerLocale, storyId, nextPage.index)
+      .then((nextUrl) => {
+        if (cancelled || !nextUrl) return;
+        const preloader = new Audio(nextUrl);
+        preloader.preload = "auto";
+        preloader.load();
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
   }, [pages, currentIndex, readerLocale, storyId]);
 
   // =========================================================================
@@ -278,13 +265,10 @@ export const StoryReader = ({
       return;
     }
 
-    if (!audioUrl) {
-      console.warn("[StoryReader] No audio URL for page", currentIndex);
-      return;
-    }
+    if (!audioUrl) return;
 
     // Ensure src is set (should already be via effect, but guard against edge cases)
-    if (!audio.src || audio.src !== audioUrl) {
+    if (!audio.src || (audio.src !== audioUrl && !audio.src.endsWith(audioUrl))) {
       audio.src = audioUrl;
       audio.load();
     }
@@ -293,10 +277,7 @@ export const StoryReader = ({
     audio
       .play()
       .then(() => setIsPlaying(true))
-      .catch((err) => {
-        console.error("[StoryReader] play() failed:", err.message, "src:", audio.src);
-        setIsPlaying(false);
-      });
+      .catch(() => setIsPlaying(false));
   }, [audioUrl, isPlaying, currentIndex]);
 
   // =========================================================================
@@ -559,7 +540,7 @@ export const StoryReader = ({
         </p>
       </div>
 
-      {/* ---- Hidden audio element ---- */}
+      {/* ---- Main audio element (programmatic control) ---- */}
       <audio
         ref={audioRef}
         playsInline
