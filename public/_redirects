@@ -1,0 +1,7 @@
+# Clean URL redirects for Storywell
+# Cloudflare Pages applies these redirect rules server-side
+# Format: https://developers.cloudflare.com/pages/platform/redirects/
+
+/storywell  /en/  302
+/storywell/ /en/  302
+

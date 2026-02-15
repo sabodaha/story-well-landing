@@ -14,12 +14,14 @@ export function middleware(request: NextRequest) {
   if (!pathnameHasLocale) {
     const locale = getLocale(request) || defaultLocale;
     
-    // Don't redirect if it's a static file or API route
+    // Don't redirect if it's a static file, API route, or branded shortcut
     if (
       pathname.startsWith('/_next') ||
       pathname.startsWith('/api') ||
       pathname.includes('.') ||
-      pathname.startsWith('/favicon.ico')
+      pathname.startsWith('/favicon.ico') ||
+      pathname === '/storywell' ||
+      pathname === '/storywell/'
     ) {
       return NextResponse.next();
     }
