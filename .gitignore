@@ -41,3 +41,12 @@ next-env.d.ts
 # wrangler
 .wrangler/
 .dev.vars
+
+# Static media assets (store outside Git)
+public/**/*.png
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.webp
+public/**/*.gif
+public/**/*.mp4
+public/**/*.mp3
