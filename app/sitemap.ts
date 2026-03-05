@@ -12,8 +12,9 @@ const localeRoutes = [
   '/sleep',     // Sleep music
   '/feedback',  // Feedback page
   '/reviews',   // Reviews page
-  '/privacy',   // Privacy policy
-  '/terms',     // Terms of service
+  '/privacy',    // Privacy policy
+  '/terms',      // Terms of service
+  '/impressum',  // Legal notice (Impressum)
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

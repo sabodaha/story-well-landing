@@ -99,10 +99,14 @@ export function CookieBanner() {
                     {t.cookieReadMore}{" "}
                     <Link href={`/${locale}/privacy`} className="text-purple-600 hover:text-purple-700 underline font-semibold">
                       {t.cookiePrivacyPolicy}
-                    </Link>{" "}
-                    and{" "}
+                    </Link>
+                    {", "}
                     <Link href={`/${locale}/terms`} className="text-purple-600 hover:text-purple-700 underline font-semibold">
                       {t.cookieTerms}
+                    </Link>
+                    {" & "}
+                    <Link href={`/${locale}/impressum`} className="text-purple-600 hover:text-purple-700 underline font-semibold">
+                      {t.footerImpressum}
                     </Link>{" "}
                     {t.cookieLearnMore}
                   </p>

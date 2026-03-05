@@ -731,6 +731,7 @@ export default function Home() {
                 </li>
                 <li><Link href={`/${locale}/privacy`} className="hover:text-purple-400 transition">{t.cookiePrivacyPolicy}</Link></li>
                 <li><Link href={`/${locale}/terms`} className="hover:text-purple-400 transition">{t.cookieTerms}</Link></li>
+                <li><Link href={`/${locale}/impressum`} className="hover:text-purple-400 transition">{t.footerImpressum}</Link></li>
               </ul>
             </div>
           </div>

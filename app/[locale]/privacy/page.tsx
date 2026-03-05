@@ -42,6 +42,23 @@ export default function PrivacyPolicy() {
               {t.privacyCommitment}
             </p>
 
+            {/* Controller / Verantwortlicher - DSGVO requirement */}
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t.privacyControllerTitle}</h2>
+              <p className="text-gray-700 mb-3">{t.privacyControllerText}</p>
+              <address className="not-italic text-gray-700 leading-relaxed">
+                <p className="font-semibold">{t.privacyControllerName}</p>
+                <p>{t.privacyControllerAddress}</p>
+                <p>{t.privacyControllerPhone}</p>
+                <p>
+                  {t.privacyControllerEmail.split('admin@dartim-media.com')[0]}
+                  <a href="mailto:admin@dartim-media.com" className="text-purple-600 hover:underline">
+                    admin@dartim-media.com
+                  </a>
+                </p>
+              </address>
+            </div>
+
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.privacySection1Title}</h2>
             
             <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{t.privacySection1_1Title}</h3>
@@ -233,6 +250,15 @@ export default function PrivacyPolicy() {
             <p className="text-gray-700 leading-relaxed mb-6">
               {t.privacySection10Note}
             </p>
+
+            {/* Third-Party Services - DSGVO requirement */}
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.privacyServicesTitle}</h2>
+            <p className="text-gray-700 leading-relaxed mb-4">{t.privacyServicesIntro}</p>
+            <ul className="list-disc pl-6 mb-6 text-gray-700 space-y-3">
+              <li>{t.privacyServiceFirebase}</li>
+              <li>{t.privacyServiceGA}</li>
+              <li>{t.privacyServiceCloudflare}</li>
+            </ul>
 
             <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.privacySection11Title}</h2>
             <p className="text-gray-700 leading-relaxed mb-4">

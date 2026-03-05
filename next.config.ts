@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "kidsstoriesapp.firebasestorage.app",
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "643688636511",
     NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY: "6Ld5zFEsAAAAAMDEbTgdzzLyZJoMxrEQijNuLc7l",
-    NEXT_PUBLIC_FEEDBACK_API_BASE_URL: "https://opinionboard-lb23erpsaq-uc.a.run.app",
+    NEXT_PUBLIC_FEEDBACK_API_BASE_URL: "https://us-central1-kidsstoriesapp.cloudfunctions.net/opinionBoard",
   },
 };
 
