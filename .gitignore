@@ -50,3 +50,8 @@ public/**/*.webp
 public/**/*.gif
 public/**/*.mp4
 public/**/*.mp3
+
+# Exception: essential branding assets that must be in Git
+!public/og-image.png
+!public/icon-192.png
+!public/icon-512.png
