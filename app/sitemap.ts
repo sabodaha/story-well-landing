@@ -9,9 +9,7 @@ const baseUrl = 'https://dartim-media.com';
 const localeRoutes = [
   '',           // Home page
   '/stories',   // Read online
-  '/sleep',     // Sleep music
   '/feedback',  // Feedback page
-  '/reviews',   // Reviews page
   '/privacy',    // Privacy policy
   '/terms',      // Terms of service
   '/impressum',  // Legal notice (Impressum)

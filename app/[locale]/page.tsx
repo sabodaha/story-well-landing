@@ -106,13 +106,10 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     features: t.navFeatures,
     languages: t.navLanguages,
     faq: t.navFAQ,
-    reviews: t.navReviews,
     feedback: t.navFeedback,
     stories: t.navStories,
-    sleep: t.navSleep,
     download: t.navDownload,
     storiesUrl: "",
-    sleepUrl: "",
     downloadUrl: "",
   },
   hero: {
@@ -121,12 +118,8 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
     titleHighlight: t.heroTitleHighlight,
     titleEnd: t.heroTitleEnd,
     description: t.heroDescription,
-    downloadCta: t.heroDownload,
     readOnline: t.heroReadOnline,
-    watchDemo: t.heroWatchDemo,
-    downloadUrl: "",
     readOnlineUrl: "",
-    watchDemoUrl: "",
     lovedBy: t.heroLovedBy,
     worldwide: t.heroWorldwide,
     imageUrl: "",
@@ -191,10 +184,6 @@ const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
   cta: {
     title: t.ctaTitle,
     subtitle: t.ctaSubtitle,
-    downloadAndroid: t.ctaDownloadAndroid,
-    downloadIos: t.ctaDownloadiOS,
-    downloadAndroidUrl: "",
-    downloadIosUrl: "",
   },
   footer: {
     description: t.footerDescription,
@@ -238,16 +227,9 @@ export default function Home() {
   ];
   
   const platformDownloadUrl = platform === 'ios' ? DEFAULT_DOWNLOAD_IOS_URL : DEFAULT_DOWNLOAD_URL;
-  const navDownloadUrl = resolveLink(content.nav.downloadUrl, content.nav.download) || platformDownloadUrl;
   const navStoriesUrl = resolveLink(content.nav.storiesUrl, content.nav.stories) || `/${locale}/stories/`;
-  const navSleepUrl = resolveLink(content.nav.sleepUrl, content.nav.sleep) || `/${locale}/sleep/`;
-  const heroDownloadUrl = resolveLink(content.hero.downloadUrl, content.hero.downloadCta) || platformDownloadUrl;
   const heroReadOnlineUrl =
     resolveLink(content.hero.readOnlineUrl, content.hero.readOnline) || `/${locale}/stories/`;
-  const heroWatchDemoUrl = resolveLink(content.hero.watchDemoUrl, content.hero.watchDemo);
-  const ctaAndroidUrl =
-    resolveLink(content.cta.downloadAndroidUrl, content.cta.downloadAndroid) || DEFAULT_DOWNLOAD_URL;
-  const ctaIosUrl = resolveLink(content.cta.downloadIosUrl, content.cta.downloadIos) || DEFAULT_DOWNLOAD_IOS_URL;
   const footerDownloadUrl =
     resolveLink(content.footer.downloadUrl, content.footer.downloadLabel) || platformDownloadUrl;
 
@@ -257,12 +239,10 @@ export default function Home() {
       <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-purple-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-8 w-8 text-purple-600" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Story Well
-              </span>
-            </div>
+            <Link href={`/${locale}`} className="flex items-center gap-2">
+              <img src="/website-icon.png" alt="Storywell" className="h-9 w-9 rounded-lg" />
+              <img src="/storywell-name.png" alt="Storywell" className="h-7" />
+            </Link>
             <div className="hidden md:flex items-center gap-8">
               <Link href="#features" className="text-gray-700 hover:text-purple-600 transition">
                 {content.nav.features}
@@ -276,22 +256,10 @@ export default function Home() {
               <Link href={navStoriesUrl} className="text-gray-700 hover:text-purple-600 transition">
                 {content.nav.stories}
               </Link>
-              <Link href={navSleepUrl} className="text-gray-700 hover:text-purple-600 transition">
-                {content.nav.sleep}
-              </Link>
-              <Link href={`/${locale}/reviews`} className="text-gray-700 hover:text-purple-600 transition">
-                {content.nav.reviews}
-              </Link>
               <Link href={`/${locale}/feedback`} className="text-gray-700 hover:text-purple-600 transition">
                 {content.nav.feedback}
               </Link>
               <LanguageSwitcher />
-              <LinkButton
-                href={navDownloadUrl}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                {content.nav.download}
-              </LinkButton>
             </div>
             {/* Mobile menu button */}
             <button
@@ -317,25 +285,11 @@ export default function Home() {
               <Link href={navStoriesUrl} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
                 {content.nav.stories}
               </Link>
-              <Link href={navSleepUrl} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
-                {content.nav.sleep}
-              </Link>
-              <Link href={`/${locale}/reviews`} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
-                {content.nav.reviews}
-              </Link>
               <Link href={`/${locale}/feedback`} className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>
                 {content.nav.feedback}
               </Link>
               <div className="py-2 px-3">
                 <LanguageSwitcher />
-              </div>
-              <div className="py-2 px-3">
-                <LinkButton
-                  href={navDownloadUrl}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                >
-                  {content.nav.download}
-                </LinkButton>
               </div>
             </div>
           )}
@@ -361,30 +315,16 @@ export default function Home() {
               <p className="text-xl text-gray-600 leading-relaxed">
                 {content.hero.description}
               </p>
+              <StoreBadges />
               <div className="flex flex-col sm:flex-row gap-4">
-                <LinkButton
-                  href={heroDownloadUrl}
-                  size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-lg h-14 px-8"
-                >
-                  <Download className="mr-2 h-5 w-5" />
-                  {content.hero.downloadCta}
-                </LinkButton>
                 <LinkButton
                   href={heroReadOnlineUrl}
                   size="lg"
                   variant="outline"
                   className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
                 >
+                  <BookOpen className="mr-2 h-5 w-5" />
                   {content.hero.readOnline}
-                </LinkButton>
-                <LinkButton
-                  href={heroWatchDemoUrl}
-                  size="lg"
-                  variant="outline"
-                  className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
-                >
-                  {content.hero.watchDemo}
                 </LinkButton>
               </div>
               <div className="flex items-center gap-6 pt-4">
@@ -643,15 +583,6 @@ export default function Home() {
               <BookHeart className="mr-2 h-5 w-5" />
               {t.exploreStoriesCta}
             </LinkButton>
-            <LinkButton
-              href={`/${locale}/sleep/`}
-              size="lg"
-              variant="outline"
-              className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
-            >
-              <Moon className="mr-2 h-5 w-5" />
-              {t.exploreSleepCta}
-            </LinkButton>
           </div>
         </div>
       </section>
@@ -674,10 +605,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="h-8 w-8 text-purple-400" />
-                <span className="text-2xl font-bold text-white">Story Well</span>
-              </div>
+              <Link href={`/${locale}`} className="flex items-center gap-2 mb-4">
+                <img src="/website-icon.png" alt="Storywell" className="h-9 w-9 rounded-lg" />
+                <img src="/storywell-name.png" alt="Storywell" className="h-7 brightness-0 invert" />
+              </Link>
               <p className="text-gray-400 mb-4">
                 {content.footer.description}
               </p>
@@ -691,7 +622,6 @@ export default function Home() {
                 <li><Link href="#features" className="hover:text-purple-400 transition">{content.nav.features}</Link></li>
                 <li><Link href="#languages" className="hover:text-purple-400 transition">{content.nav.languages}</Link></li>
                 <li><Link href="#faq" className="hover:text-purple-400 transition">{content.nav.faq}</Link></li>
-                <li><Link href={`/${locale}/reviews`} className="hover:text-purple-400 transition">{content.nav.reviews}</Link></li>
                 <li><Link href={`/${locale}/feedback`} className="hover:text-purple-400 transition">{content.nav.feedback}</Link></li>
                 <li>
                   {footerDownloadUrl ? (

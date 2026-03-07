@@ -56,3 +56,5 @@ public/**/*.mp3
 !public/og-image.jpg
 !public/icon-192.png
 !public/icon-512.png
+!public/website-icon.png
+!public/storywell-name.png
