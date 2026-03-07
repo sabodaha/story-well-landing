@@ -587,7 +587,7 @@ export default function Home() {
           <p className="text-xl mb-8 text-purple-100">
             {content.cta.subtitle}
           </p>
-          <StoreBadges className="justify-center" />
+          <StoreBadges className="justify-center" variant="light" />
         </div>
       </section>
 
@@ -596,7 +596,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
-              <Link href={`/${locale}`} className="flex flex-col items-start gap-1 mb-4">
+              <Link href={`/${locale}`} className="inline-flex flex-col items-center gap-1 mb-4 p-3 rounded-xl ring-1 ring-white/25">
                 <img src="/website-icon.png" alt="Storywell" className="h-12 w-12 rounded-lg" />
                 <span className="text-2xl font-bold bg-gradient-to-r from-[#992ed1] to-[#e91370] bg-clip-text text-transparent">
                   Storywell
