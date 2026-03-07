@@ -75,7 +75,7 @@ export async function generateMetadata({
       siteName: "Story Well",
       images: [
         {
-          url: `${baseUrl}/og-image.png`,
+          url: `${baseUrl}/og-image.jpg`,
           width: 1200,
           height: 630,
           alt: "Story Well – Multilingual Children's Stories",
@@ -87,7 +87,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: titles[locale] || titles[defaultLocale],
       description: descriptions[locale] || descriptions[defaultLocale],
-      images: [`${baseUrl}/og-image.png`],
+      images: [`${baseUrl}/og-image.jpg`],
     },
     icons: {
       icon: "/favicon.ico",
@@ -119,7 +119,7 @@ export default async function LocaleLayout({
       priceCurrency: 'USD',
     },
     url: 'https://dartim-media.com',
-    image: 'https://dartim-media.com/og-image.png',
+    image: 'https://dartim-media.com/og-image.jpg',
     description: locale === 'en' 
       ? "Immerse your children in beautifully illustrated stories available in 8 languages. Read offline, switch languages instantly, and create lasting memories."
       : "Multilingual children's story app",
