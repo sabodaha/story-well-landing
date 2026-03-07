@@ -120,6 +120,11 @@ export default async function LocaleLayout({
     },
     url: 'https://dartim-media.com',
     image: 'https://dartim-media.com/og-image.jpg',
+    installUrl: [
+      'https://apps.apple.com/app/id6759845142',
+      'https://play.google.com/store/apps/details?id=com.dartim_media.storywell',
+    ],
+    downloadUrl: 'https://dartim-media.com/download',
     description: locale === 'en' 
       ? "Immerse your children in beautifully illustrated stories available in 8 languages. Read offline, switch languages instantly, and create lasting memories."
       : "Multilingual children's story app",
@@ -128,6 +133,11 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <head>
+        <meta name="apple-itunes-app" content={`app-id=6759845142, app-argument=https://dartim-media.com/${locale}`} />
+        <meta property="al:ios:app_store_id" content="6759845142" />
+        <meta property="al:ios:app_name" content="Storywell" />
+        <meta property="al:android:package" content="com.dartim_media.storywell" />
+        <meta property="al:android:app_name" content="Storywell" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(appStructuredData) }}

@@ -31,6 +31,8 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { localeNames, type Locale } from "@/lib/i18n/config";
 import { useParams } from "next/navigation";
 import { getSiteContent } from "@/lib/content/client";
+import { usePlatform } from "@/hooks/use-platform";
+import { StoreBadges } from "@/components/store-badges";
 
 const HERO_STORY_ID = "theMoonbellQuest";
 
@@ -62,6 +64,7 @@ const featureToneClasses = [
 ];
 
 const DEFAULT_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.dartim_media.storywell";
+const DEFAULT_DOWNLOAD_IOS_URL = "https://apps.apple.com/app/id6759845142";
 
 const normalizeLink = (value?: string) => (typeof value === "string" ? value.trim() : "");
 const isExternalLink = (href: string) => /^https?:\/\//i.test(href);
@@ -207,6 +210,7 @@ export default function Home() {
   const params = useParams();
   const locale = (params?.locale as Locale) || "en";
   const t = useTranslations();
+  const platform = usePlatform();
   const defaultContent = useMemo(() => buildDefaultContent(t), [t]);
   const [content, setContent] = useState(defaultContent);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -233,18 +237,19 @@ export default function Home() {
     { code: 'es', flag: "🇪🇸", native: localeNames.es.native, english: localeNames.es.english },
   ];
   
-  const navDownloadUrl = resolveLink(content.nav.downloadUrl, content.nav.download) || DEFAULT_DOWNLOAD_URL;
+  const platformDownloadUrl = platform === 'ios' ? DEFAULT_DOWNLOAD_IOS_URL : DEFAULT_DOWNLOAD_URL;
+  const navDownloadUrl = resolveLink(content.nav.downloadUrl, content.nav.download) || platformDownloadUrl;
   const navStoriesUrl = resolveLink(content.nav.storiesUrl, content.nav.stories) || `/${locale}/stories/`;
   const navSleepUrl = resolveLink(content.nav.sleepUrl, content.nav.sleep) || `/${locale}/sleep/`;
-  const heroDownloadUrl = resolveLink(content.hero.downloadUrl, content.hero.downloadCta) || DEFAULT_DOWNLOAD_URL;
+  const heroDownloadUrl = resolveLink(content.hero.downloadUrl, content.hero.downloadCta) || platformDownloadUrl;
   const heroReadOnlineUrl =
     resolveLink(content.hero.readOnlineUrl, content.hero.readOnline) || `/${locale}/stories/`;
   const heroWatchDemoUrl = resolveLink(content.hero.watchDemoUrl, content.hero.watchDemo);
   const ctaAndroidUrl =
     resolveLink(content.cta.downloadAndroidUrl, content.cta.downloadAndroid) || DEFAULT_DOWNLOAD_URL;
-  const ctaIosUrl = resolveLink(content.cta.downloadIosUrl, content.cta.downloadIos);
+  const ctaIosUrl = resolveLink(content.cta.downloadIosUrl, content.cta.downloadIos) || DEFAULT_DOWNLOAD_IOS_URL;
   const footerDownloadUrl =
-    resolveLink(content.footer.downloadUrl, content.footer.downloadLabel) || DEFAULT_DOWNLOAD_URL;
+    resolveLink(content.footer.downloadUrl, content.footer.downloadLabel) || platformDownloadUrl;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-blue-50">
@@ -660,25 +665,7 @@ export default function Home() {
           <p className="text-xl mb-8 text-purple-100">
             {content.cta.subtitle}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <LinkButton
-              href={ctaAndroidUrl}
-              size="lg"
-              className="bg-white text-purple-600 hover:bg-gray-100 text-lg h-14 px-8"
-            >
-              <Download className="mr-2 h-5 w-5" />
-              {content.cta.downloadAndroid}
-            </LinkButton>
-            <LinkButton
-              href={ctaIosUrl}
-              size="lg"
-              variant="outline"
-              className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg h-14 px-8"
-            >
-              <Download className="mr-2 h-5 w-5" />
-              {content.cta.downloadIos}
-            </LinkButton>
-          </div>
+          <StoreBadges className="justify-center" />
         </div>
       </section>
 

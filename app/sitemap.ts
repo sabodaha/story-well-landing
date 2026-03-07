@@ -28,6 +28,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 1.0,
   });
 
+  // Universal download redirect
+  urls.push({
+    url: `${baseUrl}/download`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.9,
+  });
+
   // Add all locale-specific routes
   for (const locale of locales) {
     for (const route of localeRoutes) {
