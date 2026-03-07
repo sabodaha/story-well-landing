@@ -240,8 +240,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href={`/${locale}`} className="flex items-center gap-2">
-              <img src="/website-icon.png" alt="Storywell" className="h-9 w-9 rounded-lg" />
-              <img src="/storywell-name.png" alt="Storywell" className="h-7" />
+              <img src="/website-icon.png" alt="Storywell" className="h-10 w-10 rounded-lg" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-[#992ed1] to-[#e91370] bg-clip-text text-transparent">
+                Storywell
+              </span>
             </Link>
             <div className="hidden md:flex items-center gap-8">
               <Link href="#features" className="text-gray-700 hover:text-purple-600 transition">
@@ -316,17 +318,6 @@ export default function Home() {
                 {content.hero.description}
               </p>
               <StoreBadges />
-              <div className="flex flex-col sm:flex-row gap-4">
-                <LinkButton
-                  href={heroReadOnlineUrl}
-                  size="lg"
-                  variant="outline"
-                  className="text-lg h-14 px-8 border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
-                >
-                  <BookOpen className="mr-2 h-5 w-5" />
-                  {content.hero.readOnline}
-                </LinkButton>
-              </div>
               <div className="flex items-center gap-6 pt-4">
                 <div className="flex items-center gap-1">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -605,9 +596,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
-              <Link href={`/${locale}`} className="flex items-center gap-2 mb-4">
-                <img src="/website-icon.png" alt="Storywell" className="h-9 w-9 rounded-lg" />
-                <img src="/storywell-name.png" alt="Storywell" className="h-7 brightness-0 invert" />
+              <Link href={`/${locale}`} className="flex flex-col items-start gap-1 mb-4">
+                <img src="/website-icon.png" alt="Storywell" className="h-12 w-12 rounded-lg" />
+                <span className="text-2xl font-bold bg-gradient-to-r from-[#992ed1] to-[#e91370] bg-clip-text text-transparent">
+                  Storywell
+                </span>
               </Link>
               <p className="text-gray-400 mb-4">
                 {content.footer.description}

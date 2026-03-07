@@ -6,7 +6,13 @@ const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.darti
 function AppStoreBadge({ className = "" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Download on the App Store">
-      <rect width="120" height="40" rx="5" fill="#000" />
+      <defs>
+        <linearGradient id="app-bg" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#992ed1" />
+          <stop offset="100%" stopColor="#e91370" />
+        </linearGradient>
+      </defs>
+      <rect width="120" height="40" rx="8" fill="url(#app-bg)" />
       <g fill="#fff">
         <path d="M24.77 20.3a4.95 4.95 0 0 1 2.36-4.15 5.07 5.07 0 0 0-3.99-2.16c-1.68-.18-3.31 1.01-4.17 1.01-.87 0-2.19-.99-3.62-.96a5.33 5.33 0 0 0-4.49 2.73c-1.93 3.34-.49 8.27 1.36 10.97.93 1.33 2.02 2.81 3.44 2.76 1.39-.06 1.91-.88 3.59-.88 1.67 0 2.15.88 3.6.85 1.49-.02 2.44-1.34 3.33-2.68a11.05 11.05 0 0 0 1.52-3.11 4.78 4.78 0 0 1-2.93-4.38z" />
         <path d="M22.04 12.21a4.87 4.87 0 0 0 1.12-3.49 4.96 4.96 0 0 0-3.21 1.66 4.64 4.64 0 0 0-1.15 3.36 4.1 4.1 0 0 0 3.24-1.53z" />
@@ -22,17 +28,21 @@ function AppStoreBadge({ className = "" }: { className?: string }) {
 function GooglePlayBadge({ className = "" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 135 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Get it on Google Play">
-      <rect width="135" height="40" rx="5" fill="#000" />
+      <defs>
+        <linearGradient id="gp-bg" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#992ed1" />
+          <stop offset="100%" stopColor="#e91370" />
+        </linearGradient>
+        <linearGradient id="gp-tri" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#00C3FF" />
+          <stop offset="35%" stopColor="#62DE93" />
+          <stop offset="65%" stopColor="#F9E24C" />
+          <stop offset="100%" stopColor="#FF6B6B" />
+        </linearGradient>
+      </defs>
+      <rect width="135" height="40" rx="8" fill="url(#gp-bg)" />
       <g>
-        <defs>
-          <linearGradient id="gp-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#00C3FF" />
-            <stop offset="35%" stopColor="#62DE93" />
-            <stop offset="65%" stopColor="#F9E24C" />
-            <stop offset="100%" stopColor="#FF6B6B" />
-          </linearGradient>
-        </defs>
-        <path d="M13 7.5l12.5 12.5L13 32.5V7.5z" fill="url(#gp-grad)" />
+        <path d="M13 7.5l12.5 12.5L13 32.5V7.5z" fill="url(#gp-tri)" />
         <path d="M13 7.5l15.5 9.5-3 3L13 7.5z" fill="#00C3FF" opacity="0.8" />
         <path d="M13 32.5l12.5-12.5 3 3L13 32.5z" fill="#FF6B6B" opacity="0.8" />
       </g>
