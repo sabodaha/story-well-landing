@@ -10,13 +10,13 @@ export const metadata: Metadata = {
     description: "Download Storywell for free on iOS and Android. Beautifully illustrated children's stories in 8 languages. No ads, offline reading, safe for kids.",
     type: "website",
     url: `${baseUrl}/download`,
-    siteName: "Story Well",
+    siteName: "Storywell",
     images: [
       {
         url: `${baseUrl}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "Story Well – Multilingual Children's Stories",
+        alt: "Storywell – Multilingual Children's Stories",
       },
     ],
   },

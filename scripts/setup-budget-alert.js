@@ -52,7 +52,7 @@ async function main() {
     const [budget] = await budgets.createBudget({
       parent: billingAccountName,
       budget: {
-        displayName: "Story Well – $50 Monthly Safety Net",
+        displayName: "Storywell – $50 Monthly Safety Net",
         budgetFilter: {
           projects: [`projects/${PROJECT_ID}`],
           calendarPeriod: "MONTH",
@@ -94,7 +94,7 @@ function printManualInstructions() {
   console.log("  2. Select the billing account for project 'kidsstoriesapp'");
   console.log("  3. Click 'Budgets & alerts' in the left menu");
   console.log("  4. Click '+ CREATE BUDGET'");
-  console.log("  5. Name: 'Story Well – $50 Monthly Safety Net'");
+  console.log("  5. Name: 'Storywell – $50 Monthly Safety Net'");
   console.log("  6. Scope: Select project 'kidsstoriesapp'");
   console.log("  7. Amount: Set to $50 (Budget type: Specified amount)");
   console.log("  8. Actions:");
@@ -114,6 +114,8 @@ main().catch((e) => {
   console.error("Fatal:", e);
   process.exit(1);
 });
+
+
 
 
 

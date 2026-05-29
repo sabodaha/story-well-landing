@@ -8,7 +8,7 @@ describe('Structured Data', () => {
     const appSchema = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
-      name: 'Story Well',
+      name: 'Storywell',
       applicationCategory: 'EducationApplication',
       operatingSystem: 'Android, iOS',
       offers: {
@@ -25,7 +25,7 @@ describe('Structured Data', () => {
 
     expect(appSchema['@context']).toBe('https://schema.org');
     expect(appSchema['@type']).toBe('SoftwareApplication');
-    expect(appSchema.name).toBe('Story Well');
+    expect(appSchema.name).toBe('Storywell');
     expect(appSchema.offers.price).toBe('0');
   });
 

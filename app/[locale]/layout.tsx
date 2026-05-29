@@ -30,14 +30,14 @@ export async function generateMetadata({
   const baseUrl = 'https://dartim-media.com';
   
   const titles: Record<Locale, string> = {
-    en: "Story Well - Multilingual Children's Story App",
-    de: "Story Well - Mehrsprachige Kindergeschichten-App",
-    es: "Story Well - Aplicación de Cuentos Infantiles Multilingüe",
-    fr: "Story Well - Application d'Histoires pour Enfants Multilingue",
-    it: "Story Well - App di Storie per Bambini Multilingue",
-    ru: "Story Well - Многоязычное приложение детских историй",
-    tr: "Story Well - Çok Dilli Çocuk Hikayeleri Uygulaması",
-    uk: "Story Well - Багатомовний додаток дитячих історій",
+    en: "Storywell - Multilingual Children's Story App",
+    de: "Storywell - Mehrsprachige Kindergeschichten-App",
+    es: "Storywell - Aplicación de Cuentos Infantiles Multilingüe",
+    fr: "Storywell - Application d'Histoires pour Enfants Multilingue",
+    it: "Storywell - App di Storie per Bambini Multilingue",
+    ru: "Storywell - Многоязычное приложение детских историй",
+    tr: "Storywell - Çok Dilli Çocuk Hikayeleri Uygulaması",
+    uk: "Storywell - Багатомовний додаток дитячих історій",
   };
   
   const descriptions: Record<Locale, string> = {
@@ -62,7 +62,7 @@ export async function generateMetadata({
     title: titles[locale] || titles[defaultLocale],
     description: descriptions[locale] || descriptions[defaultLocale],
     keywords: ["children's stories", "multilingual", "kids app", "bedtime stories", "language learning", "offline reading"],
-    authors: [{ name: "Story Well Team" }],
+    authors: [{ name: "Storywell Team" }],
     alternates: {
       canonical: `${baseUrl}/${locale}`,
       languages,
@@ -72,13 +72,13 @@ export async function generateMetadata({
       description: descriptions[locale] || descriptions[defaultLocale],
       type: "website",
       url: `${baseUrl}/${locale}`,
-      siteName: "Story Well",
+      siteName: "Storywell",
       images: [
         {
           url: `${baseUrl}/og-image.jpg`,
           width: 1200,
           height: 630,
-          alt: "Story Well – Multilingual Children's Stories",
+          alt: "Storywell – Multilingual Children's Stories",
         },
       ],
       locale: locale,
@@ -110,7 +110,7 @@ export default async function LocaleLayout({
   const appStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Story Well',
+    name: 'Storywell',
     applicationCategory: 'EducationApplication',
     operatingSystem: 'Android, iOS',
     offers: {

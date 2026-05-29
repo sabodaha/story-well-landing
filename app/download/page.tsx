@@ -24,12 +24,12 @@ export default function DownloadPage() {
         <div className="flex items-center justify-center gap-2">
           <BookOpen className="h-10 w-10 text-purple-600" />
           <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Story Well
+            Storywell
           </span>
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900">
-          Download Story Well
+          Download Storywell
         </h1>
         <p className="text-gray-600">
           Beautifully illustrated children&apos;s stories in 8 languages.

@@ -108,7 +108,7 @@ function StoriesPageContent() {
   // ---- Document title -------------------------------------------------------
   useEffect(() => {
     if (typeof document === "undefined") return;
-    const baseTitle = "Story Well";
+    const baseTitle = "Storywell";
     const storyTitle = activeStory ? resolveLocalizedText(activeStory.title, locale) : t.storiesTitle;
     document.title = storyTitle ? `${storyTitle} | ${baseTitle}` : baseTitle;
   }, [activeStory, locale, t.storiesTitle]);
@@ -163,7 +163,7 @@ function StoriesPageContent() {
             href={`/${locale}`}
             className="text-xl font-semibold text-purple-700 hover:text-purple-800"
           >
-            Story Well
+            Storywell
           </Link>
           <div className="flex items-center gap-3">
             <Button asChild className="bg-gradient-to-r from-purple-600 to-pink-600">

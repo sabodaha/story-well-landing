@@ -28,7 +28,7 @@ This landing page includes Google Analytics 4 with **minimal data collection** t
 2. Click **Admin** (gear icon in bottom left)
 3. Click **Create Property**
 4. Fill in:
-   - **Property name**: Story Well Landing Page
+   - **Property name**: Storywell Landing Page
    - **Reporting time zone**: Your timezone
    - **Currency**: EUR
 5. Click **Next** → Select **Small** business size
@@ -40,7 +40,7 @@ This landing page includes Google Analytics 4 with **minimal data collection** t
 2. Click **Add stream** → **Web**
 3. Fill in:
    - **Website URL**: `https://dartim-media.com`
-   - **Stream name**: Story Well Website
+   - **Stream name**: Storywell Website
 4. Click **Create stream**
 5. **Copy your Measurement ID** (format: `G-XXXXXXXXXX`)
 

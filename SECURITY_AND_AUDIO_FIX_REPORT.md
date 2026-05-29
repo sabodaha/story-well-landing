@@ -1,14 +1,14 @@
 # Security Mitigations & Audio Playback Fix - Implementation Report
 
 **Date:** January 2025  
-**Project:** Story Well Landing Page (`landing-page`)  
+**Project:** Storywell Landing Page (`landing-page`)  
 **Objective:** Implement security mitigations to protect Firebase resources from web app abuse while maintaining Android app functionality, and fix audio playback issues in the web reader.
 
 ---
 
 ## Executive Summary
 
-This report documents the implementation of security measures and audio playback fixes for the Story Well web application. The work focused on:
+This report documents the implementation of security measures and audio playback fixes for the Storywell web application. The work focused on:
 
 1. **Security Mitigations**: App Check initialization, Firebase Storage SDK migration, budget alerts, and future enforcement mechanisms
 2. **Audio Playback Fix**: Resolution of 403 Access Denied errors when playing audio files stored in Firebase Storage
@@ -169,7 +169,7 @@ const url = await getDownloadURL(fileRef);
 2. Select billing account for project `kidsstoriesapp`
 3. Navigate to "Budgets & alerts"
 4. Create budget:
-   - Name: `Story Well – $50 Monthly Safety Net`
+   - Name: `Storywell – $50 Monthly Safety Net`
    - Amount: $50
    - Thresholds: 50%, 80%, 100%
    - Add email notifications
@@ -658,6 +658,8 @@ node scripts/setup-appcheck-enforcement.js             # Enable
 ---
 
 **End of Report**
+
+
 
 
 

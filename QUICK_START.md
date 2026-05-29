@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get your Story Well landing page live in 5 minutes! ⚡
+Get your Storywell landing page live in 5 minutes! ⚡
 
 ## 🚀 Fastest Way to Deploy
 

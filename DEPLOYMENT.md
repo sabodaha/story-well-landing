@@ -1,6 +1,6 @@
-# Deploying Story Well Landing Page to Cloudflare Pages
+# Deploying Storywell Landing Page to Cloudflare Pages
 
-This guide will walk you through deploying the Story Well landing page to Cloudflare Pages.
+This guide will walk you through deploying the Storywell landing page to Cloudflare Pages.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ This is the easiest method with automatic deployments on every push.
 cd E:\Projects\myapp\landing-page
 git init
 git add .
-git commit -m "Initial commit: Story Well landing page"
+git commit -m "Initial commit: Storywell landing page"
 ```
 
 Create a new repository on GitHub, then:

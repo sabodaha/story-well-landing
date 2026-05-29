@@ -1,4 +1,4 @@
-# Next Steps for Story Well Landing Page
+# Next Steps for Storywell Landing Page
 
 ## ✅ What's Been Created
 
@@ -26,7 +26,7 @@ landing-page/
 1. **Navigation Bar** - Fixed header with links and CTA button
 2. **Hero Section** - Eye-catching gradient hero with primary CTA
 3. **Features Grid** - 9 feature cards showcasing app capabilities
-4. **Benefits Section** - Why parents love Story Well
+4. **Benefits Section** - Why parents love Storywell
 5. **Languages Showcase** - All 8 supported languages with flags
 6. **FAQ Section** - Accordion with common questions
 7. **CTA Section** - Secondary call-to-action with gradient background
@@ -93,7 +93,7 @@ Choose your preferred method:
 cd E:\Projects\myapp\landing-page
 git init
 git add .
-git commit -m "Initial commit: Story Well landing page"
+git commit -m "Initial commit: Storywell landing page"
 # Create repo on GitHub, then:
 git remote add origin YOUR_GITHUB_URL
 git push -u origin main
@@ -128,7 +128,7 @@ Replace the mock illustration with actual app screenshots:
 // In app/page.tsx, replace the placeholder div with:
 <Image
   src="/screenshots/app-hero.png"
-  alt="Story Well App"
+  alt="Storywell App"
   width={800}
   height={600}
   className="rounded-2xl shadow-2xl"
