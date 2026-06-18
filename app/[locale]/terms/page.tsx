@@ -12,9 +12,9 @@ export default function TermsOfService() {
   const locale = params?.locale as string || 'en';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-brand-purple/5 via-background to-brand-pink/5">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-purple-100">
+      <header className="bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link href={`/${locale}`}>
             <Button variant="ghost" className="gap-2">
@@ -28,129 +28,129 @@ export default function TermsOfService() {
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 text-magic-gradient">
             {t.termsTitle}
           </h1>
-          <p className="text-gray-600 mb-8">{t.termsLastUpdated}</p>
+          <p className="text-muted-foreground mb-8">{t.termsLastUpdated}</p>
 
           <div className="prose prose-lg max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsIntro}
             </p>
 
-            <p className="text-gray-700 leading-relaxed mb-8">
+            <p className="text-foreground/80 leading-relaxed mb-8">
               <strong>{t.termsAgreement}</strong>
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection1Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection1Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection1Intro}
             </p>
-            <p className="text-gray-700 leading-relaxed mb-4">{t.termsSection1Agree}</p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <p className="text-foreground/80 leading-relaxed mb-4">{t.termsSection1Agree}</p>
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection1List1}</li>
               <li>{t.termsSection1List2}</li>
               <li>{t.termsSection1List3}</li>
               <li>{t.termsSection1List4}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsSection1Note}
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection2Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection2Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection2Intro}
             </p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection2List1}</li>
               <li>{t.termsSection2List2}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsSection2Note}
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection3Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection3Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection3Intro}
             </p>
-            <p className="text-gray-700 leading-relaxed mb-4">{t.termsSection3Agree}</p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <p className="text-foreground/80 leading-relaxed mb-4">{t.termsSection3Agree}</p>
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection3List1}</li>
               <li>{t.termsSection3List2}</li>
               <li>{t.termsSection3List3}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               <strong>{t.termsSection3Note}</strong>
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection4Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection4Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection4Intro}
             </p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection4List1}</li>
               <li>{t.termsSection4List2}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsSection4Note}
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection5Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection5Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection5Intro}
             </p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection5List1}</li>
               <li>{t.termsSection5List2}</li>
               <li>{t.termsSection5List3}</li>
               <li>{t.termsSection5List4}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection5NotResponsible}
             </p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection5NotList1}</li>
               <li>{t.termsSection5NotList2}</li>
               <li>{t.termsSection5NotList3}</li>
               <li>{t.termsSection5NotList4}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               <strong>{t.termsSection5Note}</strong>
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection6Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection6Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection6Intro}
             </p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection6List1}</li>
               <li>{t.termsSection6List2}</li>
               <li>{t.termsSection6List3}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsSection6Note}
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection7Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection7Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection7Intro}
             </p>
-            <p className="text-gray-700 leading-relaxed mb-4">{t.termsSection7Disclaim}</p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <p className="text-foreground/80 leading-relaxed mb-4">{t.termsSection7Disclaim}</p>
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection7List1}</li>
               <li>{t.termsSection7List2}</li>
               <li>{t.termsSection7List3}</li>
               <li>{t.termsSection7List4}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               <strong>{t.termsSection7Note}</strong>
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection8Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection8Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection8Intro}
             </p>
-            <ul className="list-disc pl-6 mb-4 text-gray-700 space-y-2">
+            <ul className="list-disc pl-6 mb-4 text-foreground/80 space-y-2">
               <li>{t.termsSection8List1}</li>
               <li>{t.termsSection8List2}</li>
               <li>{t.termsSection8List3}</li>
@@ -158,56 +158,56 @@ export default function TermsOfService() {
               <li>{t.termsSection8List5}</li>
               <li>{t.termsSection8List6}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsSection8Note}
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection9Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection9Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection9Intro}
             </p>
-            <ul className="list-disc pl-6 mb-6 text-gray-700 space-y-2">
+            <ul className="list-disc pl-6 mb-6 text-foreground/80 space-y-2">
               <li>{t.termsSection9List1}</li>
               <li>{t.termsSection9List2}</li>
               <li>{t.termsSection9List3}</li>
               <li>{t.termsSection9List4}</li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection10Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection10Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection10Intro}
             </p>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsSection10Note}
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection11Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection11Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection11Intro}
             </p>
-            <p className="text-gray-700 leading-relaxed mb-6">
+            <p className="text-foreground/80 leading-relaxed mb-6">
               {t.termsSection11Note}
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{t.termsSection12Title}</h2>
-            <p className="text-gray-700 leading-relaxed mb-4">
+            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.termsSection12Title}</h2>
+            <p className="text-foreground/80 leading-relaxed mb-4">
               {t.termsSection12Intro}
             </p>
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-              <p className="text-gray-700 mb-2">
+            <div className="bg-primary/5 border border-border rounded-lg p-6">
+              <p className="text-foreground/80 mb-2">
                 {t.termsSection12Email}{" "}
-                <a href="mailto:admin@dartim-media.com" className="text-purple-600 hover:text-purple-700 font-semibold">
+                <a href="mailto:admin@dartim-media.com" className="text-primary hover:text-primary font-semibold">
                   admin@dartim-media.com
                 </a>
               </p>
-              <p className="text-gray-700">
+              <p className="text-foreground/80">
                 {t.termsSection12Website}{" "}
-                <a href="https://dartim-media.com/" className="text-purple-600 hover:text-purple-700 font-semibold">
+                <a href="https://dartim-media.com/" className="text-primary hover:text-primary font-semibold">
                   https://dartim-media.com/
                 </a>
               </p>
             </div>
-            <p className="text-gray-700 leading-relaxed mt-4">
+            <p className="text-foreground/80 leading-relaxed mt-4">
               {t.termsSection12Response}
             </p>
           </div>

@@ -21,11 +21,11 @@ export function FAQSection({ items }: FAQSectionProps) {
     <>
       <Accordion type="single" collapsible className="space-y-4">
         {items.map((item, index) => (
-          <AccordionItem key={`${item.title}-${index}`} value={`item-${index}`} className="bg-white rounded-lg px-6 border-2">
-            <AccordionTrigger className="text-left font-semibold hover:text-purple-600">
+          <AccordionItem key={`${item.title}-${index}`} value={`item-${index}`} className="bg-card rounded-lg px-6 border-2">
+            <AccordionTrigger className="text-left font-semibold hover:text-primary">
               {item.title}
             </AccordionTrigger>
-            <AccordionContent className="text-gray-600">
+            <AccordionContent className="text-muted-foreground">
               {item.description}
             </AccordionContent>
           </AccordionItem>

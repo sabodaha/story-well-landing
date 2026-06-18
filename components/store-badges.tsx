@@ -5,21 +5,17 @@ type BadgeVariant = "default" | "light";
 const APP_STORE_URL = "https://apps.apple.com/app/id6759845142";
 const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.dartim_media.storywell";
 
+// Conventional store badges: dark warm-ink on light backgrounds, white on dark
+// backgrounds. Brand color lives elsewhere — store marks stay recognizable.
+const BADGE_DARK = "#14110D";
+
 function AppStoreBadge({ className = "", variant = "default" }: { className?: string; variant?: BadgeVariant }) {
   const light = variant === "light";
-  const bgFill = light ? "#fff" : "url(#app-bg)";
+  const bgFill = light ? "#fff" : BADGE_DARK;
   const fgFill = light ? "#1f2937" : "#fff";
 
   return (
     <svg className={className} viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Download on the App Store">
-      {!light && (
-        <defs>
-          <linearGradient id="app-bg" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#992ed1" />
-            <stop offset="100%" stopColor="#e91370" />
-          </linearGradient>
-        </defs>
-      )}
       <rect width="120" height="40" rx="8" fill={bgFill} />
       <g fill={fgFill}>
         <path d="M24.77 20.3a4.95 4.95 0 0 1 2.36-4.15 5.07 5.07 0 0 0-3.99-2.16c-1.68-.18-3.31 1.01-4.17 1.01-.87 0-2.19-.99-3.62-.96a5.33 5.33 0 0 0-4.49 2.73c-1.93 3.34-.49 8.27 1.36 10.97.93 1.33 2.02 2.81 3.44 2.76 1.39-.06 1.91-.88 3.59-.88 1.67 0 2.15.88 3.6.85 1.49-.02 2.44-1.34 3.33-2.68a11.05 11.05 0 0 0 1.52-3.11 4.78 4.78 0 0 1-2.93-4.38z" />
@@ -35,18 +31,12 @@ function AppStoreBadge({ className = "", variant = "default" }: { className?: st
 
 function GooglePlayBadge({ className = "", variant = "default" }: { className?: string; variant?: BadgeVariant }) {
   const light = variant === "light";
-  const bgFill = light ? "#fff" : "url(#gp-bg)";
+  const bgFill = light ? "#fff" : BADGE_DARK;
   const fgFill = light ? "#1f2937" : "#fff";
 
   return (
     <svg className={className} viewBox="0 0 135 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Get it on Google Play">
       <defs>
-        {!light && (
-          <linearGradient id="gp-bg" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#992ed1" />
-            <stop offset="100%" stopColor="#e91370" />
-          </linearGradient>
-        )}
         <linearGradient id="gp-tri" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#00C3FF" />
           <stop offset="35%" stopColor="#62DE93" />

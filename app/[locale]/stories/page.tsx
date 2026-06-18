@@ -36,7 +36,7 @@ const pickDefaultStory = (stories: Story[]): Story | null => {
 
 export default function StoriesPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-purple-50 via-pink-50 to-blue-50"><p className="text-gray-500">Loading...</p></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-brand-purple/5 via-background to-brand-pink/5"><p className="text-muted-foreground">Loading...</p></div>}>
       <StoriesPageContent />
     </Suspense>
   );
@@ -156,17 +156,17 @@ function StoriesPageContent() {
   const showReader = activeStory && !isPremiumActive;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-blue-50">
-      <header className="border-b border-purple-100 bg-white/80 backdrop-blur-md">
+    <div className="min-h-screen bg-gradient-to-b from-brand-purple/5 via-background to-brand-pink/5">
+      <header className="border-b border-border bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link
             href={`/${locale}`}
-            className="text-xl font-semibold text-purple-700 hover:text-purple-800"
+            className="text-xl font-semibold text-primary hover:text-primary"
           >
             Storywell
           </Link>
           <div className="flex items-center gap-3">
-            <Button asChild className="bg-gradient-to-r from-purple-600 to-pink-600">
+            <Button asChild className="bg-magic-gradient">
               <Link href={`/${locale}/sleep`}>{t.navSleep}</Link>
             </Button>
           </div>
@@ -177,11 +177,11 @@ function StoriesPageContent() {
         {/* Reader at the top */}
         <section ref={readerRef} className="scroll-mt-20">
           {loading ? (
-            <Card className="border-purple-100">
-              <CardContent className="p-6 text-gray-600">{t.storiesLoading}</CardContent>
+            <Card className="border-border">
+              <CardContent className="p-6 text-muted-foreground">{t.storiesLoading}</CardContent>
             </Card>
           ) : showReader ? (
-            <div className="rounded-3xl shadow-2xl overflow-hidden border-4 border-purple-200">
+            <div className="rounded-3xl shadow-2xl overflow-hidden border-4 border-primary/40">
               <StoryReader
                 storyId={activeStory.id}
                 locale={locale}
@@ -205,12 +205,12 @@ function StoriesPageContent() {
               />
             </div>
           ) : isPremiumActive && activeStory ? (
-            <Card className="border-purple-100 shadow-lg">
+            <Card className="border-border shadow-lg">
               <CardContent className="space-y-4 p-6">
-                <h2 className="text-2xl font-semibold text-gray-900">
+                <h2 className="text-2xl font-semibold text-foreground">
                   {resolveLocalizedText(activeStory.title, locale)}
                 </h2>
-                <div className="rounded-lg border border-purple-100 bg-purple-50 p-4 text-sm text-purple-700">
+                <div className="rounded-lg border border-border bg-primary/5 p-4 text-sm text-primary">
                   {t.storiesPremiumNotice}
                 </div>
               </CardContent>
@@ -220,7 +220,7 @@ function StoriesPageContent() {
           {/* Currently reading label */}
           {activeStory && !loading && (
             <div className="mt-3 text-center">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-muted-foreground">
                 {resolveLocalizedText(activeStory.title, locale)}
                 {activeStory.author ? ` · ${activeStory.author}` : ""}
               </span>
@@ -231,26 +231,26 @@ function StoriesPageContent() {
         {/* Story tiles grid */}
         <section className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t.storiesTitle}</h1>
-            <p className="mt-2 text-gray-600">{t.storiesSubtitle}</p>
+            <h1 className="text-3xl font-bold text-foreground">{t.storiesTitle}</h1>
+            <p className="mt-2 text-muted-foreground">{t.storiesSubtitle}</p>
           </div>
 
           {loading ? (
-            <Card className="border-purple-100">
-              <CardContent className="p-6 text-gray-600">{t.storiesLoading}</CardContent>
+            <Card className="border-border">
+              <CardContent className="p-6 text-muted-foreground">{t.storiesLoading}</CardContent>
             </Card>
           ) : error ? (
-            <Card className="border-red-200">
+            <Card className="border-destructive">
               <CardContent className="flex items-center justify-between gap-4 p-6">
-                <span className="text-red-600">{error}</span>
+                <span className="text-destructive">{error}</span>
                 <Button variant="outline" onClick={retryLoad}>
                   {t.storiesRetry}
                 </Button>
               </CardContent>
             </Card>
           ) : stories.length === 0 ? (
-            <Card className="border-purple-100">
-              <CardContent className="p-6 text-gray-600">{t.storiesEmpty}</CardContent>
+            <Card className="border-border">
+              <CardContent className="p-6 text-muted-foreground">{t.storiesEmpty}</CardContent>
             </Card>
           ) : (
             <StoryCardGrid

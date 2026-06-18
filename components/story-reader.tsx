@@ -342,7 +342,7 @@ export const StoryReader = ({
 
   if (loading) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-2xl border border-purple-100 bg-black/80 text-white">
+      <div className="flex h-96 items-center justify-center rounded-2xl border border-border bg-black/80 text-white">
         {labels.loading}
       </div>
     );
@@ -350,8 +350,8 @@ export const StoryReader = ({
 
   if (error) {
     return (
-      <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-red-300 bg-black/80 text-white">
-        <span className="text-red-400">{error}</span>
+      <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-destructive bg-black/80 text-white">
+        <span className="text-destructive">{error}</span>
         <button
           onClick={retryLoad}
           className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10"
@@ -364,8 +364,8 @@ export const StoryReader = ({
 
   if (pages.length === 0) {
     return (
-      <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-amber-300 bg-black/80 text-white">
-        <span className="text-amber-300">No pages found for this story yet.</span>
+      <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-warning bg-black/80 text-white">
+        <span className="text-warning">No pages found for this story yet.</span>
         <button
           onClick={retryLoad}
           className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10"
@@ -378,7 +378,7 @@ export const StoryReader = ({
 
   if (!currentPage) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-2xl border border-purple-100 bg-black/80 text-white">
+      <div className="flex h-96 items-center justify-center rounded-2xl border border-border bg-black/80 text-white">
         {labels.error}
       </div>
     );

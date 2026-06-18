@@ -77,15 +77,15 @@ export const SleepPlayer = ({ labels }: SleepPlayerProps) => {
   };
 
   return (
-    <Card className="border-purple-100 shadow-lg">
+    <Card className="border-border shadow-lg">
       <CardContent className="space-y-6 p-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{labels.title}</h1>
-          <p className="mt-2 text-gray-600">{labels.subtitle}</p>
+          <h1 className="text-3xl font-bold text-foreground">{labels.title}</h1>
+          <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-gray-700">{labels.chooseTrack}</p>
+          <p className="text-sm font-semibold text-foreground/80">{labels.chooseTrack}</p>
           <div className="flex flex-wrap gap-3">
             {tracks.map((track) => (
               <Button
@@ -100,19 +100,19 @@ export const SleepPlayer = ({ labels }: SleepPlayerProps) => {
           </div>
         </div>
 
-        <div className="rounded-xl border border-purple-100 bg-purple-50 p-4">
-          <p className="text-sm text-purple-700">
+        <div className="rounded-xl border border-border bg-primary/5 p-4">
+          <p className="text-sm text-primary">
             {labels.nowPlaying}: <span className="font-semibold">{activeTrack?.title}</span>
           </p>
           {audioUrl ? (
             <audio ref={audioRef} controls src={audioUrl} className="mt-4 w-full" />
           ) : (
-            <p className="mt-3 text-sm text-purple-500">{labels.audioMissing}</p>
+            <p className="mt-3 text-sm text-primary">{labels.audioMissing}</p>
           )}
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-gray-700">{labels.timerLabel}</p>
+          <p className="text-sm font-semibold text-foreground/80">{labels.timerLabel}</p>
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"

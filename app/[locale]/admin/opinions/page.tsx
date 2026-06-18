@@ -171,8 +171,8 @@ export default function AdminOpinionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-blue-50">
-      <header className="bg-white/80 backdrop-blur-md border-b border-purple-100">
+    <div className="min-h-screen bg-gradient-to-b from-brand-purple/5 via-background to-brand-pink/5">
+      <header className="bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between gap-4">
           <Link href={`/${locale}`}>
             <Button variant="ghost" className="gap-2">
@@ -186,41 +186,41 @@ export default function AdminOpinionsPage() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-10">
-          <Badge className="mb-4 bg-purple-100 text-purple-700 hover:bg-purple-200">
+          <Badge className="mb-4 bg-primary/10 text-primary hover:bg-accent">
             {t.adminOpinionsBadge}
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-3">{t.adminOpinionsTitle}</h1>
-          <p className="text-lg text-gray-600">{t.adminOpinionsSubtitle}</p>
+          <p className="text-lg text-muted-foreground">{t.adminOpinionsSubtitle}</p>
         </div>
 
         {!user ? (
-          <Card className="border-2 border-purple-200 shadow-xl max-w-xl mx-auto">
+          <Card className="border-2 border-border shadow-xl max-w-xl mx-auto">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-purple-600" />
+                <ShieldCheck className="h-5 w-5 text-primary" />
                 {t.adminSignIn}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                className="w-full bg-magic-gradient hover:opacity-90"
                 onClick={handleSignIn}
               >
                 {t.adminSignIn}
               </Button>
               {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
                   {error}
                 </div>
               )}
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-2 border-purple-200 shadow-xl">
+          <Card className="border-2 border-border shadow-xl">
             <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <CardTitle>{t.adminOpinionsTitle}</CardTitle>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {t.adminSignedInAs}: {user.email}
                 </p>
               </div>
@@ -236,19 +236,19 @@ export default function AdminOpinionsPage() {
             </CardHeader>
             <CardContent>
               {error && (
-                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+                <div className="mb-4 rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4" />
                   {error}
                 </div>
               )}
 
               {isLoading ? (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   {t.adminLoading}
                 </div>
               ) : opinions.length === 0 ? (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                <div className="rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
                   {t.adminNoPending}
                 </div>
               ) : (
@@ -256,29 +256,29 @@ export default function AdminOpinionsPage() {
                   {opinions.map((opinion) => (
                     <div
                       key={opinion.id}
-                      className="rounded-xl border border-purple-100 bg-white/70 p-4 shadow-sm"
+                      className="rounded-xl border border-border bg-white/70 p-4 shadow-sm"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="space-y-1">
-                          <p className="font-semibold text-gray-900">
+                          <p className="font-semibold text-foreground">
                             {t.adminColumnName}: {opinion.name || t.feedbackAnonymous}
                           </p>
                           {opinion.storyTitle && (
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               {t.adminColumnStory}: {opinion.storyTitle}
                             </p>
                           )}
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {t.adminColumnLocale}: {opinion.locale || "-"}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {t.adminColumnRating}: {opinion.rating ?? "-"}
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <Button
                             size="sm"
-                            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                            className="gap-2 bg-success hover:opacity-90"
                             onClick={() => handleUpdate(opinion.id, "approved")}
                             disabled={isUpdating === opinion.id}
                           >
@@ -288,7 +288,7 @@ export default function AdminOpinionsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="gap-2 border-red-200 text-red-600 hover:bg-red-50"
+                            className="gap-2 border-destructive text-destructive hover:bg-destructive/10"
                             onClick={() => handleUpdate(opinion.id, "rejected")}
                             disabled={isUpdating === opinion.id}
                           >
@@ -297,7 +297,7 @@ export default function AdminOpinionsPage() {
                           </Button>
                         </div>
                       </div>
-                      <div className="mt-3 text-sm text-gray-700 leading-relaxed">
+                      <div className="mt-3 text-sm text-foreground/80 leading-relaxed">
                         {t.adminColumnMessage}: {opinion.message}
                       </div>
                     </div>

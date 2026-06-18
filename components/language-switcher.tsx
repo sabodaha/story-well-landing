@@ -37,10 +37,10 @@ export function LanguageSwitcher() {
           <DropdownMenuItem
             key={locale}
             onClick={() => switchLocale(locale)}
-            className={currentLocale === locale ? 'bg-purple-50' : ''}
+            className={currentLocale === locale ? 'bg-accent' : ''}
           >
             <span className="font-medium">{localeNames[locale].native}</span>
-            <span className="ml-2 text-sm text-gray-500">
+            <span className="ml-2 text-sm text-muted-foreground">
               {localeNames[locale].english}
             </span>
           </DropdownMenuItem>

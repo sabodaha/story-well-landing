@@ -34,18 +34,18 @@ export const StoryCardGrid = ({
             key={story.id}
             type="button"
             onClick={() => onSelect(story.id)}
-            className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 rounded-3xl"
+            className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-3xl"
             aria-pressed={isSelected}
             aria-label={title || "Story"}
           >
             <Card
               className={`overflow-hidden border-2 transition-all ${
                 isSelected
-                  ? "border-purple-400 shadow-lg"
-                  : "border-purple-100 hover:border-purple-300 hover:shadow-md"
+                  ? "border-primary shadow-lg"
+                  : "border-border hover:border-primary/40 hover:shadow-md"
               }`}
             >
-              <div className="relative aspect-[4/3] w-full bg-purple-50">
+              <div className="relative aspect-[4/3] w-full bg-muted">
                 {story.coverImageUrl ? (
                   <Image
                     src={story.coverImageUrl}
@@ -55,20 +55,20 @@ export const StoryCardGrid = ({
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-purple-400">
+                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                     <span className="text-4xl">📖</span>
                   </div>
                 )}
                 {story.isPremium && premiumLabel ? (
-                  <span className="absolute left-3 top-3 rounded-full bg-purple-600 px-3 py-1 text-xs font-semibold text-white">
+                  <span className="absolute left-3 top-3 rounded-full bg-brand-gold px-3 py-1 text-xs font-semibold text-[#4A2E08]">
                     {premiumLabel}
                   </span>
                 ) : null}
               </div>
               <CardContent className="space-y-2 p-4">
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{title}</h3>
+                <h3 className="text-lg font-semibold text-foreground line-clamp-2">{title}</h3>
                 {story.author ? (
-                  <p className="text-sm text-gray-500">{story.author}</p>
+                  <p className="text-sm text-muted-foreground">{story.author}</p>
                 ) : (
                   <div className="h-4" />
                 )}
@@ -80,4 +80,3 @@ export const StoryCardGrid = ({
     </div>
   );
 };
-

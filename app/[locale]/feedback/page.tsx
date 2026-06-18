@@ -248,8 +248,8 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-blue-50">
-      <header className="bg-white/80 backdrop-blur-md border-b border-purple-100">
+    <div className="min-h-screen bg-gradient-to-b from-brand-purple/5 via-background to-brand-pink/5">
+      <header className="bg-white/80 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between gap-4">
           <Link href={`/${locale}`}>
             <Button variant="ghost" className="gap-2">
@@ -263,33 +263,33 @@ export default function FeedbackPage() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-10">
-          <Badge className="mb-4 bg-purple-100 text-purple-700 hover:bg-purple-200">
+          <Badge className="mb-4 bg-primary/10 text-primary hover:bg-accent">
             {t.feedbackBadge}
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold">
             {t.feedbackTitle}{" "}
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="text-magic-gradient">
               {t.feedbackTitleHighlight}
             </span>{" "}
             {t.feedbackTitleEnd}
           </h1>
-          <p className="text-lg text-gray-600 mt-4 max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground mt-4 max-w-3xl mx-auto">
             {t.feedbackSubtitle}
           </p>
         </div>
 
         {(listConfigMissing || submitConfigMissing) && (
-          <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800 flex items-start gap-3">
+          <div className="mb-8 rounded-xl border border-warning bg-warning/10 p-4 text-warning flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 mt-0.5" />
             <p className="text-sm">{t.feedbackMissingConfig}</p>
           </div>
         )}
 
         <div className="grid lg:grid-cols-2 gap-8 items-start">
-          <Card className="border-2 border-purple-200 shadow-xl">
+          <Card className="border-2 border-border shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-purple-600" />
+                <MessageCircle className="h-5 w-5 text-primary" />
                 {t.feedbackFormTitle}
               </CardTitle>
               <CardDescription>{t.feedbackFormDescription}</CardDescription>
@@ -309,7 +309,7 @@ export default function FeedbackPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground/80">
                     {t.feedbackFormNameLabel}
                   </label>
                   <input
@@ -317,12 +317,12 @@ export default function FeedbackPage() {
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     placeholder={t.feedbackFormNamePlaceholder}
-                    className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none"
+                    className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 text-foreground shadow-sm focus:border-primary/40 focus:ring-2 focus:ring-ring outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground/80">
                     {t.feedbackFormStoryLabel}
                   </label>
                   <input
@@ -330,12 +330,12 @@ export default function FeedbackPage() {
                     value={storyTitle}
                     onChange={(event) => setStoryTitle(event.target.value)}
                     placeholder={t.feedbackFormStoryPlaceholder}
-                    className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none"
+                    className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 text-foreground shadow-sm focus:border-primary/40 focus:ring-2 focus:ring-ring outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground/80">
                     {t.feedbackFormRatingLabel}
                   </label>
                   <div className="mt-2 flex items-center gap-2">
@@ -345,8 +345,8 @@ export default function FeedbackPage() {
                         type="button"
                         onClick={() => setRating(value)}
                         className={cn(
-                          "rounded-full p-1 transition hover:bg-purple-50",
-                          value === rating ? "bg-purple-50" : ""
+                          "rounded-full p-1 transition hover:bg-accent",
+                          value === rating ? "bg-primary/5" : ""
                         )}
                         aria-pressed={value === rating}
                         aria-label={`${t.feedbackFormRatingLabel}: ${value}`}
@@ -354,17 +354,17 @@ export default function FeedbackPage() {
                         <Star
                           className={cn(
                             "h-5 w-5",
-                            value <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                            value <= rating ? "fill-brand-gold text-brand-gold" : "text-muted-foreground"
                           )}
                         />
                       </button>
                     ))}
-                    <span className="text-sm text-gray-500">{rating}/5</span>
+                    <span className="text-sm text-muted-foreground">{rating}/5</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-foreground/80">
                     {t.feedbackFormMessageLabel}
                   </label>
                   <textarea
@@ -372,17 +372,17 @@ export default function FeedbackPage() {
                     onChange={(event) => setMessage(event.target.value)}
                     placeholder={t.feedbackFormMessagePlaceholder}
                     rows={5}
-                    className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none"
+                    className="mt-2 w-full rounded-lg border border-border bg-white px-4 py-3 text-foreground shadow-sm focus:border-primary/40 focus:ring-2 focus:ring-ring outline-none"
                   />
                 </div>
 
                 {submitError && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <div className="rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {submitError}
                   </div>
                 )}
                 {submitSuccess && (
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2">
+                  <div className="rounded-lg border border-success bg-success/10 px-4 py-3 text-sm text-success flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4" />
                     {t.feedbackFormSuccess}
                   </div>
@@ -390,7 +390,7 @@ export default function FeedbackPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="w-full bg-magic-gradient hover:opacity-90"
                   disabled={isSubmitting || submitConfigMissing}
                 >
                   {isSubmitting ? (
@@ -406,7 +406,7 @@ export default function FeedbackPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-blue-200 shadow-xl">
+          <Card className="border-2 border-border shadow-xl">
             <CardHeader className="flex flex-row items-start justify-between gap-3">
               <div>
                 <CardTitle>{t.feedbackListTitle}</CardTitle>
@@ -426,20 +426,20 @@ export default function FeedbackPage() {
             </CardHeader>
             <CardContent>
               {listConfigMissing ? (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                <div className="rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
                   {t.feedbackMissingConfig}
                 </div>
               ) : isLoadingList ? (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   {t.feedbackListLoading}
                 </div>
               ) : listError ? (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive">
                   {t.feedbackListError}
                 </div>
               ) : formattedOpinions.length === 0 ? (
-                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                <div className="rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
                   {t.feedbackListEmpty}
                 </div>
               ) : (
@@ -447,15 +447,15 @@ export default function FeedbackPage() {
                   {formattedOpinions.map((opinion) => (
                     <div
                       key={opinion.id}
-                      className="rounded-xl border border-purple-100 bg-white/70 p-4 shadow-sm"
+                      className="rounded-xl border border-border bg-white/70 p-4 shadow-sm"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                         <div>
-                          <p className="font-semibold text-gray-900">
+                          <p className="font-semibold text-foreground">
                             {opinion.name?.trim() || t.feedbackAnonymous}
                           </p>
                           {opinion.storyTitle && (
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-muted-foreground">
                               {t.feedbackStoryLabel}: {opinion.storyTitle}
                             </p>
                           )}
@@ -468,18 +468,18 @@ export default function FeedbackPage() {
                                   key={`${opinion.id}-star-${value}`}
                                   className={cn(
                                     "h-4 w-4",
-                                    value <= opinion.rating! ? "fill-yellow-400 text-yellow-400" : "text-gray-200"
+                                    value <= opinion.rating! ? "fill-brand-gold text-brand-gold" : "text-muted-foreground"
                                   )}
                                 />
                               ))}
                             </div>
                           )}
                           {formatDate(opinion.createdAt) && (
-                            <span className="text-xs text-gray-400">{formatDate(opinion.createdAt)}</span>
+                            <span className="text-xs text-muted-foreground">{formatDate(opinion.createdAt)}</span>
                           )}
                         </div>
                       </div>
-                      <p className="text-sm text-gray-700 leading-relaxed">{opinion.message}</p>
+                      <p className="text-sm text-foreground/80 leading-relaxed">{opinion.message}</p>
                     </div>
                   ))}
                 </div>
@@ -489,20 +489,20 @@ export default function FeedbackPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mt-10">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
-            <div className="flex items-center gap-2 mb-3 text-emerald-700 font-semibold">
+          <div className="rounded-2xl border border-success bg-success/10 p-6">
+            <div className="flex items-center gap-2 mb-3 text-success font-semibold">
               <ShieldCheck className="h-5 w-5" />
               {t.feedbackGuidelinesTitle}
             </div>
-            <ul className="text-sm text-emerald-900 space-y-2 list-disc pl-5">
+            <ul className="text-sm text-success space-y-2 list-disc pl-5">
               <li>{t.feedbackGuideline1}</li>
               <li>{t.feedbackGuideline2}</li>
               <li>{t.feedbackGuideline3}</li>
             </ul>
           </div>
-          <div className="rounded-2xl border border-purple-200 bg-white p-6">
-            <h3 className="font-semibold text-gray-900 mb-2">{t.feedbackModerationNote}</h3>
-            <p className="text-sm text-gray-600">{t.feedbackPrivacyNote}</p>
+          <div className="rounded-2xl border border-border bg-white p-6">
+            <h3 className="font-semibold text-foreground mb-2">{t.feedbackModerationNote}</h3>
+            <p className="text-sm text-muted-foreground">{t.feedbackPrivacyNote}</p>
           </div>
         </div>
       </main>
