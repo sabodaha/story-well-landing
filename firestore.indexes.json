@@ -24,6 +24,22 @@
         { "fieldPath": "ipHash", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "promo_codes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "claimedIpHash", "order": "ASCENDING" },
+        { "fieldPath": "claimedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "promo_codes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "campaign", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

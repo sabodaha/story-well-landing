@@ -10,22 +10,29 @@ const APP_STORE_URL = `https://apps.apple.com/app/id${APPLE_APP_ID}`;
 const GOOGLE_PLAY_URL =
   'https://play.google.com/store/apps/details?id=com.dartim_media.storywell';
 
-// Promo campaigns: channel word → the custom offer codes created in
-// App Store Connect and Play Console. A word must exist in BOTH consoles
-// before it is distributed. iOS codes are activated via the redeem URL;
-// Android custom codes can only be entered inside the app's purchase
-// sheet, so Android users see the code + instructions instead of a
-// silent redirect.
+// Promo campaigns: channel word → the offer codes created in App Store
+// Connect and Play Console. A word must exist in BOTH consoles before it
+// is distributed. iOS codes are activated via the redeem URL. On Android,
+// one-tap activation fetches a ONE-TIME code from the promoDispenser
+// Cloud Function and deep-links into the Play redeem flow; if the pool is
+// empty or the request fails, the page falls back to showing the custom
+// code with manual in-app activation steps.
 type Promo = { ios: string; android: string; locale: keyof typeof STRINGS };
 
 const PROMOS: Record<string, Promo> = {
   KAZKA: { ios: 'KAZKA', android: 'KAZKA', locale: 'uk' },
 };
 
+const PROMO_CLAIM_URL =
+  'https://us-central1-kidsstoriesapp.cloudfunctions.net/promoDispenser/claim';
+
 const STRINGS = {
   uk: {
     promoTitle: 'Ваш промокод',
     promoSubtitle: '3 місяці Premium безкоштовно',
+    activate: 'Активувати 3 місяці безкоштовно',
+    claiming: 'Отримуємо ваш код…',
+    fallbackNote: 'Не вдалося активувати автоматично. Активуйте вручну:',
     copy: 'Скопіювати код',
     copied: 'Скопійовано!',
     stepsTitle: 'Як активувати:',
@@ -43,6 +50,9 @@ const STRINGS = {
   en: {
     promoTitle: 'Your promo code',
     promoSubtitle: '3 months of Premium for free',
+    activate: 'Activate 3 free months',
+    claiming: 'Getting your code…',
+    fallbackNote: "Automatic activation didn't work. Activate manually:",
     copy: 'Copy code',
     copied: 'Copied!',
     stepsTitle: 'How to activate:',
@@ -74,6 +84,8 @@ export default function DownloadPage() {
   const [platform, setPlatform] = useState<Platform | null>(null);
   const [promoWord, setPromoWord] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [manualFallback, setManualFallback] = useState(false);
 
   useEffect(() => {
     const p = detectPlatform();
@@ -109,6 +121,28 @@ export default function DownloadPage() {
     }
   };
 
+  // One-tap Android activation: claim a one-time code, then deep-link into
+  // the Play redeem flow with the code prefilled. Any failure (empty pool,
+  // network, function down) falls back to the manual custom-code steps.
+  const claimAndRedeem = async () => {
+    if (!promoWord || claiming) return;
+    setClaiming(true);
+    try {
+      const response = await fetch(PROMO_CLAIM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campaign: promoWord.toLowerCase() }),
+      });
+      if (!response.ok) throw new Error(`claim-failed-${response.status}`);
+      const data: { code?: string } = await response.json();
+      if (!data.code) throw new Error('claim-empty');
+      window.location.href = `https://play.google.com/redeem?code=${encodeURIComponent(data.code)}`;
+    } catch {
+      setManualFallback(true);
+      setClaiming(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-brand-purple/5 via-background to-brand-pink/5 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center space-y-8 py-12">
@@ -119,13 +153,35 @@ export default function DownloadPage() {
           </span>
         </div>
 
-        {promo && platform !== 'ios' ? (
+        {promo && platform === 'android' && !manualFallback ? (
           <>
             <div className="space-y-1">
               <h1 className="text-2xl font-bold text-foreground">
                 {t.promoTitle}
               </h1>
               <p className="text-muted-foreground">{t.promoSubtitle}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={claimAndRedeem}
+              disabled={claiming}
+              className="inline-flex w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-lg font-semibold text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-60"
+            >
+              {claiming ? t.claiming : t.activate}
+            </button>
+
+            <p className="text-xs text-muted-foreground">{t.autorenew}</p>
+          </>
+        ) : promo && platform !== 'ios' ? (
+          <>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold text-foreground">
+                {t.promoTitle}
+              </h1>
+              <p className="text-muted-foreground">
+                {manualFallback ? t.fallbackNote : t.promoSubtitle}
+              </p>
             </div>
 
             <div className="rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 px-6 py-5 space-y-3">

@@ -464,3 +464,121 @@ export const opinionBoard = onRequest(
   app
 );
 
+// ---------------------------------------------------------------------------
+// Promo code dispenser
+//
+// Hands out ONE-TIME Google Play subscription promo codes so the landing
+// page can deep-link straight into the Play redeem flow
+// (https://play.google.com/redeem?code=...). Pools are uploaded with
+// functions/scripts/upload-promo-codes.mjs into the `promo_codes`
+// collection: doc id = the code, fields { campaign, status, createdAt }.
+// The collection is Admin-SDK-only (denied in firestore.rules).
+// ---------------------------------------------------------------------------
+
+const promoApp = express();
+promoApp.use(corsMiddleware);
+promoApp.use(express.json({ limit: "10kb" }));
+
+const promoCollection = () => db.collection("promo_codes");
+const PROMO_CAMPAIGNS = new Set(["kazka"]);
+const PROMO_CLAIMS_PER_IP_PER_DAY = 3;
+const PROMO_LOW_POOL_WARNING = 25;
+
+promoApp.post("/claim", async (req: Request, res: Response) => {
+  try {
+    const campaign = String(req.body?.campaign || "").trim().toLowerCase();
+    if (!PROMO_CAMPAIGNS.has(campaign)) {
+      return res.status(400).json({ error: "unknown-campaign" });
+    }
+
+    // Daily per-IP cap so refresh loops or light bots can't drain the pool.
+    const ipHash = hashIp(getClientIp(req));
+    const since = Timestamp.fromMillis(Date.now() - 24 * 60 * 60 * 1000);
+    const recentClaims = await promoCollection()
+      .where("claimedIpHash", "==", ipHash)
+      .where("claimedAt", ">", since)
+      .limit(PROMO_CLAIMS_PER_IP_PER_DAY)
+      .get();
+    if (recentClaims.size >= PROMO_CLAIMS_PER_IP_PER_DAY) {
+      return res.status(429).json({ error: "rate-limited" });
+    }
+
+    const code = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(
+        promoCollection()
+          .where("campaign", "==", campaign)
+          .where("status", "==", "available")
+          .limit(1)
+      );
+      if (snap.empty) return null;
+      const doc = snap.docs[0];
+      tx.update(doc.ref, {
+        status: "claimed",
+        claimedAt: FieldValue.serverTimestamp(),
+        claimedIpHash: ipHash,
+        claimedUserAgent: req.header("user-agent") || null,
+      });
+      return doc.id;
+    });
+
+    if (!code) {
+      logger.warn("promo:claim:pool-empty", { campaign });
+      return res.status(410).json({ error: "pool-empty" });
+    }
+
+    const remaining = await promoCollection()
+      .where("campaign", "==", campaign)
+      .where("status", "==", "available")
+      .count()
+      .get();
+    if (remaining.data().count <= PROMO_LOW_POOL_WARNING) {
+      logger.warn("promo:claim:pool-low", {
+        campaign,
+        remaining: remaining.data().count,
+      });
+    }
+
+    return res.json({ code });
+  } catch (error) {
+    logger.error("promo:claim:error", error);
+    return res.status(500).json({ error: "failed-to-claim" });
+  }
+});
+
+promoApp.get("/status", async (req: Request, res: Response) => {
+  try {
+    const campaign = String(req.query.campaign || "").trim().toLowerCase();
+    if (!PROMO_CAMPAIGNS.has(campaign)) {
+      return res.status(400).json({ error: "unknown-campaign" });
+    }
+    const [available, claimed] = await Promise.all([
+      promoCollection()
+        .where("campaign", "==", campaign)
+        .where("status", "==", "available")
+        .count()
+        .get(),
+      promoCollection()
+        .where("campaign", "==", campaign)
+        .where("status", "==", "claimed")
+        .count()
+        .get(),
+    ]);
+    return res.json({
+      campaign,
+      available: available.data().count,
+      claimed: claimed.data().count,
+    });
+  } catch (error) {
+    logger.error("promo:status:error", error);
+    return res.status(500).json({ error: "failed-to-load" });
+  }
+});
+
+export const promoDispenser = onRequest(
+  {
+    cors: true,
+    region: "us-central1",
+  },
+  promoApp
+);
+
