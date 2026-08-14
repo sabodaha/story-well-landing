@@ -5,8 +5,8 @@
 /.pnp
 .pnp.js
 .yarn/install-state.gz
-/functions/node_modules
-/functions/lib
+/firebase/node_modules
+/firebase/lib
 
 # testing
 /coverage
