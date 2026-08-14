@@ -24,6 +24,16 @@ const PROMOS: Record<string, Promo> = {
 const PROMO_CLAIM_URL =
   'https://us-central1-kidsstoriesapp.cloudfunctions.net/promoDispenser/claim';
 
+// One-tap redeem via play.google.com/redeem is PARKED: on real devices the
+// Play redeem flow confirms the 90-day promo but then routes the purchase
+// to the ANNUAL base plan with its 7-day trial (device-verified 2026-08-14),
+// putting users one tap away from a yearly charge. Until that flow is
+// verified safe, Android always uses the manual in-app custom-code path,
+// where the promo provably applies to the monthly (backwards-compatible)
+// base plan. The dispenser Cloud Function and code pool stay deployed for
+// a future re-enable.
+const ANDROID_ONE_TAP_REDEEM = false as boolean;
+
 type Locale = 'uk' | 'ru' | 'de' | 'en';
 
 // Page language follows the visitor's browser language (uk/ru/de),
@@ -82,8 +92,9 @@ const STRINGS: Record<
     steps: [
       'Встановіть Storywell із Google Play',
       'Відкрийте застосунок і перейдіть на екран Premium',
+      'Оберіть МІСЯЧНИЙ план підписки',
       'У вікні оплати Google Play натисніть «Використати код»',
-      'Введіть код — пробний період коштує 0',
+      'Введіть код — 90 днів коштують 0',
     ],
     install: 'Відкрити Google Play',
     autorenew:
@@ -112,8 +123,9 @@ const STRINGS: Record<
     steps: [
       'Установите Storywell из Google Play',
       'Откройте приложение и перейдите на экран Premium',
+      'Выберите МЕСЯЧНЫЙ план подписки',
       'В окне оплаты Google Play нажмите «Использовать код»',
-      'Введите код — пробный период стоит 0',
+      'Введите код — 90 дней стоят 0',
     ],
     install: 'Открыть Google Play',
     autorenew:
@@ -143,8 +155,9 @@ const STRINGS: Record<
     steps: [
       'Installieren Sie Storywell aus Google Play',
       'Öffnen Sie die App und gehen Sie zum Premium-Bildschirm',
+      'Wählen Sie den MONATS-Plan',
       'Tippen Sie im Google-Play-Zahlungsfenster auf „Code einlösen“',
-      'Geben Sie den Code ein — der Testzeitraum kostet 0 €',
+      'Geben Sie den Code ein — 90 Tage kosten 0 €',
     ],
     install: 'Google Play öffnen',
     autorenew:
@@ -174,8 +187,9 @@ const STRINGS: Record<
     steps: [
       'Install Storywell from Google Play',
       'Open the app and go to the Premium screen',
+      'Select the MONTHLY plan',
       'In the Google Play payment sheet, tap "Redeem code"',
-      'Enter the code — the trial period costs 0',
+      'Enter the code — 90 days cost 0',
     ],
     install: 'Open Google Play',
     autorenew:
@@ -345,7 +359,10 @@ export default function DownloadClient({
 
       <main className="relative z-10 mx-auto -mt-8 w-full max-w-md px-4 pb-10">
         <div className="space-y-5 rounded-3xl bg-card p-6 text-center shadow-xl shadow-brand-purple/10 ring-1 ring-black/5">
-          {promo && platform === 'android' && !manualFallback ? (
+          {promo &&
+          platform === 'android' &&
+          ANDROID_ONE_TAP_REDEEM &&
+          !manualFallback ? (
             <>
               <div className="text-4xl" aria-hidden>
                 🎁
