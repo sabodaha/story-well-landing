@@ -1,4 +1,12 @@
 import type { Metadata } from "next";
+import { Nunito } from "next/font/google";
+import "../globals.css";
+
+const nunito = Nunito({
+  variable: "--font-nunito",
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  weight: ["400", "600", "700", "800"],
+});
 
 const baseUrl = 'https://dartim-media.com';
 
@@ -37,8 +45,8 @@ export default function KazkaLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uk">
-      <body>{children}</body>
+    <html lang="uk" className={nunito.variable}>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
