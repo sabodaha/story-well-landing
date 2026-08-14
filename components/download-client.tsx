@@ -32,7 +32,11 @@ const PROMO_CLAIM_URL =
 // where the promo provably applies to the monthly (backwards-compatible)
 // base plan. The dispenser Cloud Function and code pool stay deployed for
 // a future re-enable.
-const ANDROID_ONE_TAP_REDEEM = false as boolean;
+// Re-enabled 2026-08-14: codes now come from the dedicated
+// storywell_premium_gift product (single monthly base plan), so the Play
+// redeem flow has no annual plan to mis-route to — device-verified:
+// "90-day trial → €3.99+tax/month".
+const ANDROID_ONE_TAP_REDEEM = true as boolean;
 
 type Locale = 'uk' | 'ru' | 'de' | 'en';
 
