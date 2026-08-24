@@ -478,6 +478,22 @@ export const opinionBoard = onRequest(
 const promoApp = express();
 promoApp.use(corsMiddleware);
 promoApp.use(express.json({ limit: "10kb" }));
+// sendBeacon payloads arrive as text/plain on purpose: any other content type
+// makes the request non-simple, and browsers drop preflighted beacons.
+promoApp.use(express.text({ type: "text/plain", limit: "10kb" }));
+
+/// Body of a beacon or a normal JSON post, whichever the caller used.
+function readJsonBody(body: unknown): Record<string, unknown> {
+  if (typeof body === "string") {
+    try {
+      const parsed = JSON.parse(body);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+}
 
 const promoCollection = () => db.collection("promo_codes");
 const PROMO_CAMPAIGNS = new Set(["kazka"]);
@@ -511,12 +527,13 @@ function utcDateKey(): string {
 /// run JavaScript, so previews are not counted.
 promoApp.post("/hit", async (req: Request, res: Response) => {
   try {
-    const campaign = sanitizeTag(req.body?.campaign);
+    const body = readJsonBody(req.body);
+    const campaign = sanitizeTag(body.campaign);
     if (!campaign || !PROMO_CAMPAIGNS.has(campaign)) {
       return res.status(400).json({ error: "unknown-campaign" });
     }
-    const src = sanitizeTag(req.body?.src, NO_SRC) as string;
-    const rawPlatform = sanitizeTag(req.body?.platform) || "other";
+    const src = sanitizeTag(body.src, NO_SRC) as string;
+    const rawPlatform = sanitizeTag(body.platform) || "other";
     const platform = PROMO_PLATFORMS.has(rawPlatform) ? rawPlatform : "other";
 
     await promoHitsCollection()

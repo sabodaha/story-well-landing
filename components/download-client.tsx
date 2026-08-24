@@ -244,20 +244,23 @@ function reportHit(
     src,
     platform: platform ?? 'desktop',
   });
+  // text/plain keeps the request CORS-simple. Anything else (application/json
+  // included) makes the browser preflight it, and preflighted beacons are
+  // dropped silently — verified against production on 2026-08-24.
   try {
     if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-      navigator.sendBeacon(
+      const sent = navigator.sendBeacon(
         PROMO_HIT_URL,
-        new Blob([payload], { type: 'application/json' })
+        new Blob([payload], { type: 'text/plain;charset=UTF-8' })
       );
-      return;
+      if (sent) return;
     }
   } catch {
     // Fall through to fetch below.
   }
   void fetch(PROMO_HIT_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body: payload,
     keepalive: true,
   }).catch(() => {});
