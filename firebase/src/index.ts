@@ -484,12 +484,78 @@ const PROMO_CAMPAIGNS = new Set(["kazka"]);
 const PROMO_CLAIMS_PER_IP_PER_DAY = 3;
 const PROMO_LOW_POOL_WARNING = 25;
 
+// Daily counters per placement, readable by the admin panel. One document per
+// UTC day: { date, total, bySrc: { <src>: { visits, ios, android, desktop,
+// claims } } }. Aggregate-only by design — no IP, no user agent, no identifier
+// of any kind — so this stays outside the privacy policy's PII surface.
+const promoHitsCollection = () => db.collection("promo_hits");
+const PROMO_PLATFORMS = new Set(["ios", "android", "desktop", "other"]);
+const NO_SRC = "_none";
+
+function sanitizeTag(raw: unknown, fallback: string | null = null): string | null {
+  const clean = String(raw || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 32);
+  return clean || fallback;
+}
+
+function utcDateKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/// Records one landing-page visit. Called from the browser, so it also counts
+/// iPhone visitors — the only place iOS is measurable at all, because Apple's
+/// redeem URL carries no parameters. Telegram's link-preview crawler does not
+/// run JavaScript, so previews are not counted.
+promoApp.post("/hit", async (req: Request, res: Response) => {
+  try {
+    const campaign = sanitizeTag(req.body?.campaign);
+    if (!campaign || !PROMO_CAMPAIGNS.has(campaign)) {
+      return res.status(400).json({ error: "unknown-campaign" });
+    }
+    const src = sanitizeTag(req.body?.src, NO_SRC) as string;
+    const rawPlatform = sanitizeTag(req.body?.platform) || "other";
+    const platform = PROMO_PLATFORMS.has(rawPlatform) ? rawPlatform : "other";
+
+    await promoHitsCollection()
+      .doc(utcDateKey())
+      .set(
+        {
+          date: utcDateKey(),
+          campaign,
+          updatedAt: FieldValue.serverTimestamp(),
+          total: FieldValue.increment(1),
+          bySrc: {
+            [src]: {
+              visits: FieldValue.increment(1),
+              [platform]: FieldValue.increment(1),
+            },
+          },
+        },
+        { merge: true }
+      );
+
+    return res.status(204).send();
+  } catch (error) {
+    logger.error("promo:hit:error", error);
+    // Never fail the page over a counter.
+    return res.status(204).send();
+  }
+});
+
 promoApp.post("/claim", async (req: Request, res: Response) => {
   try {
     const campaign = String(req.body?.campaign || "").trim().toLowerCase();
     if (!PROMO_CAMPAIGNS.has(campaign)) {
       return res.status(400).json({ error: "unknown-campaign" });
     }
+
+    // Placement id the landing page picked up from ?src=, e.g. the Telegram
+    // community a link was posted in. Sanitised again here because the client
+    // is not a trust boundary.
+    const src = sanitizeTag(req.body?.src);
 
     // Daily per-IP cap so refresh loops or light bots can't drain the pool.
     const ipHash = hashIp(getClientIp(req));
@@ -517,6 +583,7 @@ promoApp.post("/claim", async (req: Request, res: Response) => {
         claimedAt: FieldValue.serverTimestamp(),
         claimedIpHash: ipHash,
         claimedUserAgent: req.header("user-agent") || null,
+        claimedSrc: src,
       });
       return doc.id;
     });
@@ -525,6 +592,21 @@ promoApp.post("/claim", async (req: Request, res: Response) => {
       logger.warn("promo:claim:pool-empty", { campaign });
       return res.status(410).json({ error: "pool-empty" });
     }
+
+    // Mirror the claim into the daily counters so the admin panel can show the
+    // whole funnel (visits → claims) from one readable collection.
+    promoHitsCollection()
+      .doc(utcDateKey())
+      .set(
+        {
+          date: utcDateKey(),
+          campaign,
+          updatedAt: FieldValue.serverTimestamp(),
+          bySrc: { [src || NO_SRC]: { claims: FieldValue.increment(1) } },
+        },
+        { merge: true }
+      )
+      .catch((error) => logger.warn("promo:claim:counter-failed", error));
 
     const remaining = await promoCollection()
       .where("campaign", "==", campaign)
@@ -551,20 +633,31 @@ promoApp.get("/status", async (req: Request, res: Response) => {
     if (!PROMO_CAMPAIGNS.has(campaign)) {
       return res.status(400).json({ error: "unknown-campaign" });
     }
+    // Optional ?src= narrows the claimed count to one placement, so a Telegram
+    // community's pull can be read without opening the Firestore console.
+    const src =
+      String(req.query.src || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, "")
+        .slice(0, 32) || null;
+
+    let claimedQuery = promoCollection()
+      .where("campaign", "==", campaign)
+      .where("status", "==", "claimed");
+    if (src) claimedQuery = claimedQuery.where("claimedSrc", "==", src);
+
     const [available, claimed] = await Promise.all([
       promoCollection()
         .where("campaign", "==", campaign)
         .where("status", "==", "available")
         .count()
         .get(),
-      promoCollection()
-        .where("campaign", "==", campaign)
-        .where("status", "==", "claimed")
-        .count()
-        .get(),
+      claimedQuery.count().get(),
     ]);
     return res.json({
       campaign,
+      ...(src ? { src } : {}),
       available: available.data().count,
       claimed: claimed.data().count,
     });

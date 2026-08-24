@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { detectPlatform, type Platform } from '@/hooks/use-platform';
 import { StoreBadges } from '@/components/store-badges';
 import { Check, Copy } from 'lucide-react';
@@ -23,6 +23,9 @@ const PROMOS: Record<string, Promo> = {
 
 const PROMO_CLAIM_URL =
   'https://us-central1-kidsstoriesapp.cloudfunctions.net/promoDispenser/claim';
+
+const PROMO_HIT_URL =
+  'https://us-central1-kidsstoriesapp.cloudfunctions.net/promoDispenser/hit';
 
 // One-tap redeem via play.google.com/redeem is PARKED: on real devices the
 // Play redeem flow confirms the 90-day promo but then routes the purchase
@@ -219,10 +222,58 @@ function appleRedeemUrl(code: string): string {
   return `https://apps.apple.com/redeem?ctx=offercodes&id=${APPLE_APP_ID}&code=${encodeURIComponent(code)}`;
 }
 
+// Placement id from ?src= (e.g. /kazka?src=wiesbaden), so one Telegram
+// community can be told apart from another. Kept to a safe charset because
+// it is echoed into the Play referrer and the dispenser payload.
+function sanitizeSrc(raw: string | null): string | null {
+  if (!raw) return null;
+  return raw.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 32) || null;
+}
+
+// Counts one landing-page visit against its placement. sendBeacon is used
+// because iPhone visitors are redirected to the App Store in the same tick — a
+// normal fetch would be cancelled before it left the browser. Aggregate-only
+// on the server: no identifiers are sent, and the counter never blocks the page.
+function reportHit(
+  campaign: string,
+  src: string | null,
+  platform: Platform | null
+): void {
+  const payload = JSON.stringify({
+    campaign: campaign.toLowerCase(),
+    src,
+    platform: platform ?? 'desktop',
+  });
+  try {
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon(
+        PROMO_HIT_URL,
+        new Blob([payload], { type: 'application/json' })
+      );
+      return;
+    }
+  } catch {
+    // Fall through to fetch below.
+  }
+  void fetch(PROMO_HIT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: payload,
+    keepalive: true,
+  }).catch(() => {});
+}
+
 // The referrer lands in the Play Install Referrer API, so Firebase
 // Analytics attributes each install to its promo campaign for free.
-function playPromoUrl(word: string): string {
-  const referrer = `utm_source=promo_${word.toLowerCase()}&utm_medium=smart_link&utm_campaign=offer_codes`;
+// iOS carries no equivalent — Apple's redeem URL takes no parameters — so
+// src attribution on iPhone is only visible as dispenser/click counts.
+function playPromoUrl(word: string, src: string | null): string {
+  const referrer = [
+    `utm_source=promo_${word.toLowerCase()}`,
+    'utm_medium=smart_link',
+    'utm_campaign=offer_codes',
+    ...(src ? [`utm_content=${src}`] : []),
+  ].join('&');
   return `${GOOGLE_PLAY_URL}&referrer=${encodeURIComponent(referrer)}`;
 }
 
@@ -235,21 +286,34 @@ export default function DownloadClient({
 }) {
   const [platform, setPlatform] = useState<Platform | null>(null);
   const [promoWord, setPromoWord] = useState<string | null>(null);
+  const [src, setSrc] = useState<string | null>(null);
   const [locale, setLocale] = useState<Locale>('en');
   const [copied, setCopied] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [manualFallback, setManualFallback] = useState(false);
+  // One visit = one count, even if React re-mounts the effect in dev.
+  const hitReported = useRef(false);
 
   useEffect(() => {
     const p = detectPlatform();
-    const raw =
-      forcedPromo ?? new URLSearchParams(window.location.search).get('promo');
+    const params = new URLSearchParams(window.location.search);
+    const raw = forcedPromo ?? params.get('promo');
     const word = raw ? raw.trim().toUpperCase() : null;
     const promo = word && PROMOS[word] ? word : null;
 
+    const placement = sanitizeSrc(params.get('src'));
+
     setPlatform(p);
     setPromoWord(promo);
+    setSrc(placement);
     setLocale(detectLocale());
+
+    // Fire before the iOS redirect below, so iPhone visits are counted too —
+    // this is the only signal Apple's parameter-less redeem URL leaves us.
+    if (promo && !hitReported.current) {
+      hitReported.current = true;
+      reportHit(promo, placement, p);
+    }
 
     if (p === 'ios') {
       window.location.href = promo
@@ -286,7 +350,7 @@ export default function DownloadClient({
       const response = await fetch(PROMO_CLAIM_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campaign: promoWord.toLowerCase() }),
+        body: JSON.stringify({ campaign: promoWord.toLowerCase(), src }),
       });
       if (!response.ok) throw new Error(`claim-failed-${response.status}`);
       const data: { code?: string } = await response.json();
@@ -429,7 +493,7 @@ export default function DownloadClient({
                     </ol>
                   </div>
                   <a
-                    href={playPromoUrl(promoWord!)}
+                    href={playPromoUrl(promoWord!, src)}
                     className="bg-magic-gradient inline-flex w-full items-center justify-center rounded-full px-8 py-3.5 font-bold text-white shadow-lg shadow-brand-pink/30 transition-transform active:scale-[0.98]"
                   >
                     {t.install}
