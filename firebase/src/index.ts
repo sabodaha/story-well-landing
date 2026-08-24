@@ -88,8 +88,13 @@ const parseLimit = (req: Request, defaultLimit = 20) => {
   return Math.min(Math.max(raw, 1), 100);
 };
 
+// Salted so a stored hash cannot be walked back to an address: the IPv4 space
+// is small enough to enumerate exhaustively. An absent salt degrades to the
+// previous behaviour instead of breaking rate limiting.
+const IP_HASH_SALT = process.env.IP_HASH_SALT || "";
+
 const hashIp = (ip: string) => {
-  return crypto.createHash("sha256").update(ip).digest("hex");
+  return crypto.createHash("sha256").update(IP_HASH_SALT + ip).digest("hex");
 };
 
 const getClientIp = (req: Request) => {
@@ -497,7 +502,13 @@ function readJsonBody(body: unknown): Record<string, unknown> {
 
 const promoCollection = () => db.collection("promo_codes");
 const PROMO_CAMPAIGNS = new Set(["kazka"]);
-const PROMO_CLAIMS_PER_IP_PER_DAY = 3;
+// Two jobs, two limits. The per-IP cap only has to stop a looping client, so it
+// is deliberately loose and short-windowed: mobile carriers put many subscribers
+// behind one address, and a Telegram post arrives as a burst from exactly those
+// networks. Guarding the pool is the global cap's job, and that one is immune to
+// shared addresses.
+const PROMO_CLAIMS_PER_IP_PER_HOUR = 10;
+const PROMO_CLAIMS_PER_DAY = 200;
 const PROMO_LOW_POOL_WARNING = 25;
 
 // Daily counters per placement, readable by the admin panel. One document per
@@ -536,23 +547,40 @@ promoApp.post("/hit", async (req: Request, res: Response) => {
     const rawPlatform = sanitizeTag(body.platform) || "other";
     const platform = PROMO_PLATFORMS.has(rawPlatform) ? rawPlatform : "other";
 
-    await promoHitsCollection()
-      .doc(utcDateKey())
-      .set(
-        {
-          date: utcDateKey(),
-          campaign,
-          updatedAt: FieldValue.serverTimestamp(),
-          total: FieldValue.increment(1),
-          bySrc: {
-            [src]: {
-              visits: FieldValue.increment(1),
-              [platform]: FieldValue.increment(1),
-            },
-          },
-        },
-        { merge: true }
+    // A beacon from our own page always carries an Origin header; curl and
+    // scripts normally do not. Those are counted apart so the visit numbers
+    // stay a picture of real browsers. Nothing is rejected — an attacker
+    // should not be able to tell which bucket they landed in.
+    const origin = String(req.headers.origin || "");
+    const fromBrowser = allowedOrigins.includes(origin);
+    const userAgent = String(req.header("user-agent") || "").toLowerCase();
+    const looksAutomated =
+      !userAgent ||
+      /bot|crawl|spider|headless|scrap|preview|curl|wget|python-requests|okhttp|axios|node-fetch/.test(
+        userAgent
       );
+
+    const counters: Record<string, unknown> = {
+      date: utcDateKey(),
+      campaign,
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    if (!fromBrowser) {
+      counters.suspicious = FieldValue.increment(1);
+    } else if (looksAutomated) {
+      counters.bots = FieldValue.increment(1);
+    } else {
+      counters.total = FieldValue.increment(1);
+      counters.bySrc = {
+        [src]: {
+          visits: FieldValue.increment(1),
+          [platform]: FieldValue.increment(1),
+        },
+      };
+    }
+
+    await promoHitsCollection().doc(utcDateKey()).set(counters, { merge: true });
 
     return res.status(204).send();
   } catch (error) {
@@ -574,16 +602,26 @@ promoApp.post("/claim", async (req: Request, res: Response) => {
     // is not a trust boundary.
     const src = sanitizeTag(req.body?.src);
 
-    // Daily per-IP cap so refresh loops or light bots can't drain the pool.
+    // Per-IP, short window: enough to stop a looping client, loose enough that a
+    // whole carrier NAT sharing one address is not locked out for a day.
     const ipHash = hashIp(getClientIp(req));
-    const since = Timestamp.fromMillis(Date.now() - 24 * 60 * 60 * 1000);
+    const since = Timestamp.fromMillis(Date.now() - 60 * 60 * 1000);
     const recentClaims = await promoCollection()
       .where("claimedIpHash", "==", ipHash)
       .where("claimedAt", ">", since)
-      .limit(PROMO_CLAIMS_PER_IP_PER_DAY)
+      .limit(PROMO_CLAIMS_PER_IP_PER_HOUR)
       .get();
-    if (recentClaims.size >= PROMO_CLAIMS_PER_IP_PER_DAY) {
+    if (recentClaims.size >= PROMO_CLAIMS_PER_IP_PER_HOUR) {
       return res.status(429).json({ error: "rate-limited" });
+    }
+
+    // Global daily cap: the real guard on the pool, and unaffected by shared
+    // addresses. One document read, from the counters we already maintain.
+    const todayCounters = await promoHitsCollection().doc(utcDateKey()).get();
+    const claimsToday = Number(todayCounters.get("claims") || 0);
+    if (claimsToday >= PROMO_CLAIMS_PER_DAY) {
+      logger.warn("promo:claim:daily-cap-reached", { campaign, claimsToday });
+      return res.status(429).json({ error: "daily-cap" });
     }
 
     const code = await db.runTransaction(async (tx) => {
@@ -619,6 +657,7 @@ promoApp.post("/claim", async (req: Request, res: Response) => {
           date: utcDateKey(),
           campaign,
           updatedAt: FieldValue.serverTimestamp(),
+          claims: FieldValue.increment(1),
           bySrc: { [src || NO_SRC]: { claims: FieldValue.increment(1) } },
         },
         { merge: true }

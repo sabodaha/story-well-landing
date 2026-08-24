@@ -313,9 +313,20 @@ export default function DownloadClient({
 
     // Fire before the iOS redirect below, so iPhone visits are counted too —
     // this is the only signal Apple's parameter-less redeem URL leaves us.
+    // One count per browser session per placement: a reload, a back navigation
+    // or a second tap on the same link is the same visitor, not a new one.
     if (promo && !hitReported.current) {
       hitReported.current = true;
-      reportHit(promo, placement, p);
+      const seenKey = `sw-hit-${promo}-${placement ?? ''}`;
+      let alreadyCounted = false;
+      try {
+        alreadyCounted = window.sessionStorage.getItem(seenKey) === '1';
+        if (!alreadyCounted) window.sessionStorage.setItem(seenKey, '1');
+      } catch {
+        // Storage can be unavailable (private mode, old WebView). Counting a
+        // duplicate is better than losing the visit entirely.
+      }
+      if (!alreadyCounted) reportHit(promo, placement, p);
     }
 
     if (p === 'ios') {
