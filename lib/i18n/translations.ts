@@ -198,7 +198,7 @@ export const translations = {
     privacyServicesIntro: 'We use the following third-party services to provide and improve our Service:',
     privacyServiceFirebase: 'Firebase (Google LLC): Authentication, database (Firestore), cloud storage, cloud functions. Privacy policy: https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC): Website analytics with anonymized IP addresses. Only loaded after user consent. Privacy policy: https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Content delivery network (CDN) and hosting. Privacy policy: https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Content delivery network (CDN), hosting, and cookie-free website analytics (page views and country only; no cookies, no cross-site tracking). Privacy policy: https://www.cloudflare.com/privacypolicy/',
 
     // Privacy & Terms
     backToHome: 'Back to Home',
@@ -651,7 +651,7 @@ export const translations = {
     privacyServicesIntro: 'Wir nutzen folgende Drittanbieter-Dienste zur Bereitstellung und Verbesserung unseres Dienstes:',
     privacyServiceFirebase: 'Firebase (Google LLC): Authentifizierung, Datenbank (Firestore), Cloud-Speicher, Cloud-Funktionen. Datenschutzerkl\u00e4rung: https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC): Website-Analyse mit anonymisierten IP-Adressen. Wird nur nach Einwilligung des Nutzers geladen. Datenschutzerkl\u00e4rung: https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Content Delivery Network (CDN) und Hosting. Datenschutzerkl\u00e4rung: https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Content Delivery Network (CDN), Hosting und cookiefreie Website-Analyse (nur Seitenaufrufe und Land; keine Cookies, kein seitenübergreifendes Tracking). Datenschutzerkl\u00e4rung: https://www.cloudflare.com/privacypolicy/',
 
     backToHome: 'Zur\u00fcck zur Startseite',
     privacyTitle: 'Datenschutzerkl\u00e4rung \u2014 Storywell',
@@ -1099,7 +1099,7 @@ export const translations = {
     privacyServicesIntro: 'Utilizamos los siguientes servicios de terceros para proporcionar y mejorar nuestro servicio:',
     privacyServiceFirebase: 'Firebase (Google LLC): Autenticación, base de datos (Firestore), almacenamiento en la nube, funciones en la nube. Política de privacidad: https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC): Análisis del sitio web con direcciones IP anonimizadas. Solo se carga después del consentimiento del usuario. Política de privacidad: https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Red de distribución de contenido (CDN) y alojamiento. Política de privacidad: https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Red de distribución de contenido (CDN), alojamiento y analítica web sin cookies (solo páginas vistas y país; sin cookies ni seguimiento entre sitios). Política de privacidad: https://www.cloudflare.com/privacypolicy/',
 
     backToHome: 'Volver al inicio',
     privacyTitle: 'Política de privacidad — Storywell',
@@ -1547,7 +1547,7 @@ export const translations = {
     privacyServicesIntro: 'Nous utilisons les services tiers suivants pour fournir et améliorer notre service :',
     privacyServiceFirebase: 'Firebase (Google LLC) : Authentification, base de données (Firestore), stockage cloud, fonctions cloud. Politique de confidentialité : https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC) : Analyse du site web avec adresses IP anonymisées. Chargé uniquement après le consentement de l\'utilisateur. Politique de confidentialité : https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.) : Réseau de diffusion de contenu (CDN) et hébergement. Politique de confidentialité : https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.) : Réseau de diffusion de contenu (CDN), hébergement et analyse du trafic sans cookies (pages vues et pays uniquement ; aucun cookie, aucun suivi inter-sites). Politique de confidentialité : https://www.cloudflare.com/privacypolicy/',
 
     backToHome: 'Retour à l\'accueil',
     privacyTitle: 'Politique de confidentialité — Storywell',
@@ -1995,7 +1995,7 @@ export const translations = {
     privacyServicesIntro: 'Utilizziamo i seguenti servizi di terze parti per fornire e migliorare il nostro servizio:',
     privacyServiceFirebase: 'Firebase (Google LLC): Autenticazione, database (Firestore), archiviazione cloud, funzioni cloud. Informativa sulla privacy: https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC): Analisi del sito web con indirizzi IP anonimizzati. Caricato solo dopo il consenso dell\'utente. Informativa sulla privacy: https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Rete di distribuzione dei contenuti (CDN) e hosting. Informativa sulla privacy: https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Rete di distribuzione dei contenuti (CDN), hosting e analisi del sito senza cookie (solo visualizzazioni di pagina e Paese; nessun cookie, nessun tracciamento tra siti). Informativa sulla privacy: https://www.cloudflare.com/privacypolicy/',
 
     backToHome: 'Torna alla home',
     privacyTitle: 'Informativa sulla privacy — Storywell',
@@ -2443,7 +2443,7 @@ export const translations = {
     privacyServicesIntro: 'Мы используем следующие сторонние сервисы для предоставления и улучшения нашего сервиса:',
     privacyServiceFirebase: 'Firebase (Google LLC): Аутентификация, база данных (Firestore), облачное хранилище, облачные функции. Политика конфиденциальности: https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC): Аналитика веб-сайта с анонимизированными IP-адресами. Загружается только после согласия пользователя. Политика конфиденциальности: https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Сеть доставки контента (CDN) и хостинг. Политика конфиденциальности: https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Сеть доставки контента (CDN), хостинг и веб-аналитика без файлов cookie (только просмотры страниц и страна; без cookie и без отслеживания между сайтами). Политика конфиденциальности: https://www.cloudflare.com/privacypolicy/',
 
     backToHome: 'Вернуться на главную',
     privacyTitle: 'Политика конфиденциальности — Storywell',
@@ -2891,7 +2891,7 @@ export const translations = {
     privacyServicesIntro: 'Hizmetimizi sağlamak ve geliştirmek için aşağıdaki üçüncü taraf hizmetlerini kullanıyoruz:',
     privacyServiceFirebase: 'Firebase (Google LLC): Kimlik doğrulama, veritabanı (Firestore), bulut depolama, bulut işlevleri. Gizlilik politikası: https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC): Anonimleştirilmiş IP adresleriyle web sitesi analitiği. Yalnızca kullanıcı onayından sonra yüklenir. Gizlilik politikası: https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): İçerik dağıtım ağı (CDN) ve barındırma. Gizlilik politikası: https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): İçerik dağıtım ağı (CDN), barındırma ve çerezsiz web analizi (yalnızca sayfa görüntülemeleri ve ülke; çerez yok, siteler arası izleme yok). Gizlilik politikası: https://www.cloudflare.com/privacypolicy/',
 
     backToHome: 'Ana Sayfaya Dön',
     privacyTitle: 'Gizlilik Politikası — Storywell',
@@ -3339,7 +3339,7 @@ export const translations = {
     privacyServicesIntro: 'Ми використовуємо наступні сторонні сервіси для надання та покращення нашого сервісу:',
     privacyServiceFirebase: 'Firebase (Google LLC): Автентифікація, база даних (Firestore), хмарне сховище, хмарні функції. Політика конфіденційності: https://firebase.google.com/support/privacy',
     privacyServiceGA: 'Google Analytics 4 (Google LLC): Аналітика веб-сайту з анонімізованими IP-адресами. Завантажується лише після згоди користувача. Політика конфіденційності: https://policies.google.com/privacy',
-    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Мережа доставки контенту (CDN) та хостинг. Політика конфіденційності: https://www.cloudflare.com/privacypolicy/',
+    privacyServiceCloudflare: 'Cloudflare (Cloudflare, Inc.): Мережа доставки контенту (CDN), хостинг і вебаналітика без файлів cookie (лише перегляди сторінок і країна; без cookie та без відстеження між сайтами). Політика конфіденційності: https://www.cloudflare.com/privacypolicy/',
 
     backToHome: 'Повернутися на головну',
     privacyTitle: 'Політика конфіденційності — Storywell',
