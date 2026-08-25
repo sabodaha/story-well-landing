@@ -258,6 +258,7 @@ export default function PrivacyPolicy() {
               <li>{t.privacyServiceFirebase}</li>
               <li>{t.privacyServiceGA}</li>
               <li>{t.privacyServiceCloudflare}</li>
+              <li>{t.privacyServiceRecaptcha}</li>
             </ul>
 
             <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">{t.privacySection11Title}</h2>
