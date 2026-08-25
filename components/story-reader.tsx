@@ -19,6 +19,11 @@ const resolveLocalizedText = (
   return value[locale] || value.en || Object.values(value)[0] || "";
 };
 
+/** Backoff schedule for the automatic retries that run before any error is shown. */
+const RETRY_DELAYS_MS = [400, 1200];
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -59,6 +64,9 @@ export const StoryReader = ({
   const [pages, setPages] = useState<StoryPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
+  const requestIdRef = useRef(0);
+  const inFlightRef = useRef(false);
 
   // ---- Navigation ---------------------------------------------------------
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -113,34 +121,76 @@ export const StoryReader = ({
   }, [currentPage, readerLocale, storyId]);
 
   // =========================================================================
-  // Data fetching – single call, simple error/retry
+  // Data fetching – one loader shared by the initial load and the retry button
   // =========================================================================
 
+  /**
+   * Loads the pages of `storyId`, transparently re-trying transient failures.
+   * `manual` runs keep the current error/empty state on screen and only flag
+   * `retrying`, so the button can disable itself instead of the whole view
+   * flipping back to the loading state.
+   */
+  const loadPages = useCallback(
+    async ({ manual = false }: { manual?: boolean } = {}) => {
+      if (manual && inFlightRef.current) return;
+      inFlightRef.current = true;
+
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
+      const isStale = () => requestId !== requestIdRef.current;
+
+      if (manual) {
+        setRetrying(true);
+      } else {
+        setLoading(true);
+        setError(null);
+      }
+
+      try {
+        for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
+          try {
+            const data = await fetchPagesForStory(storyId);
+            if (isStale()) return;
+            setPages(data);
+            setCurrentIndex(0);
+            setError(null);
+            setLoading(false);
+            return;
+          } catch (err) {
+            if (isStale()) return;
+            if (attempt >= RETRY_DELAYS_MS.length) {
+              console.error(`[StoryReader] Failed loading pages for storyId="${storyId}"`, err);
+              setError(err instanceof Error ? err.message : labels.error);
+              setLoading(false);
+              return;
+            }
+            const delay = RETRY_DELAYS_MS[attempt];
+            console.warn(
+              `[StoryReader] Attempt ${attempt + 1} failed for storyId="${storyId}", retrying in ${delay}ms`
+            );
+            await sleep(delay);
+            if (isStale()) return;
+          }
+        }
+      } finally {
+        if (!isStale()) {
+          inFlightRef.current = false;
+          setRetrying(false);
+        }
+      }
+    },
+    [storyId, labels.error]
+  );
+
   useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError(null);
+    void loadPages();
+    // Invalidate the in-flight request so a late response cannot land on a newer one.
+    return () => { requestIdRef.current += 1; };
+  }, [loadPages]);
 
-    fetchPagesForStory(storyId)
-      .then((data) => {
-        if (!active) return;
-        console.log(
-          "[StoryReader] Loaded", data.length,
-          "pages. First page audioUrls:", data[0]?.audioUrls ?? "(none)"
-        );
-        setPages(data);
-        setCurrentIndex(0);
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (!active) return;
-        console.error(`[StoryReader] Failed loading pages for storyId="${storyId}"`, err);
-        setError(err instanceof Error ? err.message : labels.error);
-        setLoading(false);
-      });
-
-    return () => { active = false; };
-  }, [storyId, locale, labels.error]);
+  const retryLoad = useCallback(() => {
+    void loadPages({ manual: true });
+  }, [loadPages]);
 
   // =========================================================================
   // Navigation helpers
@@ -317,26 +367,6 @@ export const StoryReader = ({
   };
 
   // =========================================================================
-  // Retry
-  // =========================================================================
-
-  const retryLoad = () => {
-    setLoading(true);
-    setError(null);
-    fetchPagesForStory(storyId)
-      .then((data) => {
-        setPages(data);
-        setCurrentIndex(0);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(`[StoryReader] Retry failed for storyId="${storyId}"`, err);
-        setError(err instanceof Error ? err.message : labels.error);
-        setLoading(false);
-      });
-  };
-
-  // =========================================================================
   // Render – loading / error states
   // =========================================================================
 
@@ -354,9 +384,10 @@ export const StoryReader = ({
         <span className="text-destructive">{error}</span>
         <button
           onClick={retryLoad}
-          className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10"
+          disabled={retrying}
+          className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {labels.retry}
+          {retrying ? labels.loading : labels.retry}
         </button>
       </div>
     );
@@ -368,9 +399,10 @@ export const StoryReader = ({
         <span className="text-warning">No pages found for this story yet.</span>
         <button
           onClick={retryLoad}
-          className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10"
+          disabled={retrying}
+          className="rounded-lg border border-white/30 px-4 py-2 text-sm hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {labels.retry}
+          {retrying ? labels.loading : labels.retry}
         </button>
       </div>
     );

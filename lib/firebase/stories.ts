@@ -3,16 +3,39 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
+  getDocsFromServer,
   getFirestore,
   orderBy,
   query,
   where,
 } from "firebase/firestore";
 import { getFirebaseApp } from "./client";
+import { runProjectedQuery } from "./rest";
 import type { LocalizedText, Story, StoryPage } from "@/lib/types/story";
 
 const db = getFirestore(getFirebaseApp());
+
+const STORY_FIELD_PATHS = [
+  "title",
+  "summary",
+  "author",
+  "coverImageUrl",
+  "createdAt",
+  "lastUpdatedAt",
+  "isPublished",
+  "isPremium",
+];
+
+// The page documents also carry per-locale alignment data that this site never
+// reads; projecting to these four fields keeps the payload at a fraction of it.
+const PAGE_FIELD_PATHS = ["index", "imageUrl", "caption", "audioUrls"];
+
+const selectMask = (fieldPaths: string[]) => ({
+  fields: fieldPaths.map((fieldPath) => ({ fieldPath })),
+});
+
+const errorMessage = (value: unknown): string =>
+  value instanceof Error ? value.message : String(value);
 
 const normalizeLocalizedText = (value: unknown): LocalizedText => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -70,19 +93,41 @@ const mapStoryPage = (data: Record<string, unknown>): StoryPage => ({
   audioUrls: normalizeLocalizedText(data.audioUrls),
 });
 
+const publishedStoriesQuery = () =>
+  query(collection(db, "stories"), where("isPublished", "==", true), orderBy("createdAt", "desc"));
+
+const pagesQuery = (storyId: string) =>
+  query(collection(db, "stories", storyId, "pages"), orderBy("index", "asc"));
+
 export const fetchPublishedStories = async (): Promise<Story[]> => {
+  let restMessage: string;
   try {
-    const storiesQuery = query(
-      collection(db, "stories"),
-      where("isPublished", "==", true),
-      orderBy("createdAt", "desc")
-    );
-    // Keep story list fetch untimed so slow first loads do not fail on production users.
-    const snapshot = await getDocs(storiesQuery);
+    const documents = await runProjectedQuery([], {
+      from: [{ collectionId: "stories" }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: "isPublished" },
+          op: "EQUAL",
+          value: { booleanValue: true },
+        },
+      },
+      orderBy: [{ field: { fieldPath: "createdAt" }, direction: "DESCENDING" }],
+      select: selectMask(STORY_FIELD_PATHS),
+    });
+    return documents.map((entry) => mapStory(entry.id, entry.data));
+  } catch (error) {
+    restMessage = errorMessage(error);
+  }
+
+  try {
+    // getDocsFromServer rather than getDocs: the cached read resolves empty
+    // instead of rejecting when the connection is down.
+    const snapshot = await getDocsFromServer(publishedStoriesQuery());
     return snapshot.docs.map((docSnap) => mapStory(docSnap.id, docSnap.data()));
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`[Firestore] Failed to fetch published stories: ${message}`);
+    throw new Error(
+      `[Firestore] Failed to fetch published stories: ${restMessage} (SDK fallback: ${errorMessage(error)})`
+    );
   }
 };
 
@@ -93,26 +138,37 @@ export const fetchStoryById = async (storyId: string): Promise<Story | null> => 
     if (!snapshot.exists()) return null;
     return mapStory(snapshot.id, snapshot.data());
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`[Firestore] Failed to fetch story "${storyId}": ${message}`);
+    throw new Error(`[Firestore] Failed to fetch story "${storyId}": ${errorMessage(error)}`);
+  }
+};
+
+const loadPages = async (storyId: string): Promise<StoryPage[]> => {
+  let restMessage: string;
+  try {
+    const documents = await runProjectedQuery(["stories", storyId], {
+      from: [{ collectionId: "pages" }],
+      orderBy: [{ field: { fieldPath: "index" }, direction: "ASCENDING" }],
+      select: selectMask(PAGE_FIELD_PATHS),
+    });
+    return documents.map((entry) => mapStoryPage(entry.data));
+  } catch (error) {
+    restMessage = errorMessage(error);
+  }
+
+  try {
+    const snapshot = await getDocsFromServer(pagesQuery(storyId));
+    return snapshot.docs.map((docSnap) => mapStoryPage(docSnap.data()));
+  } catch (error) {
+    throw new Error(
+      `[Firestore] Failed to fetch pages at stories/${storyId}/pages: ${restMessage} (SDK fallback: ${errorMessage(error)})`
+    );
   }
 };
 
 export const fetchPagesForStory = async (storyId: string): Promise<StoryPage[]> => {
-  try {
-    const pagesQuery = query(
-      collection(db, "stories", storyId, "pages"),
-      orderBy("index", "asc")
-    );
-    const snapshot = await getDocs(pagesQuery);
-    if (snapshot.empty) {
-      console.warn(`[Firestore] No pages found at stories/${storyId}/pages`);
-    }
-    return snapshot.docs.map((docSnap) => mapStoryPage(docSnap.data()));
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`[Firestore] Failed to fetch pages at stories/${storyId}/pages: ${message}`);
+  const pages = await loadPages(storyId);
+  if (pages.length === 0) {
+    console.warn(`[Firestore] No pages found at stories/${storyId}/pages`);
   }
+  return pages;
 };
-
-

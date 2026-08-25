@@ -165,11 +165,6 @@ function StoriesPageContent() {
           >
             Storywell
           </Link>
-          <div className="flex items-center gap-3">
-            <Button asChild className="bg-magic-gradient">
-              <Link href={`/${locale}/sleep`}>{t.navSleep}</Link>
-            </Button>
-          </div>
         </div>
       </header>
 
