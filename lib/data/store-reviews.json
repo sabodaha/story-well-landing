@@ -9,7 +9,38 @@
       "author": "!Loki1984",
       "version": "1.0",
       "text": "Гарний застосунок для казок перед сном. Можна включити дитині та сподіватися на швидке засипання :) Чекаємо нових історій!",
-      "id": "13824758122"
+      "id": "13824758122",
+      "lang": "uk",
+      "translations": {
+        "en": {
+          "title": "Liked everything",
+          "text": "A nice app for bedtime stories. You can put it on for your child and hope they fall asleep quickly :) Looking forward to new stories!"
+        },
+        "de": {
+          "title": "Alles hat gefallen",
+          "text": "Eine schöne App für Gutenachtgeschichten. Man kann sie dem Kind anmachen und auf schnelles Einschlafen hoffen :) Wir warten auf neue Geschichten!"
+        },
+        "ru": {
+          "title": "Всё понравилось",
+          "text": "Хорошее приложение для сказок перед сном. Можно включить ребёнку и надеяться на быстрое засыпание :) Ждём новых историй!"
+        },
+        "it": {
+          "title": "Ci è piaciuto tutto",
+          "text": "Una bella app per le favole della buonanotte. La puoi mettere al bambino e sperare che si addormenti in fretta :) Aspettiamo nuove storie!"
+        },
+        "fr": {
+          "title": "Tout nous a plu",
+          "text": "Une belle application pour les histoires du soir. On peut la mettre à l'enfant et espérer qu'il s'endorme vite :) Nous attendons de nouvelles histoires !"
+        },
+        "tr": {
+          "title": "Her şeyi beğendik",
+          "text": "Uyku öncesi masallar için güzel bir uygulama. Çocuğa açıp hızlıca uyumasını umabilirsiniz :) Yeni hikâyeleri bekliyoruz!"
+        },
+        "es": {
+          "title": "Nos gustó todo",
+          "text": "Una buena aplicación para cuentos antes de dormir. Se la puedes poner al niño y esperar que se duerma rápido :) ¡Esperamos nuevas historias!"
+        }
+      }
     },
     {
       "source": "appstore",
@@ -19,7 +50,38 @@
       "author": "Belyavka",
       "version": "1.0",
       "text": "Very sweet stories for the little ones with beautiful illustrations and the ability to read or listen in different languages",
-      "id": "13827998822"
+      "id": "13827998822",
+      "lang": "en",
+      "translations": {
+        "de": {
+          "title": "süße Märchen",
+          "text": "Sehr süße Geschichten für die Kleinen mit schönen Illustrationen und der Möglichkeit, in verschiedenen Sprachen zu lesen oder zu hören"
+        },
+        "ru": {
+          "title": "милые сказки",
+          "text": "Очень милые истории для малышей с красивыми иллюстрациями и возможностью читать или слушать на разных языках"
+        },
+        "uk": {
+          "title": "милі казки",
+          "text": "Дуже милі історії для малят з гарними ілюстраціями та можливістю читати або слухати різними мовами"
+        },
+        "it": {
+          "title": "dolci fiabe",
+          "text": "Storie molto dolci per i più piccoli con belle illustrazioni e la possibilità di leggere o ascoltare in diverse lingue"
+        },
+        "fr": {
+          "title": "de doux contes",
+          "text": "Des histoires très douces pour les tout-petits avec de belles illustrations et la possibilité de lire ou d'écouter en différentes langues"
+        },
+        "tr": {
+          "title": "tatlı masallar",
+          "text": "Küçükler için çok tatlı hikâyeler, güzel resimlerle ve farklı dillerde okuma ya da dinleme imkânıyla"
+        },
+        "es": {
+          "title": "dulces cuentos",
+          "text": "Historias muy dulces para los más pequeños con bonitas ilustraciones y la posibilidad de leer o escuchar en diferentes idiomas"
+        }
+      }
     },
     {
       "source": "appstore",
@@ -29,7 +91,38 @@
       "author": "hi giifdudf",
       "version": "1.3.1",
       "text": "Дітям дуже сподобалось. Особливо казка про Одіссея та Циклопа. Оцінка 5!",
-      "id": "13968071602"
+      "id": "13968071602",
+      "lang": "uk",
+      "translations": {
+        "en": {
+          "title": "Ivan",
+          "text": "The kids really liked it. Especially the story about Odysseus and the Cyclops. Rating 5!"
+        },
+        "de": {
+          "title": "Ivan",
+          "text": "Den Kindern hat es sehr gefallen. Besonders das Märchen über Odysseus und den Zyklopen. Bewertung 5!"
+        },
+        "ru": {
+          "title": "Ivan",
+          "text": "Детям очень понравилось. Особенно сказка про Одиссея и Циклопа. Оценка 5!"
+        },
+        "it": {
+          "title": "Ivan",
+          "text": "Ai bambini è piaciuto molto. Soprattutto la favola su Ulisse e il Ciclope. Voto 5!"
+        },
+        "fr": {
+          "title": "Ivan",
+          "text": "Les enfants ont beaucoup aimé. Surtout le conte sur Ulysse et le Cyclope. Note 5 !"
+        },
+        "tr": {
+          "title": "Ivan",
+          "text": "Çocuklar çok beğendi. Özellikle Odysseus ve Kiklop masalı. Puan 5!"
+        },
+        "es": {
+          "title": "Ivan",
+          "text": "A los niños les gustó mucho. Sobre todo el cuento de Odiseo y el Cíclope. ¡Nota 5!"
+        }
+      }
     },
     {
       "source": "appstore",
@@ -39,7 +132,38 @@
       "author": "Kuvenov",
       "version": "1.0",
       "text": "Чудовий застосунок для казок",
-      "id": "13834365241"
+      "id": "13834365241",
+      "lang": "uk",
+      "translations": {
+        "en": {
+          "title": "Liked everything",
+          "text": "A wonderful app for fairy tales"
+        },
+        "de": {
+          "title": "Alles hat gefallen",
+          "text": "Eine wunderbare App für Märchen"
+        },
+        "ru": {
+          "title": "Всё понравилось",
+          "text": "Замечательное приложение для сказок"
+        },
+        "it": {
+          "title": "Ci è piaciuto tutto",
+          "text": "Un'app fantastica per le fiabe"
+        },
+        "fr": {
+          "title": "Tout nous a plu",
+          "text": "Une super application pour les contes"
+        },
+        "tr": {
+          "title": "Her şeyi beğendik",
+          "text": "Masallar için harika bir uygulama"
+        },
+        "es": {
+          "title": "Nos gustó todo",
+          "text": "Una aplicación estupenda para los cuentos"
+        }
+      }
     }
   ]
 }

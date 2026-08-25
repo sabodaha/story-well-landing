@@ -263,8 +263,8 @@ export default function Home() {
               <Link href={navStoriesUrl} className="text-foreground/80 hover:text-primary transition">
                 {content.nav.stories}
               </Link>
-              <Link href={`/${locale}/feedback`} className="text-foreground/80 hover:text-primary transition">
-                {content.nav.feedback}
+              <Link href={`/${locale}/reviews/`} className="text-foreground/80 hover:text-primary transition">
+                {t.navReviews}
               </Link>
               <LanguageSwitcher />
             </div>
@@ -292,8 +292,8 @@ export default function Home() {
               <Link href={navStoriesUrl} className="block py-2 px-3 rounded-lg text-foreground/80 hover:bg-accent hover:text-primary transition" onClick={() => setMobileMenuOpen(false)}>
                 {content.nav.stories}
               </Link>
-              <Link href={`/${locale}/feedback`} className="block py-2 px-3 rounded-lg text-foreground/80 hover:bg-accent hover:text-primary transition" onClick={() => setMobileMenuOpen(false)}>
-                {content.nav.feedback}
+              <Link href={`/${locale}/reviews/`} className="block py-2 px-3 rounded-lg text-foreground/80 hover:bg-accent hover:text-primary transition" onClick={() => setMobileMenuOpen(false)}>
+                {t.navReviews}
               </Link>
               <div className="py-2 px-3">
                 <LanguageSwitcher />
@@ -672,6 +672,7 @@ export default function Home() {
                 <li><Link href="#features" className="hover:text-brand-gold transition">{content.nav.features}</Link></li>
                 <li><Link href="#languages" className="hover:text-brand-gold transition">{content.nav.languages}</Link></li>
                 <li><Link href="#faq" className="hover:text-brand-gold transition">{content.nav.faq}</Link></li>
+                <li><Link href={`/${locale}/reviews/`} className="hover:text-brand-gold transition">{t.navReviews}</Link></li>
                 <li><Link href={`/${locale}/feedback`} className="hover:text-brand-gold transition">{content.nav.feedback}</Link></li>
                 <li>
                   {footerDownloadUrl ? (

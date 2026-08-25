@@ -1,30 +1,39 @@
 'use client';
 
-import { Star } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/lib/i18n/use-translations";
+import { useParams } from "next/navigation";
+import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
+import { ReviewCard, type StoreReview } from "@/components/review-card";
 import data from "@/lib/data/store-reviews.json";
 
-const MAX_RATING = 5;
+/** Three, not four: an odd row composes better and implies there are more. */
+const HOMEPAGE_COUNT = 3;
 
-// The store field is a storefront country, not a language, so it only yields a
-// language tag for storefronts whose reviews we tag — and only when the script
-// agrees (a DE storefront review is often written in English).
-const STORE_LANG: Record<string, string> = { UA: "uk" };
-const CYRILLIC = /[Ѐ-ӿ]/;
-
-const inferLang = (store: string, text: string): string | undefined => {
-  const lang = STORE_LANG[store];
-  if (!lang) return undefined;
-  return CYRILLIC.test(text) ? lang : undefined;
-};
+/**
+ * Highest rated first, then the more substantial review. A one-line "Nice app"
+ * is genuine but persuades nobody, so it belongs on the full list rather than in
+ * the three the homepage spends its space on.
+ */
+const byPersuasiveness = (a: StoreReview, b: StoreReview) =>
+  b.rating - a.rating || b.text.length - a.text.length;
 
 export const Testimonials = ({ className = "" }: { className?: string }) => {
   const copy = useTranslations();
-  const reviews = data.reviews;
+  const params = useParams();
+  const raw = params?.locale;
+  const locale: Locale = locales.includes(raw as Locale) ? (raw as Locale) : defaultLocale;
 
+  // Through unknown: each review's `translations` literal differs (a Ukrainian
+  // review has no "uk" key), so the inferred union does not structurally match.
+  const reviews = data.reviews as unknown as StoreReview[];
   if (reviews.length === 0) return null;
+
+  const featured = [...reviews].sort(byPersuasiveness).slice(0, HOMEPAGE_COUNT);
+  const hasMore = reviews.length > featured.length;
 
   return (
     <section
@@ -45,59 +54,24 @@ export const Testimonials = ({ className = "" }: { className?: string }) => {
           </p>
         </div>
 
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {reviews.map((review) => {
-            const rating = Math.max(0, Math.min(MAX_RATING, Math.round(review.rating)));
-            const titleLang = inferLang(review.store, review.title);
-            const textLang = inferLang(review.store, review.text);
-            const storeLabel =
-              review.source === "appstore" ? copy.reviewsFromAppStore : copy.reviewsFromGooglePlay;
-
-            return (
-              <li key={`${review.source}-${review.id}`} className="flex">
-                <Card className="w-full transition-colors hover:border-primary/40">
-                  <figure className="flex h-full flex-col gap-4 px-6">
-                    <p className="flex items-center gap-0.5">
-                      {Array.from({ length: MAX_RATING }, (_, i) => (
-                        <Star
-                          key={i}
-                          aria-hidden="true"
-                          className={
-                            i < rating
-                              ? "size-4 fill-brand-gold text-brand-gold"
-                              : "size-4 fill-none text-muted-foreground/40"
-                          }
-                        />
-                      ))}
-                      {/* Numeric so it stays correct in every page locale — there is no
-                          translated "N out of 5" string on the page. */}
-                      <span className="sr-only">{`${rating}/${MAX_RATING}`}</span>
-                    </p>
-
-                    {review.title ? (
-                      <h3 lang={titleLang} className="font-semibold text-lg leading-snug">
-                        {review.title}
-                      </h3>
-                    ) : null}
-
-                    <blockquote
-                      lang={textLang}
-                      className="text-muted-foreground whitespace-pre-line leading-relaxed"
-                    >
-                      {review.text}
-                    </blockquote>
-
-                    <figcaption className="mt-auto pt-2 text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">{review.author}</span>
-                      <span aria-hidden="true"> · </span>
-                      <span>{storeLabel}</span>
-                    </figcaption>
-                  </figure>
-                </Card>
-              </li>
-            );
-          })}
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featured.map((review) => (
+            <li key={`${review.source}-${review.id}`} className="flex">
+              <ReviewCard review={review} locale={locale} />
+            </li>
+          ))}
         </ul>
+
+        {hasMore ? (
+          <div className="mt-12 flex justify-center">
+            <Button asChild variant="outline" size="lg" className="h-12 px-6">
+              <Link href={`/${locale}/reviews/`}>
+                {copy.reviewsSeeAll}
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
