@@ -10,6 +10,8 @@ export interface Story {
   lastUpdatedAt?: Date | null;
   isPublished: boolean;
   isPremium: boolean;
+  /** "story" | "series_episode" | "audiobook", absent on older documents. */
+  contentType: string;
 }
 
 export interface StoryPage {

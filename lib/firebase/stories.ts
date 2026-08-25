@@ -24,6 +24,7 @@ const STORY_FIELD_PATHS = [
   "lastUpdatedAt",
   "isPublished",
   "isPremium",
+  "contentType",
 ];
 
 // The page documents also carry per-locale alignment data that this site never
@@ -84,6 +85,7 @@ const mapStory = (id: string, data: Record<string, unknown>): Story => ({
   lastUpdatedAt: normalizeDate(data.lastUpdatedAt),
   isPublished: Boolean(data.isPublished ?? true),
   isPremium: Boolean(data.isPremium ?? false),
+  contentType: typeof data.contentType === "string" ? data.contentType : "",
 });
 
 const mapStoryPage = (data: Record<string, unknown>): StoryPage => ({

@@ -49,9 +49,13 @@ export const StoryCarousel = ({ className = "" }: { className?: string }) => {
     fetchPublishedStories()
       .then((result) => {
         if (cancelled) return;
+        // Audiobooks are listen-only and need their own presentation, so they stay
+        // out of a row of picture-book covers.
         // Free stories lead: they are the ones a visitor can open in the browser
         // reader right now. A premium card sends them to a notice they cannot act on.
-        const withCovers = result.filter((story) => Boolean(story.coverImageUrl));
+        const withCovers = result.filter(
+          (story) => Boolean(story.coverImageUrl) && story.contentType !== "audiobook"
+        );
         const ordered = [
           ...withCovers.filter((story) => !story.isPremium),
           ...withCovers.filter((story) => story.isPremium),
