@@ -1,9 +1,15 @@
 // Firestore REST access. The client SDK cannot request partial documents, so a
 // projected read has to go through the runQuery endpoint with a select mask.
 
+import { getAppCheckToken } from "./client";
+
 const FIRESTORE_REST_HOST = "https://firestore.googleapis.com/v1";
 const RETRY_DELAYS_MS = [300, 900];
 const REQUEST_TIMEOUT_MS = 15000;
+// App Check must never delay a read. Enforcement is off, so an absent token
+// costs nothing today; once it is on, a tokenless request 403s and the SDK
+// fallback — which carries its own token — takes over.
+const APP_CHECK_TIMEOUT_MS = 2000;
 
 // runQuery interleaves documents with bare progress markers; anything carrying
 // none of these keys and no document is an element shape we must not ignore.
@@ -73,6 +79,19 @@ export const decodeFirestoreFields = (fields: unknown): Record<string, unknown> 
 
 const shouldRetryStatus = (status: number) => status === 429 || status >= 500;
 
+/** Resolves to a header bag carrying the App Check token, or an empty one. */
+const appCheckHeaders = async (): Promise<Record<string, string>> => {
+  try {
+    const token = await Promise.race([
+      getAppCheckToken(),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), APP_CHECK_TIMEOUT_MS)),
+    ]);
+    return token ? { "X-Firebase-AppCheck": token } : {};
+  } catch {
+    return {};
+  }
+};
+
 const readErrorDetail = async (response: Response): Promise<string> => {
   try {
     const body = await response.text();
@@ -82,18 +101,93 @@ const readErrorDetail = async (response: Response): Promise<string> => {
   }
 };
 
-const buildRunQueryUrl = (parentSegments: string[]): string => {
+const documentsBaseUrl = (): { base: string; apiKey: string } => {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   if (!projectId || !apiKey) {
     throw new Error("Missing NEXT_PUBLIC_FIREBASE_PROJECT_ID or NEXT_PUBLIC_FIREBASE_API_KEY");
   }
 
+  return {
+    base: `${FIRESTORE_REST_HOST}/projects/${encodeURIComponent(
+      projectId
+    )}/databases/(default)/documents`,
+    apiKey,
+  };
+};
+
+const buildRunQueryUrl = (parentSegments: string[]): string => {
+  const { base, apiKey } = documentsBaseUrl();
   const parent = parentSegments.map((segment) => encodeURIComponent(segment)).join("/");
   const suffix = parent ? `/${parent}` : "";
-  return `${FIRESTORE_REST_HOST}/projects/${encodeURIComponent(
-    projectId
-  )}/databases/(default)/documents${suffix}:runQuery?key=${encodeURIComponent(apiKey)}`;
+  return `${base}${suffix}:runQuery?key=${encodeURIComponent(apiKey)}`;
+};
+
+// Resolves to null only when the server answered 404, so "this story does not
+// exist" stays distinguishable from "we could not reach the server".
+export const runProjectedGet = async (
+  pathSegments: string[],
+  fieldPaths: string[]
+): Promise<RestDocument | null> => {
+  const { base, apiKey } = documentsBaseUrl();
+  const path = pathSegments.map((segment) => encodeURIComponent(segment)).join("/");
+  const mask = fieldPaths
+    .map((fieldPath) => `mask.fieldPaths=${encodeURIComponent(fieldPath)}`)
+    .join("&");
+  const url = `${base}/${path}?key=${encodeURIComponent(apiKey)}&${mask}`;
+  const headers = await appCheckHeaders();
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
+    if (attempt > 0) {
+      await delay(RETRY_DELAYS_MS[attempt - 1]);
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      let response: Response;
+      try {
+        response = await fetch(url, { headers, signal: controller.signal });
+      } catch (error) {
+        lastError = toError(error);
+        continue;
+      }
+
+      if (response.status === 404) return null;
+
+      if (!response.ok) {
+        const detail = await readErrorDetail(response);
+        const httpError = new Error(
+          `document read failed with HTTP ${response.status}${detail ? `: ${detail}` : ""}`
+        );
+        if (!shouldRetryStatus(response.status)) throw httpError;
+        lastError = httpError;
+        continue;
+      }
+
+      let payload: unknown;
+      try {
+        payload = await response.json();
+      } catch (error) {
+        lastError = toError(error);
+        continue;
+      }
+
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        lastError = new Error("document read returned an unexpected payload shape");
+        continue;
+      }
+
+      const { name, fields } = payload as { name?: unknown; fields?: unknown };
+      return { id: documentIdFromName(name), data: decodeFirestoreFields(fields) };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  throw lastError ?? new Error("document read failed");
 };
 
 // Resolves only when the server delivered the whole result set. Transport
@@ -106,6 +200,7 @@ export const runProjectedQuery = async (
 ): Promise<RestDocument[]> => {
   const url = buildRunQueryUrl(parentSegments);
   const body = JSON.stringify({ structuredQuery });
+  const headers = { "Content-Type": "application/json", ...(await appCheckHeaders()) };
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
@@ -123,7 +218,7 @@ export const runProjectedQuery = async (
       try {
         response = await fetch(url, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body,
           signal: controller.signal,
         });

@@ -2,7 +2,7 @@ import {
   Timestamp,
   collection,
   doc,
-  getDoc,
+  getDocFromServer,
   getDocsFromServer,
   getFirestore,
   orderBy,
@@ -10,7 +10,7 @@ import {
   where,
 } from "firebase/firestore";
 import { getFirebaseApp } from "./client";
-import { runProjectedQuery } from "./rest";
+import { runProjectedGet, runProjectedQuery } from "./rest";
 import type { LocalizedText, Story, StoryPage } from "@/lib/types/story";
 
 const db = getFirestore(getFirebaseApp());
@@ -132,13 +132,24 @@ export const fetchPublishedStories = async (): Promise<Story[]> => {
 };
 
 export const fetchStoryById = async (storyId: string): Promise<Story | null> => {
+  let restMessage: string;
   try {
-    const storyRef = doc(db, "stories", storyId);
-    const snapshot = await getDoc(storyRef);
+    const document = await runProjectedGet(["stories", storyId], STORY_FIELD_PATHS);
+    return document ? mapStory(document.id, document.data) : null;
+  } catch (error) {
+    restMessage = errorMessage(error);
+  }
+
+  try {
+    // getDocFromServer rather than getDoc: the cached read reports a missing
+    // document when the connection is down, which reads as "story not found".
+    const snapshot = await getDocFromServer(doc(db, "stories", storyId));
     if (!snapshot.exists()) return null;
     return mapStory(snapshot.id, snapshot.data());
   } catch (error) {
-    throw new Error(`[Firestore] Failed to fetch story "${storyId}": ${errorMessage(error)}`);
+    throw new Error(
+      `[Firestore] Failed to fetch story "${storyId}": ${restMessage} (SDK fallback: ${errorMessage(error)})`
+    );
   }
 };
 
