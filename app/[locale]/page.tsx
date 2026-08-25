@@ -26,10 +26,13 @@ import {
   X,
   ShieldCheck,
   Sparkles,
+  Headphones,
 } from "lucide-react";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { localeNames, type Locale } from "@/lib/i18n/config";
+import { locales, localeNames, type Locale } from "@/lib/i18n/config";
+import { fetchPublishedStories } from "@/lib/firebase/stories";
+import { Testimonials } from "@/components/testimonials";
 import { useParams } from "next/navigation";
 import { getSiteContent } from "@/lib/content/client";
 import { usePlatform } from "@/hooks/use-platform";
@@ -126,14 +129,10 @@ const buildDefaultContent =(t: ReturnType<typeof useTranslations>) => ({
     title: t.benefitsTitle,
     titleHighlight: t.benefitsTitleHighlight,
     stats: {
-      totalStoriesLabel: t.benefitsTotalStories,
-      totalStoriesValue: "127",
+      storiesLabel: t.storiesTitle,
       languagesLabel: t.benefitsLanguages,
-      languagesValue: "8",
-      favoritesLabel: t.benefitsFavorites,
-      favoritesValue: "45",
-      offlineLabel: t.benefitsOffline,
-      offlineValue: "12",
+      audiobooksLabel: t.statsAudiobooks,
+      freeLabel: t.statsFree,
     },
     items: [
       { icon: "Languages", title: t.benefitLanguageTitle, description: t.benefitLanguageDesc },
@@ -182,6 +181,33 @@ export default function Home() {
   const defaultContent = useMemo(() => buildDefaultContent(t), [t]);
   const [content, setContent] = useState(defaultContent);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Counted from the live catalogue rather than typed in, so the page cannot drift
+  // from the library the way a hardcoded number does. Null until it arrives; the
+  // card shows an em dash rather than a placeholder figure.
+  const [catalog, setCatalog] = useState<{
+    total: number;
+    audiobooks: number;
+    free: number;
+  } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetchPublishedStories()
+      .then((stories) => {
+        if (!active) return;
+        setCatalog({
+          total: stories.length,
+          audiobooks: stories.filter((s) => s.contentType === "audiobook").length,
+          free: stories.filter((s) => !s.isPremium).length,
+        });
+      })
+      .catch(() => {
+        // The rest of the page does not depend on these numbers.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -347,7 +373,52 @@ export default function Home() {
       <AppScreenshots className="bg-card/50" />
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
+      {/* How It Works */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">{t.howBadge}</Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              {t.howTitle} <span className="text-magic-gradient">{t.howTitleHighlight}</span>
+            </h2>
+          </div>
+
+          {/* Numbered because this genuinely is a sequence — the order is the point. */}
+          <ol className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: BookOpen, title: t.howStep1Title, desc: t.howStep1Desc },
+              { icon: Languages, title: t.howStep2Title, desc: t.howStep2Desc },
+              { icon: Headphones, title: t.howStep3Title, desc: t.howStep3Desc },
+            ].map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <li key={step.title} className="flex flex-col items-center text-center gap-3">
+                  <div className="relative">
+                    <div className="h-16 w-16 rounded-2xl bg-magic-gradient flex items-center justify-center">
+                      <Icon className="h-8 w-8 text-white" aria-hidden="true" />
+                    </div>
+                    <span
+                      className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-card border border-border text-sm font-bold text-brand-purple flex items-center justify-center tabular-nums"
+                      aria-hidden="true"
+                    >
+                      {index + 1}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-lg text-foreground">{step.title}</h3>
+                  <p className="text-muted-foreground max-w-xs">{step.desc}</p>
+                </li>
+              );
+            })}
+          </ol>
+
+          <p className="mt-12 text-center text-muted-foreground max-w-2xl mx-auto">
+            {t.howFreeNote}
+          </p>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
@@ -364,28 +435,49 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {content.features.items.map((feature, index) => {
+          {/* The first three are what actually sets Storywell apart; giving the
+              remaining six the same visual weight turned the section into a
+              checklist and buried them. */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {content.features.items.slice(0, 3).map((feature, index) => {
               const Icon = resolveIcon(feature.icon);
               const tone = featureToneClasses[index % featureToneClasses.length];
               return (
-                <Card key={`${feature.title}-${index}`} className={`border-2 transition-all hover:shadow-xl ${tone.borderHover}`}>
+                <Card
+                  key={`${feature.title}-${index}`}
+                  className={`border-2 transition-all hover:shadow-xl ${tone.borderHover}`}
+                >
                   <CardHeader>
-                    <div className={`h-12 w-12 ${tone.bg} rounded-xl flex items-center justify-center mb-4`}>
-                      <Icon className={`h-6 w-6 ${tone.text}`} />
+                    <div className={`h-14 w-14 ${tone.bg} rounded-2xl flex items-center justify-center mb-4`}>
+                      <Icon className={`h-7 w-7 ${tone.text}`} />
                     </div>
-                    <CardTitle>{feature.title}</CardTitle>
-                    <CardDescription>{feature.description}</CardDescription>
+                    <CardTitle className="text-2xl">{feature.title}</CardTitle>
+                    <CardDescription className="text-base">{feature.description}</CardDescription>
                   </CardHeader>
                 </Card>
               );
             })}
           </div>
+
+          <ul className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+            {content.features.items.slice(3).map((feature, index) => {
+              const Icon = resolveIcon(feature.icon);
+              return (
+                <li key={`${feature.title}-${index}`} className="flex items-start gap-3">
+                  <Icon className="h-5 w-5 mt-0.5 shrink-0 text-brand-purple" aria-hidden="true" />
+                  <span className="text-foreground">
+                    <span className="font-semibold">{feature.title}</span>
+                    <span className="text-muted-foreground"> — {feature.description}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
@@ -423,28 +515,31 @@ export default function Home() {
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-muted-foreground">{content.benefits.stats.totalStoriesLabel}</p>
-                        <p className="text-3xl font-bold text-primary">{content.benefits.stats.totalStoriesValue}</p>
+                        <p className="text-sm text-muted-foreground">{content.benefits.stats.storiesLabel}</p>
+                        <p className="text-3xl font-bold text-primary tabular-nums">
+                          {catalog ? catalog.total : "—"}
+                        </p>
                       </div>
                       <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center">
                         <BookOpen className="h-8 w-8 text-primary" />
                       </div>
                     </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full w-3/4 bg-magic-gradient"></div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 pt-4">
+                    <div className="grid grid-cols-3 gap-4 border-t border-border pt-6">
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-foreground">{content.benefits.stats.languagesValue}</p>
+                        <p className="text-2xl font-bold text-foreground tabular-nums">{locales.length}</p>
                         <p className="text-xs text-muted-foreground">{content.benefits.stats.languagesLabel}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-foreground">{content.benefits.stats.favoritesValue}</p>
-                        <p className="text-xs text-muted-foreground">{content.benefits.stats.favoritesLabel}</p>
+                        <p className="text-2xl font-bold text-foreground tabular-nums">
+                          {catalog ? catalog.audiobooks : "—"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{content.benefits.stats.audiobooksLabel}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-foreground">{content.benefits.stats.offlineValue}</p>
-                        <p className="text-xs text-muted-foreground">{content.benefits.stats.offlineLabel}</p>
+                        <p className="text-2xl font-bold text-foreground tabular-nums">
+                          {catalog ? catalog.free : "—"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{content.benefits.stats.freeLabel}</p>
                       </div>
                     </div>
                   </div>
@@ -456,7 +551,7 @@ export default function Home() {
       </section>
 
       {/* Languages Section */}
-      <section id="languages" className="py-20 px-4 sm:px-6 lg:px-8">
+      <section id="languages" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
@@ -486,6 +581,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      <Testimonials />
 
       {/* FAQ Section */}
       <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">

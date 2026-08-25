@@ -70,6 +70,8 @@ export const translations = {
     benefitsLanguages: 'Languages',
     benefitsFavorites: 'Favorites',
     benefitsOffline: 'Offline',
+    statsAudiobooks: 'Audiobooks',
+    statsFree: 'Free to read',
     
     // Languages Section
     languagesBadge: '🌍 Languages',
@@ -414,8 +416,6 @@ export const translations = {
     cookieBack: 'Back',
 
     // Reviews
-    reviewsTitle: 'User Reviews',
-    reviewsSubtitle: 'See what others are saying about Storywell',
     reviewsFormTitle: 'Leave a Review',
     reviewsNameLabel: 'Name',
     reviewsRatingLabel: 'Rating',
@@ -494,6 +494,26 @@ export const translations = {
     appShotSleep: 'Sleep music with a timer',
     appShotStory: 'Know each story before you start',
 
+    // Reviews Section
+    reviewsBadge: '⭐ Real Reviews',
+    reviewsTitle: 'What families',
+    reviewsTitleHighlight: 'are saying',
+    reviewsSubtitle: 'Straight from the App Store and Google Play — nothing here is written by us.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ How It Works',
+    howTitle: 'Bedtime, in',
+    howTitleHighlight: 'three taps',
+    howStep1Title: 'Pick a story',
+    howStep1Desc: 'Browse by age. New stories are added every week.',
+    howStep2Title: 'Choose the language',
+    howStep2Desc: 'Switch between 8 languages at any moment — the story keeps its place.',
+    howStep3Title: 'Read together or listen',
+    howStep3Desc: 'Read side by side, or let the narrator take over while your child follows the words.',
+    howFreeNote: 'Many stories are free. A subscription unlocks the full library and all audiobooks.',
+
     exploreSleepCta: 'Sleep Music',
   },
   de: {
@@ -547,6 +567,8 @@ export const translations = {
     benefitsLanguages: 'Sprachen',
     benefitsFavorites: 'Favoriten',
     benefitsOffline: 'Offline',
+    statsAudiobooks: 'Hörbücher',
+    statsFree: 'Kostenlos',
     languagesBadge: '🌍 Sprachen',
     languagesTitle: 'Geschichten in',
     languagesTitleHighlight: '8 Sprachen',
@@ -874,8 +896,6 @@ export const translations = {
     termsSection12Email: '📩 E-Mail:',
     termsSection12Website: '🌍 Website:',
     termsSection12Response: 'Wir bemühen uns, so schnell wie möglich zu antworten.',
-    reviewsTitle: 'User Reviews',
-    reviewsSubtitle: 'See what others are saying about Storywell',
     reviewsFormTitle: 'Leave a Review',
     reviewsNameLabel: 'Name',
     reviewsRatingLabel: 'Rating',
@@ -954,6 +974,26 @@ export const translations = {
     appShotSleep: 'Einschlafmusik mit Timer',
     appShotStory: 'Jede Geschichte vorab im Überblick',
 
+    // Reviews Section
+    reviewsBadge: '⭐ Echte Bewertungen',
+    reviewsTitle: 'Das sagen',
+    reviewsTitleHighlight: 'Familien',
+    reviewsSubtitle: 'Direkt aus dem App Store und von Google Play — nichts davon stammt von uns.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ So funktioniert es',
+    howTitle: 'Gute-Nacht-Geschichte in',
+    howTitleHighlight: 'drei Schritten',
+    howStep1Title: 'Geschichte auswählen',
+    howStep1Desc: 'Nach Alter sortiert. Jede Woche kommen neue Geschichten dazu.',
+    howStep2Title: 'Sprache wählen',
+    howStep2Desc: 'Jederzeit zwischen 8 Sprachen wechseln — die Seite bleibt dieselbe.',
+    howStep3Title: 'Gemeinsam lesen oder zuhören',
+    howStep3Desc: 'Lesen Sie zu zweit — oder die Erzählstimme liest vor, während Ihr Kind mitliest.',
+    howFreeNote: 'Viele Geschichten sind kostenlos. Ein Abo schaltet die ganze Bibliothek und alle Hörbücher frei.',
+
     exploreSleepCta: 'Schlafmusik',
   },
   es: {
@@ -1007,6 +1047,8 @@ export const translations = {
     benefitsLanguages: 'Idiomas',
     benefitsFavorites: 'Favoritos',
     benefitsOffline: 'Sin conexión',
+    statsAudiobooks: 'Audiolibros',
+    statsFree: 'Gratis',
     languagesBadge: '🌍 Idiomas',
     languagesTitle: 'Historias en',
     languagesTitleHighlight: '8 idiomas',
@@ -1334,8 +1376,6 @@ export const translations = {
     termsSection12Email: '📩 Correo electrónico:',
     termsSection12Website: '🌍 Sitio web:',
     termsSection12Response: 'Nos esforzamos por responder lo antes posible.',
-    reviewsTitle: 'User Reviews',
-    reviewsSubtitle: 'See what others are saying about Storywell',
     reviewsFormTitle: 'Leave a Review',
     reviewsNameLabel: 'Name',
     reviewsRatingLabel: 'Rating',
@@ -1414,6 +1454,26 @@ export const translations = {
     appShotSleep: 'Música para dormir con temporizador',
     appShotStory: 'Conoce cada historia antes de empezar',
 
+    // Reviews Section
+    reviewsBadge: '⭐ Reseñas Reales',
+    reviewsTitle: 'Lo que dicen',
+    reviewsTitleHighlight: 'las familias',
+    reviewsSubtitle: 'Directamente desde App Store y Google Play — nada de esto lo escribimos nosotros.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ Cómo Funciona',
+    howTitle: 'La hora de dormir, en',
+    howTitleHighlight: 'tres toques',
+    howStep1Title: 'Elige una historia',
+    howStep1Desc: 'Explora por edad. Cada semana añadimos historias nuevas.',
+    howStep2Title: 'Elige el idioma',
+    howStep2Desc: 'Cambia entre 8 idiomas cuando quieras — la historia no pierde la página.',
+    howStep3Title: 'Lee o escucha',
+    howStep3Desc: 'Léela con tu hijo, o deja que el narrador lea mientras él sigue las palabras.',
+    howFreeNote: 'Muchas historias son gratuitas. La suscripción desbloquea la biblioteca completa y todos los audiolibros.',
+
     exploreSleepCta: 'Música para Dormir',
   },
   fr: {
@@ -1467,6 +1527,8 @@ export const translations = {
     benefitsLanguages: 'Langues',
     benefitsFavorites: 'Favoris',
     benefitsOffline: 'Hors ligne',
+    statsAudiobooks: 'Livres audio',
+    statsFree: 'Gratuites',
     languagesBadge: '🌍 Langues',
     languagesTitle: 'Histoires en',
     languagesTitleHighlight: '8 langues',
@@ -1794,8 +1856,6 @@ export const translations = {
     termsSection12Email: '📩 E-mail:',
     termsSection12Website: '🌍 Site web:',
     termsSection12Response: 'Nous visons à répondre dans les plus brefs délais.',
-    reviewsTitle: 'User Reviews',
-    reviewsSubtitle: 'See what others are saying about Storywell',
     reviewsFormTitle: 'Leave a Review',
     reviewsNameLabel: 'Name',
     reviewsRatingLabel: 'Rating',
@@ -1874,6 +1934,26 @@ export const translations = {
     appShotSleep: 'Musique de sommeil avec minuteur',
     appShotStory: 'Découvrir chaque histoire avant de commencer',
 
+    // Reviews Section
+    reviewsBadge: '⭐ Avis Authentiques',
+    reviewsTitle: 'Ce que disent',
+    reviewsTitleHighlight: 'les familles',
+    reviewsSubtitle: 'Directement depuis l\'App Store et Google Play — rien ici n\'est écrit par nous.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ Comment Ça Marche',
+    howTitle: 'L\'heure du coucher, en',
+    howTitleHighlight: 'trois clics',
+    howStep1Title: 'Choisir une histoire',
+    howStep1Desc: 'Parcourez par âge. De nouvelles histoires arrivent chaque semaine.',
+    howStep2Title: 'Choisir la langue',
+    howStep2Desc: 'Passez d\'une langue à l\'autre à tout moment — vous gardez votre page.',
+    howStep3Title: 'Lire ensemble ou écouter',
+    howStep3Desc: 'Lisez à deux, ou laissez le narrateur lire pendant que votre enfant suit les mots.',
+    howFreeNote: 'De nombreuses histoires sont gratuites. L\'abonnement donne accès à toute la bibliothèque et à tous les livres audio.',
+
     exploreSleepCta: 'Musique de Sommeil',
   },
   it: {
@@ -1927,6 +2007,8 @@ export const translations = {
     benefitsLanguages: 'Lingue',
     benefitsFavorites: 'Preferiti',
     benefitsOffline: 'Offline',
+    statsAudiobooks: 'Audiolibri',
+    statsFree: 'Gratis',
     languagesBadge: '🌍 Lingue',
     languagesTitle: 'Storie in',
     languagesTitleHighlight: '8 lingue',
@@ -2254,8 +2336,6 @@ export const translations = {
     termsSection12Email: '📩 E-mail:',
     termsSection12Website: '🌍 Sito web:',
     termsSection12Response: 'Ci impegniamo a rispondere il prima possibile.',
-    reviewsTitle: 'User Reviews',
-    reviewsSubtitle: 'See what others are saying about Storywell',
     reviewsFormTitle: 'Leave a Review',
     reviewsNameLabel: 'Name',
     reviewsRatingLabel: 'Rating',
@@ -2334,6 +2414,26 @@ export const translations = {
     appShotSleep: 'Musica per dormire con timer',
     appShotStory: 'Conosci ogni storia prima di iniziare',
 
+    // Reviews Section
+    reviewsBadge: '⭐ Recensioni Reali',
+    reviewsTitle: 'Cosa dicono',
+    reviewsTitleHighlight: 'le famiglie',
+    reviewsSubtitle: 'Direttamente da App Store e Google Play — niente di tutto questo è scritto da noi.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ Come Funziona',
+    howTitle: 'La buonanotte, in',
+    howTitleHighlight: 'tre tocchi',
+    howStep1Title: 'Scegli una storia',
+    howStep1Desc: 'Sfoglia per età. Ogni settimana arrivano storie nuove.',
+    howStep2Title: 'Scegli la lingua',
+    howStep2Desc: 'Cambia tra 8 lingue in qualsiasi momento — la pagina resta la stessa.',
+    howStep3Title: 'Leggi o ascolta',
+    howStep3Desc: 'Leggila con tuo figlio, oppure lascia leggere il narratore mentre lui segue le parole.',
+    howFreeNote: 'Molte storie sono gratuite. L\'abbonamento sblocca l\'intera biblioteca e tutti gli audiolibri.',
+
     exploreSleepCta: 'Musica per Dormire',
   },
   ru: {
@@ -2387,6 +2487,8 @@ export const translations = {
     benefitsLanguages: 'Языки',
     benefitsFavorites: 'Избранное',
     benefitsOffline: 'Офлайн',
+    statsAudiobooks: 'Аудиокниги',
+    statsFree: 'Бесплатно',
     languagesBadge: '🌍 Языки',
     languagesTitle: 'Истории на',
     languagesTitleHighlight: '8 языках',
@@ -2714,8 +2816,6 @@ export const translations = {
     termsSection12Email: '📩 Електронна пошта:',
     termsSection12Website: '🌍 Веб-сайт:',
     termsSection12Response: 'Ми прагнемо відповісти якомога швидше.',
-    reviewsTitle: 'User Reviews',
-    reviewsSubtitle: 'See what others are saying about Storywell',
     reviewsFormTitle: 'Leave a Review',
     reviewsNameLabel: 'Name',
     reviewsRatingLabel: 'Rating',
@@ -2794,6 +2894,26 @@ export const translations = {
     appShotSleep: 'Музыка для сна с таймером',
     appShotStory: 'Смотрите описание перед чтением',
 
+    // Reviews Section
+    reviewsBadge: '⭐ Настоящие Отзывы',
+    reviewsTitle: 'Что говорят',
+    reviewsTitleHighlight: 'родители',
+    reviewsSubtitle: 'Прямо из App Store и Google Play — ни один отзыв не написан нами.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ Как Это Работает',
+    howTitle: 'Сказка на ночь в',
+    howTitleHighlight: 'три касания',
+    howStep1Title: 'Выберите историю',
+    howStep1Desc: 'Ищите по возрасту. Новые истории появляются каждую неделю.',
+    howStep2Title: 'Выберите язык',
+    howStep2Desc: 'Переключайтесь между 8 языками в любой момент — страница сохранится.',
+    howStep3Title: 'Читайте или слушайте',
+    howStep3Desc: 'Читайте вместе или включите озвучку — ребёнок будет следить за словами.',
+    howFreeNote: 'Многие истории бесплатны. Подписка открывает всю библиотеку и все аудиокниги.',
+
     exploreSleepCta: 'Музыка для Сна',
   },
   tr: {
@@ -2847,6 +2967,8 @@ export const translations = {
     benefitsLanguages: 'Diller',
     benefitsFavorites: 'Favoriler',
     benefitsOffline: 'Çevrimdışı',
+    statsAudiobooks: 'Sesli kitaplar',
+    statsFree: 'Ücretsiz',
     languagesBadge: '🌍 Diller',
     languagesTitle: '8 Dilde',
     languagesTitleHighlight: 'Hikayeler',
@@ -3174,8 +3296,6 @@ export const translations = {
     termsSection12Email: '📩 E-posta:',
     termsSection12Website: '🌍 Web sitesi:',
     termsSection12Response: 'En kısa sürede yanıt vermeyi hedefliyoruz.',
-    reviewsTitle: 'User Reviews',
-    reviewsSubtitle: 'See what others are saying about Storywell',
     reviewsFormTitle: 'Leave a Review',
     reviewsNameLabel: 'Name',
     reviewsRatingLabel: 'Rating',
@@ -3254,6 +3374,26 @@ export const translations = {
     appShotSleep: 'Zamanlayıcılı uyku müziği',
     appShotStory: 'Başlamadan önce her hikayeyi tanıyın',
 
+    // Reviews Section
+    reviewsBadge: '⭐ Gerçek Yorumlar',
+    reviewsTitle: 'Ailelerin',
+    reviewsTitleHighlight: 'söyledikleri',
+    reviewsSubtitle: 'Doğrudan App Store ve Google Play\'den — buradaki hiçbir yorum bize ait değil.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ Nasıl Çalışır',
+    howTitle: 'Uyku vakti,',
+    howTitleHighlight: 'üç dokunuş uzakta',
+    howStep1Title: 'Bir hikaye seçin',
+    howStep1Desc: 'Yaşa göre göz atın. Her hafta yeni hikayeler ekleniyor.',
+    howStep2Title: 'Dili seçin',
+    howStep2Desc: '8 dil arasında istediğiniz anda geçin — sayfanız kaybolmaz.',
+    howStep3Title: 'Birlikte okuyun ya da dinleyin',
+    howStep3Desc: 'Yan yana okuyun ya da anlatıcı okusun, çocuğunuz kelimeleri takip etsin.',
+    howFreeNote: 'Birçok hikaye ücretsiz. Abonelik tüm kütüphaneyi ve bütün sesli kitapları açar.',
+
     exploreSleepCta: 'Uyku Müziği',
   },
   uk: {
@@ -3307,6 +3447,8 @@ export const translations = {
     benefitsLanguages: 'Мови',
     benefitsFavorites: 'Обране',
     benefitsOffline: 'Офлайн',
+    statsAudiobooks: 'Аудіокниги',
+    statsFree: 'Безкоштовно',
     languagesBadge: '🌍 Мови',
     languagesTitle: 'Історії',
     languagesTitleHighlight: '8 мовами',
@@ -3634,8 +3776,6 @@ export const translations = {
     termsSection12Email: '📩 Електронна пошта:',
     termsSection12Website: '🌍 Веб-сайт:',
     termsSection12Response: 'Ми прагнемо відповісти якомога швидше.',
-    reviewsTitle: 'Відгуки користувачів',
-    reviewsSubtitle: 'Дізнайтеся, що кажуть про Storywell',
     reviewsFormTitle: 'Залишити відгук',
     reviewsNameLabel: 'Ім\'я',
     reviewsRatingLabel: 'Оцінка',
@@ -3713,6 +3853,26 @@ export const translations = {
     appShotReader: 'Читайте разом, сторінка за сторінкою',
     appShotSleep: 'Музика для сну з таймером',
     appShotStory: 'Дивіться опис перед читанням',
+
+    // Reviews Section
+    reviewsBadge: '⭐ Справжні Відгуки',
+    reviewsTitle: 'Що кажуть',
+    reviewsTitleHighlight: 'батьки',
+    reviewsSubtitle: 'Прямо з App Store і Google Play — жоден відгук не написаний нами.',
+    reviewsFromAppStore: 'App Store',
+    reviewsFromGooglePlay: 'Google Play',
+
+    // How It Works Section
+    howBadge: '✨ Як Це Працює',
+    howTitle: 'Казка на ніч у',
+    howTitleHighlight: 'три дотики',
+    howStep1Title: 'Оберіть історію',
+    howStep1Desc: 'Шукайте за віком. Нові історії з\'являються щотижня.',
+    howStep2Title: 'Оберіть мову',
+    howStep2Desc: 'Перемикайтеся між 8 мовами будь-коли — сторінка збережеться.',
+    howStep3Title: 'Читайте або слухайте',
+    howStep3Desc: 'Читайте разом або увімкніть озвучення — дитина стежитиме за словами.',
+    howFreeNote: 'Багато історій безкоштовні. Підписка відкриває всю бібліотеку та всі аудіокниги.',
 
     exploreSleepCta: 'Музика для Сну',
   },

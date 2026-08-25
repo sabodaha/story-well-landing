@@ -55,6 +55,8 @@
 }
 
 :root {
+  color-scheme: light;
+
   --radius: 0.75rem;
 
   /* Storywell brand */
@@ -103,7 +105,15 @@
   --sidebar-ring: #8225B6;
 }
 
+/* Applied to <html> by the pre-paint theme script in app/[locale]/layout.tsx, which
+   mirrors prefers-color-scheme. Tailwind's dark variant is class-based here
+   (@custom-variant above), so the class — not a media query — is what switches the theme.
+   Deliberately NOT redefined below: --radius (geometry, not colour) and the
+   --scene-night-* / --brand-gold-highlight tokens, which name fixed scene artwork
+   colours that must read the same in both themes. */
 .dark {
+  color-scheme: dark;
+
   /* Brand lifts lighter on dark surfaces for contrast */
   --brand-purple: #B47ADC;
   --brand-pink: #F05C97;
@@ -149,6 +159,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* html carries the background too: it is what shows through on overscroll and
+     on any viewport taller than the document, where body's background stops. */
+  html {
+    @apply bg-background;
+  }
   body {
     @apply bg-background text-foreground font-sans;
   }
@@ -156,6 +171,16 @@
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    .animate-float,
+    .animate-gradient {
+      animation: none;
+    }
   }
 
   /* Custom animations */

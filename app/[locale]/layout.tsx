@@ -18,6 +18,13 @@ const lexend = Lexend({
   weight: ["400", "500", "700"],
 });
 
+// Runs synchronously in <head>, before the browser paints, so a page opened at night is
+// never a bright cream sheet for a frame. Static export has no server to read the OS
+// preference, and Tailwind's dark variant here is class-based, so the class has to be put
+// on <html> from the client. The listener keeps an already-open tab in sync when the OS
+// theme flips. Any failure leaves the light palette, which is fully functional.
+const THEME_INIT = `(function(){try{var e=document.documentElement,m=window.matchMedia("(prefers-color-scheme: dark)"),a=function(d){e.classList.toggle("dark",d)};a(m.matches);m.addEventListener?m.addEventListener("change",function(v){a(v.matches)}):m.addListener(function(v){a(v.matches)})}catch(_){}})();`;
+
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
@@ -134,8 +141,11 @@ export default async function LocaleLayout({
   };
   
   return (
-    <html lang={locale} className={`${nunito.variable} ${lexend.variable}`}>
+    <html lang={locale} className={`${nunito.variable} ${lexend.variable}`} suppressHydrationWarning>
       <head>
+        {/* First in <head>: the class must land before the stylesheet paints. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+        <meta name="color-scheme" content="light dark" />
         <meta name="apple-itunes-app" content={`app-id=6759845142, app-argument=https://dartim-media.com/${locale}`} />
         <meta property="al:ios:app_store_id" content="6759845142" />
         <meta property="al:ios:app_name" content="Storywell" />

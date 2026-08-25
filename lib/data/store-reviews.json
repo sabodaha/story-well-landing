@@ -1,0 +1,45 @@
+{
+  "generatedFrom": "scripts/fetch-store-reviews.mjs",
+  "reviews": [
+    {
+      "source": "appstore",
+      "store": "UA",
+      "rating": 5,
+      "title": "Все сподобалось",
+      "author": "!Loki1984",
+      "version": "1.0",
+      "text": "Гарний застосунок для казок перед сном. Можна включити дитині та сподіватися на швидке засипання :) Чекаємо нових історій!",
+      "id": "13824758122"
+    },
+    {
+      "source": "appstore",
+      "store": "DE",
+      "rating": 5,
+      "title": "sweet fairy tales",
+      "author": "Belyavka",
+      "version": "1.0",
+      "text": "Very sweet stories for the little ones with beautiful illustrations and the ability to read or listen in different languages",
+      "id": "13827998822"
+    },
+    {
+      "source": "appstore",
+      "store": "UA",
+      "rating": 5,
+      "title": "Ivan",
+      "author": "hi giifdudf",
+      "version": "1.3.1",
+      "text": "Дітям дуже сподобалось. Особливо казка про Одіссея та Циклопа. Оцінка 5!",
+      "id": "13968071602"
+    },
+    {
+      "source": "appstore",
+      "store": "UA",
+      "rating": 5,
+      "title": "Все сподобалось",
+      "author": "Kuvenov",
+      "version": "1.0",
+      "text": "Чудовий застосунок для казок",
+      "id": "13834365241"
+    }
+  ]
+}

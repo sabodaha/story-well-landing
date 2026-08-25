@@ -101,7 +101,21 @@ const publishedStoriesQuery = () =>
 const pagesQuery = (storyId: string) =>
   query(collection(db, "stories", storyId, "pages"), orderBy("index", "asc"));
 
-export const fetchPublishedStories = async (): Promise<Story[]> => {
+// The carousel and the stats card both want this list. One request per page load
+// is enough; a rejected attempt is dropped so a later caller can retry.
+let publishedStoriesPromise: Promise<Story[]> | null = null;
+
+export const fetchPublishedStories = (): Promise<Story[]> => {
+  if (!publishedStoriesPromise) {
+    publishedStoriesPromise = loadPublishedStories().catch((error) => {
+      publishedStoriesPromise = null;
+      throw error;
+    });
+  }
+  return publishedStoriesPromise;
+};
+
+const loadPublishedStories = async (): Promise<Story[]> => {
   let restMessage: string;
   try {
     const documents = await runProjectedQuery([], {

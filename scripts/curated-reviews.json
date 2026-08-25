@@ -1,0 +1,4 @@
+{
+  "_comment": "Google Play reviews, entered by hand. Play has no public reviews API and its store listing renders reviews client-side, so scripts/fetch-store-reviews.mjs cannot collect them the way it collects Apple's. Copy them verbatim from Play Console -> Monitoring and optimisation -> Ratings and reviews -> Reviews (or the CSV under Download reports). Never edit, shorten or translate a reviewer's words: paste exactly what they wrote, in the language they wrote it. Give each entry a stable unique id so re-runs do not duplicate it.",
+  "reviews": []
+}
