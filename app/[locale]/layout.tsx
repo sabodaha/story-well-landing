@@ -57,9 +57,9 @@ export async function generateMetadata({
   // Generate hreflang alternates
   const languages: Record<string, string> = {};
   for (const loc of locales) {
-    languages[loc] = `${baseUrl}/${loc}`;
+    languages[loc] = `${baseUrl}/${loc}/`;
   }
-  languages['x-default'] = `${baseUrl}/en`;
+  languages['x-default'] = `${baseUrl}/en/`;
 
   return {
     title: titles[locale] || titles[defaultLocale],
@@ -67,14 +67,14 @@ export async function generateMetadata({
     keywords: ["children's stories", "multilingual", "kids app", "bedtime stories", "language learning", "offline reading"],
     authors: [{ name: "Storywell Team" }],
     alternates: {
-      canonical: `${baseUrl}/${locale}`,
+      canonical: `${baseUrl}/${locale}/`,
       languages,
     },
     openGraph: {
       title: titles[locale] || titles[defaultLocale],
       description: descriptions[locale] || descriptions[defaultLocale],
       type: "website",
-      url: `${baseUrl}/${locale}`,
+      url: `${baseUrl}/${locale}/`,
       siteName: "Storywell",
       images: [
         {
