@@ -482,6 +482,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Story Library',
     exploreStoriesSubtitle: 'Browse and read beautifully illustrated stories right in your browser — or relax with calming sleep music.',
     exploreStoriesCta: 'Browse Stories',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Inside the App',
+    appShotsTitle: 'See Storywell',
+    appShotsTitleHighlight: 'in Action',
+    appShotsSubtitle: 'Every screen in your language — this is exactly what your child sees.',
+    appShotLibrary: 'A library that grows every week',
+    appShotReader: 'Read along, page by page',
+    appShotSleep: 'Sleep music with a timer',
+    appShotStory: 'Know each story before you start',
+
     exploreSleepCta: 'Sleep Music',
   },
   de: {
@@ -930,6 +941,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Geschichtenbibliothek',
     exploreStoriesSubtitle: 'Lesen Sie wunderschön illustrierte Geschichten direkt in Ihrem Browser — oder entspannen Sie sich mit beruhigender Schlafmusik.',
     exploreStoriesCta: 'Geschichten entdecken',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Ein Blick in die App',
+    appShotsTitle: 'Storywell',
+    appShotsTitleHighlight: 'in Aktion',
+    appShotsSubtitle: 'Jede Ansicht in Ihrer Sprache — genau das sieht Ihr Kind.',
+    appShotLibrary: 'Eine Bibliothek, die jede Woche wächst',
+    appShotReader: 'Seite für Seite mitlesen',
+    appShotSleep: 'Einschlafmusik mit Timer',
+    appShotStory: 'Jede Geschichte vorab im Überblick',
+
     exploreSleepCta: 'Schlafmusik',
   },
   es: {
@@ -1378,6 +1400,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Biblioteca de Historias',
     exploreStoriesSubtitle: 'Lee historias bellamente ilustradas directamente en tu navegador — o relájate con música relajante para dormir.',
     exploreStoriesCta: 'Ver Historias',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Por Dentro de la App',
+    appShotsTitle: 'Storywell',
+    appShotsTitleHighlight: 'en Acción',
+    appShotsSubtitle: 'Cada pantalla en tu idioma — esto es exactamente lo que ve tu hijo.',
+    appShotLibrary: 'Una biblioteca que crece cada semana',
+    appShotReader: 'Sigue la lectura, página a página',
+    appShotSleep: 'Música para dormir con temporizador',
+    appShotStory: 'Conoce cada historia antes de empezar',
+
     exploreSleepCta: 'Música para Dormir',
   },
   fr: {
@@ -1826,6 +1859,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Bibliothèque d\'Histoires',
     exploreStoriesSubtitle: 'Parcourez et lisez des histoires magnifiquement illustrées directement dans votre navigateur — ou détendez-vous avec de la musique apaisante.',
     exploreStoriesCta: 'Parcourir les Histoires',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Dans l\'Application',
+    appShotsTitle: 'Storywell',
+    appShotsTitleHighlight: 'en Action',
+    appShotsSubtitle: 'Chaque écran dans votre langue — c\'est exactement ce que voit votre enfant.',
+    appShotLibrary: 'Une bibliothèque enrichie chaque semaine',
+    appShotReader: 'Lire ensemble, page après page',
+    appShotSleep: 'Musique de sommeil avec minuteur',
+    appShotStory: 'Découvrir chaque histoire avant de commencer',
+
     exploreSleepCta: 'Musique de Sommeil',
   },
   it: {
@@ -2274,6 +2318,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Biblioteca di Storie',
     exploreStoriesSubtitle: 'Sfoglia e leggi storie splendidamente illustrate direttamente nel tuo browser — oppure rilassati con musica rilassante per dormire.',
     exploreStoriesCta: 'Sfoglia Storie',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Dentro l\'App',
+    appShotsTitle: 'Storywell',
+    appShotsTitleHighlight: 'in Azione',
+    appShotsSubtitle: 'Ogni schermata nella tua lingua — è esattamente ciò che vede tuo figlio.',
+    appShotLibrary: 'Una libreria che cresce ogni settimana',
+    appShotReader: 'Segui la storia, pagina dopo pagina',
+    appShotSleep: 'Musica per dormire con timer',
+    appShotStory: 'Conosci ogni storia prima di iniziare',
+
     exploreSleepCta: 'Musica per Dormire',
   },
   ru: {
@@ -2722,6 +2777,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Библиотеку Историй',
     exploreStoriesSubtitle: 'Читайте красиво иллюстрированные истории прямо в браузере — или расслабьтесь под спокойную музыку для сна.',
     exploreStoriesCta: 'Смотреть Истории',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Внутри Приложения',
+    appShotsTitle: 'Storywell',
+    appShotsTitleHighlight: 'в Действии',
+    appShotsSubtitle: 'Каждый экран на вашем языке — именно это увидит ваш ребёнок.',
+    appShotLibrary: 'Библиотека пополняется каждую неделю',
+    appShotReader: 'Читайте вместе, страница за страницей',
+    appShotSleep: 'Музыка для сна с таймером',
+    appShotStory: 'Смотрите описание перед чтением',
+
     exploreSleepCta: 'Музыка для Сна',
   },
   tr: {
@@ -3170,6 +3236,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Hikaye Kütüphanemizi',
     exploreStoriesSubtitle: 'Tarayıcınızda güzelce resimlendirilmiş hikayeleri okuyun — veya sakinleştirici uyku müziğiyle rahatlayın.',
     exploreStoriesCta: 'Hikayeleri Keşfet',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Uygulamanın İçinden',
+    appShotsTitle: 'Storywell\'e',
+    appShotsTitleHighlight: 'Yakından Bakın',
+    appShotsSubtitle: 'Her ekran kendi dilinizde — çocuğunuzun göreceği tam olarak bu.',
+    appShotLibrary: 'Her hafta büyüyen bir kütüphane',
+    appShotReader: 'Sayfa sayfa birlikte okuyun',
+    appShotSleep: 'Zamanlayıcılı uyku müziği',
+    appShotStory: 'Başlamadan önce her hikayeyi tanıyın',
+
     exploreSleepCta: 'Uyku Müziği',
   },
   uk: {
@@ -3618,6 +3695,17 @@ export const translations = {
     exploreStoriesTitleHighlight: 'Бібліотеку Історій',
     exploreStoriesSubtitle: 'Читайте прекрасно ілюстровані історії прямо у браузері — або розслабтеся під заспокійливу музику для сну.',
     exploreStoriesCta: 'Переглянути Історії',
+
+    // App Screenshots Section
+    appShotsBadge: '📱 Усередині Застосунку',
+    appShotsTitle: 'Storywell',
+    appShotsTitleHighlight: 'у Дії',
+    appShotsSubtitle: 'Кожен екран вашою мовою — саме це побачить ваша дитина.',
+    appShotLibrary: 'Бібліотека поповнюється щотижня',
+    appShotReader: 'Читайте разом, сторінка за сторінкою',
+    appShotSleep: 'Музика для сну з таймером',
+    appShotStory: 'Дивіться опис перед читанням',
+
     exploreSleepCta: 'Музика для Сну',
   },
 } as const;

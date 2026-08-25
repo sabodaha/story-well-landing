@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { FAQSection } from "@/components/faq-section";
 import { StoryReader } from "@/components/story-reader";
+import { AppScreenshots } from "@/components/app-screenshots";
+import { StoryCarousel } from "@/components/story-carousel";
 import {
   BookOpen,
   Globe,
@@ -24,7 +26,6 @@ import {
   X,
   ShieldCheck,
   Sparkles,
-  BookHeart,
 } from "lucide-react";
 import { useTranslations } from "@/lib/i18n/use-translations";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -79,25 +80,7 @@ const resolveIcon = (name?: string) => {
   return iconMap[name as keyof typeof iconMap] || BookOpen;
 };
 
-type LinkButtonProps = ComponentProps<typeof Button> & {
-  href?: string;
-};
-
-const LinkButton = ({ href, children, ...props }: LinkButtonProps) => {
-  if (!href) {
-    return <Button {...props}>{children}</Button>;
-  }
-
-  return (
-    <Button asChild {...props}>
-      <a href={href} {...linkProps(href)}>
-        {children}
-      </a>
-    </Button>
-  );
-};
-
-const buildDefaultContent = (t: ReturnType<typeof useTranslations>) => ({
+const buildDefaultContent =(t: ReturnType<typeof useTranslations>) => ({
   nav: {
     features: t.navFeatures,
     languages: t.navLanguages,
@@ -314,18 +297,21 @@ export default function Home() {
                 {content.hero.description}
               </p>
               <StoreBadges />
-              <div className="flex items-center gap-6 pt-4">
-                <div className="flex items-center gap-1">
-                  <Star className="h-5 w-5 fill-brand-gold text-brand-gold" />
-                  <Star className="h-5 w-5 fill-brand-gold text-brand-gold" />
-                  <Star className="h-5 w-5 fill-brand-gold text-brand-gold" />
-                  <Star className="h-5 w-5 fill-brand-gold text-brand-gold" />
-                  <Star className="h-5 w-5 fill-brand-gold text-brand-gold" />
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">{content.hero.lovedBy}</span> {content.hero.worldwide}
-                </div>
-              </div>
+              <ul className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-4">
+                {[
+                  { icon: Languages, label: t.featureLanguagesTitle },
+                  { icon: Download, label: t.featureOfflineTitle },
+                  { icon: ShieldCheck, label: t.trustAdFreeTitle },
+                ].map(({ icon: Icon, label }) => (
+                  <li
+                    key={label}
+                    className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground"
+                  >
+                    <Icon className="h-4 w-4 text-brand-purple" aria-hidden="true" />
+                    <span className="font-medium text-foreground">{label}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-purple to-brand-pink rounded-3xl blur-3xl opacity-20 animate-pulse"></div>
@@ -333,6 +319,7 @@ export default function Home() {
                 <StoryReader
                   storyId={HERO_STORY_ID}
                   locale={locale}
+                  posterSrc="/hero-poster.webp"
                   onExit={() => {}}
                   labels={{
                     loading: t.storyReaderLoading,
@@ -357,8 +344,10 @@ export default function Home() {
         </div>
       </section>
 
+      <AppScreenshots className="bg-card/50" />
+
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
@@ -396,7 +385,7 @@ export default function Home() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
@@ -467,7 +456,7 @@ export default function Home() {
       </section>
 
       {/* Languages Section */}
-      <section id="languages" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
+      <section id="languages" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
@@ -499,7 +488,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
@@ -518,7 +507,7 @@ export default function Home() {
       </section>
 
       {/* Trust Signals */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-card/50">
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div className="flex flex-col items-center gap-3 p-6">
@@ -546,33 +535,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Explore Stories Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
-            {t.exploreStoriesBadge}
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            {t.exploreStoriesTitle}{" "}
-            <span className="text-magic-gradient">
-              {t.exploreStoriesTitleHighlight}
-            </span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            {t.exploreStoriesSubtitle}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <LinkButton
-              href={`/${locale}/stories/`}
-              size="lg"
-              className="bg-magic-gradient text-white hover:opacity-90 text-lg h-14 px-8"
-            >
-              <BookHeart className="mr-2 h-5 w-5" />
-              {t.exploreStoriesCta}
-            </LinkButton>
-          </div>
-        </div>
-      </section>
+      <StoryCarousel className="bg-card/50" />
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-magic-gradient">

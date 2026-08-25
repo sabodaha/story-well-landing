@@ -28,10 +28,15 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 // Types
 // ---------------------------------------------------------------------------
 
+/** Aspect classes shared by the poster frame and the loaded reader — keep in sync to avoid layout shift. */
+const FRAME_ASPECT = "aspect-[3/4] sm:aspect-[4/3]";
+
 type StoryReaderProps = {
   storyId: string;
   locale: Locale;
   onExit: () => void;
+  /** Page-1 still shown while the real pages load. Omit for the plain text loading state. */
+  posterSrc?: string;
   labels: {
     loading: string;
     error: string;
@@ -58,6 +63,7 @@ export const StoryReader = ({
   storyId,
   locale,
   onExit,
+  posterSrc,
   labels,
 }: StoryReaderProps) => {
   // ---- Data ---------------------------------------------------------------
@@ -371,8 +377,42 @@ export const StoryReader = ({
   // =========================================================================
 
   if (loading) {
+    if (posterSrc) {
+      return (
+        <div
+          className={`relative overflow-hidden rounded-2xl bg-black ${FRAME_ASPECT}`}
+          role="status"
+          aria-live="polite"
+        >
+          <Image
+            src={posterSrc}
+            alt=""
+            aria-hidden
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/45" />
+          <div
+            className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 px-6 pb-5 pt-16"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 60%, transparent 100%)",
+            }}
+          >
+            <span
+              className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white motion-reduce:animate-none"
+              aria-hidden
+            />
+            <span className="text-sm font-medium text-white/90 drop-shadow">{labels.loading}</span>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex h-96 items-center justify-center rounded-2xl border border-border bg-black/80 text-white">
+      <div className={`flex ${FRAME_ASPECT} items-center justify-center rounded-2xl border border-border bg-black/80 text-white`}>
         {labels.loading}
       </div>
     );
@@ -380,7 +420,7 @@ export const StoryReader = ({
 
   if (error) {
     return (
-      <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-destructive bg-black/80 text-white">
+      <div className={`flex ${FRAME_ASPECT} flex-col items-center justify-center gap-4 rounded-2xl border border-destructive bg-black/80 text-white`}>
         <span className="text-destructive">{error}</span>
         <button
           onClick={retryLoad}
@@ -395,7 +435,7 @@ export const StoryReader = ({
 
   if (pages.length === 0) {
     return (
-      <div className="flex h-96 flex-col items-center justify-center gap-4 rounded-2xl border border-warning bg-black/80 text-white">
+      <div className={`flex ${FRAME_ASPECT} flex-col items-center justify-center gap-4 rounded-2xl border border-warning bg-black/80 text-white`}>
         <span className="text-warning">No pages found for this story yet.</span>
         <button
           onClick={retryLoad}
@@ -410,7 +450,7 @@ export const StoryReader = ({
 
   if (!currentPage) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-2xl border border-border bg-black/80 text-white">
+      <div className={`flex ${FRAME_ASPECT} items-center justify-center rounded-2xl border border-border bg-black/80 text-white`}>
         {labels.error}
       </div>
     );
@@ -424,11 +464,17 @@ export const StoryReader = ({
     .replace("{current}", String(currentIndex + 1))
     .replace("{total}", String(totalPages));
 
+  const atStart = currentIndex === 0;
+  const atEnd = currentIndex >= totalPages - 1;
+
+  const chevronBase =
+    "pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full backdrop-blur-sm transition-opacity duration-200 motion-reduce:transition-none";
+
   return (
     <div
       ref={containerRef}
-      className={`relative select-none overflow-hidden rounded-2xl bg-black ${
-        isFullscreen ? "h-screen w-screen" : "aspect-[3/4] sm:aspect-[4/3]"
+      className={`group relative select-none overflow-hidden rounded-2xl bg-black ${
+        isFullscreen ? "h-screen w-screen" : FRAME_ASPECT
       }`}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
@@ -450,17 +496,37 @@ export const StoryReader = ({
         </div>
       )}
 
-      {/* ---- Tap zones for prev / next ---- */}
-      <div
-        className="absolute inset-y-0 left-0 z-10 w-1/3 cursor-pointer"
+      {/* ---- Tap zones for prev / next, with visible chevron affordances ---- */}
+      <button
+        type="button"
         onClick={handlePrev}
+        disabled={atStart}
         aria-label={labels.prev}
-      />
-      <div
-        className="absolute inset-y-0 right-0 z-10 w-1/3 cursor-pointer"
+        className="group/prev absolute inset-y-0 left-0 z-10 w-1/3 cursor-pointer focus:outline-none disabled:cursor-default"
+      >
+        <span
+          className={`${chevronBase} left-2 sm:left-3 ${
+            atStart ? "bg-black/25 text-white/35" : "bg-black/50 text-white"
+          } opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible/prev:opacity-100 group-focus-visible/prev:ring-2 group-focus-visible/prev:ring-white group-focus-visible/prev:ring-offset-2 group-focus-visible/prev:ring-offset-black`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden><path d="m15 18-6-6 6-6" /></svg>
+        </span>
+      </button>
+      <button
+        type="button"
         onClick={handleNext}
+        disabled={atEnd}
         aria-label={labels.next}
-      />
+        className="group/next absolute inset-y-0 right-0 z-10 w-1/3 cursor-pointer focus:outline-none disabled:cursor-default"
+      >
+        <span
+          className={`${chevronBase} right-2 sm:right-3 ${
+            atEnd ? "bg-black/25 text-white/35" : "bg-black/50 text-white"
+          } opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible/next:opacity-100 group-focus-visible/next:ring-2 group-focus-visible/next:ring-white group-focus-visible/next:ring-offset-2 group-focus-visible/next:ring-offset-black`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden><path d="m9 18 6-6-6-6" /></svg>
+        </span>
+      </button>
 
       {/* ---- Centre tap zone toggles controls ---- */}
       <div
